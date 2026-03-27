@@ -15,11 +15,22 @@ export async function getCurrentUserRole(userId: string): Promise<AppRole | null
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, is_active")
     .eq("id", userId)
     .single();
 
   return (profile?.role as AppRole | undefined) ?? null;
+}
+
+export async function isActiveStudent(userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_active")
+    .eq("id", userId)
+    .single();
+
+  return profile?.is_active ?? false;
 }
 
 export async function requireUser() {
@@ -27,6 +38,17 @@ export async function requireUser() {
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Check if student account is active
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_active, role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role === "student" && !profile?.is_active) {
+    redirect("/inactive-account");
   }
 
   return { supabase, user };

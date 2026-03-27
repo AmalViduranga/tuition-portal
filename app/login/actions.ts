@@ -25,12 +25,17 @@ export async function login(formData: FormData) {
   // Server-side role lookup prevents relying only on client-side route checks.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, must_change_password")
     .eq("id", user.id)
     .single();
 
   if (profile?.role === "admin") {
     redirect("/admin");
+  }
+
+  // Check if student must change password on first login
+  if (profile?.must_change_password) {
+    redirect("/change-password?required=true");
   }
 
   if (next.startsWith("/admin")) {

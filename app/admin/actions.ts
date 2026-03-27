@@ -3,27 +3,145 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 export async function createStudent(formData: FormData) {
   await requireAdmin();
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const fullName = String(formData.get("full_name") ?? "");
+  const fullName = String(formData.get("full_name") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const startAccessDate = String(formData.get("start_access_date") ?? "");
+  const mustChangePassword = formData.get("must_change_password") === "on";
+
+  // Get multiple class IDs (can be multiple values)
+  const classIds = formData.getAll("class_ids");
+  const validClassIds = classIds.filter((id) => id && String(id).trim() !== "");
+
+  // Validation
+  if (!email || !password || !fullName) {
+    throw new Error("Email, password, and full name are required");
+  }
+
+  if (password.length < 6) {
+    throw new Error("Password must be at least 6 characters");
+  }
+
+  // Check for duplicate email
+  const { data: existingUser } = await createAdminClient()
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (existingUser) {
+    throw new Error("A student with this email already exists");
+  }
 
   const adminClient = createAdminClient();
-  const { data, error } = await adminClient.auth.admin.createUser({
+
+  // Create user in Supabase Auth
+  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName },
+    user_metadata: {
+      full_name: fullName,
+      phone: phone || null,
+    },
   });
-  if (error) throw new Error(error.message);
 
+  if (authError) {
+    if (authError.message.includes("already registered")) {
+      throw new Error("This email is already registered in the system");
+    }
+    throw new Error(authError.message);
+  }
+
+  // Create profile record with must_change_password flag
   await adminClient.from("profiles").upsert({
-    id: data.user.id,
+    id: authData.user.id,
     full_name: fullName,
+    email: email,
+    phone: phone || null,
     role: "student",
+    is_active: true,
+    must_change_password: mustChangePassword,
   });
+
+  // Create enrollments for each selected class
+  if (validClassIds.length > 0 && startAccessDate) {
+    const enrollmentPromises = validClassIds.map((classId) =>
+      adminClient.from("student_class_enrollments").upsert({
+        student_id: authData.user.id,
+        class_id: String(classId),
+        start_access_date: startAccessDate,
+      })
+    );
+    await Promise.all(enrollmentPromises);
+  } else if (validClassIds.length > 0 && !startAccessDate) {
+    // If classes selected but no start date, use today
+    const enrollmentPromises = validClassIds.map((classId) =>
+      adminClient.from("student_class_enrollments").upsert({
+        student_id: authData.user.id,
+        class_id: String(classId),
+        start_access_date: new Date().toISOString().split("T")[0],
+      })
+    );
+    await Promise.all(enrollmentPromises);
+  }
+
+  revalidatePath("/admin/students");
+  revalidatePath("/admin/enrollments");
+  return { success: true, studentId: authData.user.id };
+}
+
+export async function toggleStudentStatus(formData: FormData) {
+  await requireAdmin();
+  const studentId = String(formData.get("student_id") ?? "");
+  const isActive = formData.get("is_active") === "true";
+
+  const { supabase } = await requireAdmin();
+  await supabase
+    .from("profiles")
+    .update({ is_active: !isActive })
+    .eq("id", studentId);
+
+  revalidatePath("/admin/students");
+}
+
+export async function deleteStudent(formData: FormData) {
+  await requireAdmin();
+  const studentId = String(formData.get("student_id") ?? "");
+
+  // Soft delete: set is_active to false
+  const { supabase } = await requireAdmin();
+  await supabase
+    .from("profiles")
+    .update({ is_active: false })
+    .eq("id", studentId);
+
+  revalidatePath("/admin/students");
+}
+
+export async function updateStudent(formData: FormData) {
+  await requireAdmin();
+  const studentId = String(formData.get("student_id") ?? "");
+  const fullName = String(formData.get("full_name") ?? "");
+  const email = String(formData.get("email") ?? "");
+
+  const adminClient = createAdminClient();
+
+  // Update profile
+  await supabase.from("profiles").update({
+    full_name: fullName,
+  }).eq("id", studentId);
+
+  // Update auth email if changed
+  if (email) {
+    await adminClient.auth.admin.updateUserById(studentId, { email });
+  }
+
   revalidatePath("/admin/students");
 }
 
@@ -37,25 +155,244 @@ export async function createClass(formData: FormData) {
   revalidatePath("/admin/classes");
 }
 
+export async function updateClass(formData: FormData) {
+  await requireAdmin();
+  const classId = String(formData.get("class_id") ?? "");
+  const name = String(formData.get("name") ?? "");
+  const description = String(formData.get("description") ?? "");
+
+  const { supabase } = await requireAdmin();
+  await supabase
+    .from("class_groups")
+    .update({ name, description })
+    .eq("id", classId);
+
+  revalidatePath("/admin/classes");
+}
+
+export async function toggleClassStatus(formData: FormData) {
+  await requireAdmin();
+  const classId = String(formData.get("class_id") ?? "");
+  const { supabase } = await requireAdmin();
+
+  // Get current status
+  const { data: classData } = await supabase
+    .from("class_groups")
+    .select("is_active")
+    .eq("id", classId)
+    .single();
+
+  await supabase
+    .from("class_groups")
+    .update({ is_active: !classData?.is_active })
+    .eq("id", classId);
+
+  revalidatePath("/admin/classes");
+}
+
 export async function addRecording(formData: FormData) {
   const { supabase } = await requireAdmin();
+  const file = formData.get("thumbnail") as File | null;
+  let thumbnailUrl = null;
+
+  // Upload thumbnail if provided
+  if (file && file.size > 0) {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `recordings/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("thumbnails")
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("thumbnails")
+      .getPublicUrl(filePath);
+
+    thumbnailUrl = publicUrl;
+  }
+
   await supabase.from("recordings").insert({
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
+    description: String(formData.get("description") ?? ""),
     youtube_video_id: String(formData.get("youtube_video_id") ?? ""),
     release_at: String(formData.get("release_at") ?? ""),
+    published: formData.get("published") === "on",
+    thumbnail_url: thumbnailUrl,
   });
+  revalidatePath("/admin/recordings");
+}
+
+export async function updateRecording(formData: FormData) {
+  await requireAdmin();
+  const recordingId = String(formData.get("recording_id") ?? "");
+  const { supabase } = await requireAdmin();
+
+  const updateData = {
+    class_id: String(formData.get("class_id") ?? ""),
+    title: String(formData.get("title") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    youtube_video_id: String(formData.get("youtube_video_id") ?? ""),
+    release_at: String(formData.get("release_at") ?? ""),
+    published: formData.get("published") === "on",
+  };
+
+  // Handle thumbnail upload
+  const file = formData.get("thumbnail") as File | null;
+  if (file && file.size > 0) {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `recordings/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("thumbnails")
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("thumbnails")
+      .getPublicUrl(filePath);
+
+    updateData.thumbnail_url = publicUrl;
+  }
+
+  await supabase
+    .from("recordings")
+    .update(updateData)
+    .eq("id", recordingId);
+
+  revalidatePath("/admin/recordings");
+}
+
+export async function toggleRecordingStatus(formData: FormData) {
+  await requireAdmin();
+  const recordingId = String(formData.get("recording_id") ?? "");
+  const { supabase } = await requireAdmin();
+
+  const { data: recording } = await supabase
+    .from("recordings")
+    .select("published")
+    .eq("id", recordingId)
+    .single();
+
+  await supabase
+    .from("recordings")
+    .update({ published: !recording?.published })
+    .eq("id", recordingId);
+
   revalidatePath("/admin/recordings");
 }
 
 export async function addMaterial(formData: FormData) {
   const { supabase } = await requireAdmin();
+  const file = formData.get("file") as File | null;
+
+  if (!file || file.size === 0) {
+    throw new Error("Please select a file to upload");
+  }
+
+  const materialType = String(formData.get("material_type") ?? "other");
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  const filePath = `materials/${fileName}`;
+
+  // Upload to Supabase Storage
+  const { error: uploadError } = await supabase.storage
+    .from("materials")
+    .upload(filePath, file, {
+      upsert: false,
+      contentType: file.type || "application/pdf",
+    });
+
+  if (uploadError) {
+    throw new Error(`File upload failed: ${uploadError.message}`);
+  }
+
+  // Get signed URL (valid for 1 hour by default)
+  const { data: { publicUrl } } = supabase.storage
+    .from("materials")
+    .getPublicUrl(filePath);
+
   await supabase.from("materials").insert({
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
-    file_url: String(formData.get("file_url") ?? ""),
+    file_url: publicUrl,
+    file_size: file.size,
+    file_type: file.type || "application/pdf",
+    material_type: materialType,
     release_at: String(formData.get("release_at") ?? ""),
+    published: formData.get("published") === "on",
   });
+
+  revalidatePath("/admin/materials");
+}
+
+export async function updateMaterial(formData: FormData) {
+  await requireAdmin();
+  const materialId = String(formData.get("material_id") ?? "");
+  const { supabase } = await requireAdmin();
+
+  const updateData = {
+    class_id: String(formData.get("class_id") ?? ""),
+    title: String(formData.get("title") ?? ""),
+    material_type: String(formData.get("material_type") ?? "other"),
+    release_at: String(formData.get("release_at") ?? ""),
+    published: formData.get("published") === "on",
+  };
+
+  // Handle new file upload if provided
+  const file = formData.get("file") as File | null;
+  if (file && file.size > 0) {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `materials/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("materials")
+      .upload(filePath, file, {
+        upsert: false,
+        contentType: file.type || "application/pdf",
+      });
+
+    if (uploadError) throw new Error(`File upload failed: ${uploadError.message}`);
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("materials")
+      .getPublicUrl(filePath);
+
+    updateData.file_url = publicUrl;
+    updateData.file_size = file.size;
+    updateData.file_type = file.type || "application/pdf";
+  }
+
+  await supabase
+    .from("materials")
+    .update(updateData)
+    .eq("id", materialId);
+
+  revalidatePath("/admin/materials");
+}
+
+export async function toggleMaterialStatus(formData: FormData) {
+  await requireAdmin();
+  const materialId = String(formData.get("material_id") ?? "");
+  const { supabase } = await requireAdmin();
+
+  const { data: material } = await supabase
+    .from("materials")
+    .select("published")
+    .eq("id", materialId)
+    .single();
+
+  await supabase
+    .from("materials")
+    .update({ published: !material?.published })
+    .eq("id", materialId);
+
   revalidatePath("/admin/materials");
 }
 
@@ -76,7 +413,22 @@ export async function addPaymentPeriod(formData: FormData) {
     class_id: String(formData.get("class_id") ?? ""),
     start_date: String(formData.get("start_date") ?? ""),
     end_date: String(formData.get("end_date") ?? ""),
+    status: "approved",
   });
+  revalidatePath("/admin/enrollments");
+}
+
+export async function updatePaymentPeriodStatus(formData: FormData) {
+  await requireAdmin();
+  const periodId = String(formData.get("period_id") ?? "");
+  const status = String(formData.get("status") ?? "pending");
+
+  const { supabase } = await requireAdmin();
+  await supabase
+    .from("student_class_payment_periods")
+    .update({ status })
+    .eq("id", periodId);
+
   revalidatePath("/admin/enrollments");
 }
 
@@ -96,4 +448,29 @@ export async function addManualMaterialUnlock(formData: FormData) {
     material_id: String(formData.get("material_id") ?? ""),
   });
   revalidatePath("/admin/enrollments");
+}
+
+// Site content management
+export async function updateSiteContent(formData: FormData) {
+  await requireAdmin();
+  const { supabase } = await requireAdmin();
+
+  const updates = [
+    { key: "site_name", value: String(formData.get("site_name") ?? "") },
+    { key: "teacher_name", value: String(formData.get("teacher_name") ?? "") },
+    { key: "teacher_qualification", value: String(formData.get("teacher_qualification") ?? "") },
+    { key: "teacher_description", value: String(formData.get("teacher_description") ?? "") },
+    { key: "subject_name", value: String(formData.get("subject_name") ?? "") },
+    { key: "subject_code", value: String(formData.get("subject_code") ?? "") },
+    { key: "subject_description", value: String(formData.get("subject_description") ?? "") },
+  ];
+
+  const promises = updates.map(({ key, value }) =>
+    supabase
+      .from("site_settings")
+      .upsert({ key, value, updated_at: new Date().toISOString() })
+  );
+
+  await Promise.all(promises);
+  revalidatePath("/admin/site-content");
 }
