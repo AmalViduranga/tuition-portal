@@ -29,20 +29,31 @@ export async function login(formData: FormData) {
     .eq("id", user.id)
     .single();
 
-  if (profile?.role === "admin") {
-    redirect("/admin");
+  // Handle case where profile might not exist or fetch fails
+  if (!profile) {
+    redirect("/login?error=Unable%20to%20load%20user%20profile");
+  }
+
+  // Normalize role for comparison (handle case sensitivity, whitespace)
+  const userRole = profile?.role?.trim().toLowerCase();
+
+  // Admins go to admin dashboard
+  if (userRole === "admin") {
+    return redirect("/admin");
   }
 
   // Check if student must change password on first login
   if (profile?.must_change_password) {
-    redirect("/change-password?required=true");
+    return redirect("/change-password?required=true");
   }
 
+  // Prevent non-admins from accessing admin routes
   if (next.startsWith("/admin")) {
-    redirect("/dashboard");
+    return redirect("/dashboard");
   }
 
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  // Students go to their intended destination or dashboard
+  return redirect(next.startsWith("/") ? next : "/dashboard");
 }
 
 export async function logout() {
@@ -56,11 +67,11 @@ export async function updatePassword(formData: FormData) {
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
   if (password.length < 8) {
-    redirect("/change-password?error=Password%20must%20be%20at%20least%208%20characters");
+    return redirect("/change-password?error=Password%20must%20be%20at%20least%208%20characters");
   }
 
   if (password !== confirmPassword) {
-    redirect("/change-password?error=Passwords%20do%20not%20match");
+    return redirect("/change-password?error=Passwords%20do%20not%20match");
   }
 
   const supabase = await createClient();
@@ -69,14 +80,14 @@ export async function updatePassword(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    return redirect("/login");
   }
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
-    redirect(`/change-password?error=${encodeURIComponent(error.message)}`);
+    return redirect(`/change-password?error=${encodeURIComponent(error.message)}`);
   }
 
   await supabase.from("profiles").update({ must_change_password: false }).eq("id", user.id);
-  redirect("/dashboard");
+  return redirect("/dashboard");
 }

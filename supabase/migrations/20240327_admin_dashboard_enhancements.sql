@@ -7,7 +7,8 @@
 -- 1. Add published column to recordings
 ALTER TABLE recordings
 ADD COLUMN published BOOLEAN DEFAULT true,
-ADD COLUMN description TEXT;
+ADD COLUMN description TEXT,
+ADD COLUMN views_count INTEGER DEFAULT 0;
 
 -- Add index for published filtering
 CREATE INDEX idx_recordings_published ON recordings(published);
@@ -139,5 +140,24 @@ COMMENT ON COLUMN materials.material_type IS 'Type of material: tute, paper, rev
 COMMENT ON COLUMN profiles.is_active IS 'Whether student account is active (inactive = deactivated but data preserved)';
 COMMENT ON COLUMN profiles.phone IS 'Optional phone number for student contact';
 COMMENT ON COLUMN profiles.must_change_password IS 'Whether student must change password on next login (set true for admin-created accounts)';
+COMMENT ON COLUMN recordings.views_count IS 'Number of times this recording has been viewed by students';
 COMMENT ON COLUMN materials.file_size IS 'File size in bytes';
 COMMENT ON COLUMN materials.file_type IS 'MIME type of uploaded file';
+
+-- =====================================================
+-- STORED PROCEDURES
+-- =====================================================
+
+-- Function to safely increment recording views
+CREATE OR REPLACE FUNCTION increment_recording_views(recording_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE recordings
+  SET views_count = COALESCE(views_count, 0) + 1
+  WHERE id = recording_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION increment_recording_views TO authenticated;
+GRANT EXECUTE ON FUNCTION increment_recording_views TO service_role;

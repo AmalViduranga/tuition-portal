@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { addRecording, updateRecording, toggleRecordingStatus } from "@/app/admin/actions";
-import { Card, Button, Input, Textarea, SearchBar, Badge, DateFormat, Modal, Table } from "@/components/ui";
+import { addRecording, updateRecording, toggleRecordingStatus, deleteRecording } from "@/app/admin/actions";
+import { Card, Button, Input, Textarea, SearchBar, Badge, DateFormat, Modal, Select, Table } from "@/components/ui";
 
 type Recording = {
   id: string;
@@ -12,18 +12,26 @@ type Recording = {
   release_at: string;
   published: boolean;
   thumbnail_url?: string;
-  class_groups: { name: string } | null;
+  class_groups: { id: string; name: string } | null;
+  created_at: string;
+  views_count?: number;
 };
 
 type Class = {
   id: string;
   name: string;
+  is_active: boolean;
+};
+
+type FilterState = {
+  search: string;
+  classFilter: string;
+  publishedFilter: "all" | "published" | "draft";
 };
 
 export default function AdminRecordingsPage() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +48,11 @@ export default function AdminRecordingsPage() {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    search: "",
+    classFilter: "",
+    publishedFilter: "all",
+  });
 
   const fetchRecordings = useCallback(async () => {
     try {
@@ -169,6 +182,27 @@ export default function AdminRecordingsPage() {
     }
   };
 
+  const handleDelete = async (recording: Recording) => {
+    if (!confirm(`Are you sure you want to delete "${recording.title}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const form = new FormData();
+      form.append("recording_id", recording.id);
+
+      const response = await fetch("/api/admin/recordings/delete", {
+        method: "POST",
+        body: form,
+      });
+
+      if (!response.ok) throw new Error("Failed to delete recording");
+      await fetchRecordings();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Unknown error");
+    }
+  };
+
   const handleToggleStatus = async (recording: Recording) => {
     try {
       const form = new FormData();
@@ -190,11 +224,21 @@ export default function AdminRecordingsPage() {
     return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   };
 
-  const filteredRecordings = recordings.filter((rec) =>
-    rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rec.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rec.class_groups?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Apply filters
+  const filteredRecordings = recordings.filter((rec) => {
+    const matchesSearch =
+      rec.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+      rec.description.toLowerCase().includes(filters.search.toLowerCase()) ||
+      rec.class_groups?.name.toLowerCase().includes(filters.search.toLowerCase());
+
+    const matchesClass = !filters.classFilter || rec.class_groups?.id === filters.classFilter;
+    const matchesPublished =
+      filters.publishedFilter === "all" ||
+      (filters.publishedFilter === "published" && rec.published) ||
+      (filters.publishedFilter === "draft" && !rec.published);
+
+    return matchesSearch && matchesClass && matchesPublished;
+  });
 
   const columns = [
     {
@@ -227,29 +271,29 @@ export default function AdminRecordingsPage() {
           {rec.description && (
             <p className="text-xs text-slate-600 mt-1 line-clamp-2">{rec.description}</p>
           )}
+          <div className="flex items-center gap-2 mt-2">
+            <Badge variant="info">{rec.class_groups?.name || "No class"}</Badge>
+            {rec.views_count !== undefined && (
+              <span className="text-xs text-slate-500">👁️ {rec.views_count}</span>
+            )}
+          </div>
         </div>
-      ),
-    },
-    {
-      key: "class",
-      header: "Class",
-      render: (rec: Recording) => (
-        <Badge variant="info">{rec.class_groups?.name || "No class"}</Badge>
       ),
     },
     {
       key: "release_at",
       header: "Release Date",
-      render: (rec: Recording) => <DateFormat date={rec.release_at} format="short" />,
+      render: (rec: Recording) => (
+        <div>
+          <p className="text-sm"><DateFormat date={rec.release_at} format="short" /></p>
+          <p className="text-xs text-slate-500">{rec.published ? "Published" : "Draft"}</p>
+        </div>
+      ),
     },
     {
-      key: "published",
-      header: "Status",
-      render: (rec: Recording) => (
-        <Badge variant={rec.published ? "success" : "warning"}>
-          {rec.published ? "Published" : "Draft"}
-        </Badge>
-      ),
+      key: "created_at",
+      header: "Created",
+      render: (rec: Recording) => <DateFormat date={rec.created_at} format="short" />,
     },
     {
       key: "actions",
@@ -275,6 +319,9 @@ export default function AdminRecordingsPage() {
           >
             {rec.published ? "Unpublish" : "Publish"}
           </Button>
+          <Button size="sm" variant="danger" onClick={() => handleDelete(rec)}>
+            Delete
+          </Button>
         </div>
       ),
     },
@@ -285,22 +332,47 @@ export default function AdminRecordingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Recordings</h1>
-          <p className="text-sm text-slate-600 mt-1">Manage class recordings and YouTube content</p>
+          <p className="text-sm text-slate-600 mt-1">
+            Manage class videos and YouTube content
+          </p>
         </div>
         <Button onClick={() => setIsModalOpen(true)} size="sm">
           + Add Recording
         </Button>
       </div>
 
-      <Card>
-        <div className="mb-4">
+      {/* Filters */}
+      <Card padding="sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search recordings by title, class, or description..."
+            value={filters.search}
+            onChange={(search) => setFilters((prev) => ({ ...prev, search }))}
+            placeholder="Search recordings..."
+          />
+          <Select
+            value={filters.classFilter}
+            onChange={(e) => setFilters((prev) => ({ ...prev, classFilter: e.target.value }))}
+            options={[
+              { value: "", label: "All Classes" },
+              ...classes.filter((c) => c.is_active).map((cls) => ({
+                value: cls.id,
+                label: cls.name,
+              })),
+            ]}
+          />
+          <Select
+            value={filters.publishedFilter}
+            onChange={(e) => setFilters((prev) => ({ ...prev, publishedFilter: e.target.value as "all" | "published" | "draft" }))}
+            options={[
+              { value: "all", label: "All Status" },
+              { value: "published", label: "Published" },
+              { value: "draft", label: "Draft" },
+            ]}
           />
         </div>
+      </Card>
 
+      <Card>
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -311,7 +383,11 @@ export default function AdminRecordingsPage() {
           <Table
             columns={columns}
             data={filteredRecordings}
-            emptyMessage="No recordings found"
+            emptyMessage={
+              filters.search || filters.classFilter || filters.publishedFilter !== "all"
+                ? "No recordings match your filters"
+                : "No recordings found. Add your first recording to get started."
+            }
             className="border border-slate-200 rounded-lg overflow-hidden"
           />
         )}
@@ -348,7 +424,7 @@ export default function AdminRecordingsPage() {
               name="class_id"
               value={formData.class_id}
               onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
-              options={classes.map((cls) => ({ value: cls.id, label: cls.name }))}
+              options={classes.filter((c) => c.is_active).map((cls) => ({ value: cls.id, label: cls.name }))}
               placeholder="Select class"
               required
             />
@@ -394,12 +470,12 @@ export default function AdminRecordingsPage() {
                   onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
                   className="rounded border-slate-300 text-indigo-600"
                 />
-                <span className="text-sm text-slate-700">Published</span>
+                <span className="text-sm text-slate-700">Published (visible to students)</span>
               </label>
             </div>
           </div>
           <Input
-            label="Thumbnail (optional)"
+            label="Custom Thumbnail (optional)"
             name="thumbnail"
             type="file"
             accept="image/*"
@@ -407,7 +483,7 @@ export default function AdminRecordingsPage() {
               const file = (e.target as HTMLInputElement).files?.[0] || null;
               setFormData({ ...formData, thumbnail: file });
             }}
-            helperText="Custom thumbnail image (auto-loads from YouTube if not provided)"
+            helperText="Upload custom thumbnail (otherwise auto-loaded from YouTube)"
           />
           <div className="flex justify-end gap-3 pt-4">
             <Button
@@ -447,7 +523,7 @@ export default function AdminRecordingsPage() {
               name="class_id"
               value={formData.class_id}
               onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
-              options={classes.map((cls) => ({ value: cls.id, label: cls.name }))}
+              options={classes.filter((c) => c.is_active).map((cls) => ({ value: cls.id, label: cls.name }))}
               required
             />
             <Input
@@ -494,16 +570,6 @@ export default function AdminRecordingsPage() {
               </label>
             </div>
           </div>
-          <Input
-            label="New Thumbnail (optional)"
-            name="thumbnail"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = (e.target as HTMLInputElement).files?.[0] || null;
-              setFormData({ ...formData, thumbnail: file });
-            }}
-          />
           <div className="flex justify-end gap-3 pt-4">
             <Button
               type="button"

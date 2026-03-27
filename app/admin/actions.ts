@@ -287,6 +287,16 @@ export async function toggleRecordingStatus(formData: FormData) {
   revalidatePath("/admin/recordings");
 }
 
+export async function deleteRecording(formData: FormData) {
+  await requireAdmin();
+  const recordingId = String(formData.get("recording_id") ?? "");
+  const { supabase } = await requireAdmin();
+
+  await supabase.from("recordings").delete().eq("id", recordingId);
+
+  revalidatePath("/admin/recordings");
+}
+
 export async function addMaterial(formData: FormData) {
   const { supabase } = await requireAdmin();
   const file = formData.get("file") as File | null;

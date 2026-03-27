@@ -7,6 +7,11 @@ type Props = {
 };
 
 export default async function LoginPage({ searchParams }: Props) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   const params = await searchParams;
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
@@ -44,15 +49,24 @@ export default async function LoginPage({ searchParams }: Props) {
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
               Password
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 pr-10"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-transparent border-none p-0 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? "👁️" : "🔒"}
+              </button>
+            </div>
           </div>
           <LoginSubmitButton />
         </form>
