@@ -15,7 +15,7 @@ export async function GET() {
         end_date,
         status,
         created_at,
-        profiles (full_name),
+        profiles:profiles!payment_reviews_student_id_fkey (full_name),
         class_groups (name)
       `)
       .order("start_date", { ascending: false });

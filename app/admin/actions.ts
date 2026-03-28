@@ -39,11 +39,9 @@ export async function createStudent(formData: FormData) {
 }
 
 export async function toggleStudentStatus(formData: FormData) {
-  await requireAdmin();
+  const { supabase } = await requireAdmin();
   const studentId = String(formData.get("student_id") ?? "");
   const isActive = formData.get("is_active") === "true";
-
-  const { supabase } = await requireAdmin();
   await supabase
     .from("profiles")
     .update({ is_active: !isActive })
@@ -53,11 +51,10 @@ export async function toggleStudentStatus(formData: FormData) {
 }
 
 export async function deleteStudent(formData: FormData) {
-  await requireAdmin();
+  const { supabase } = await requireAdmin();
   const studentId = String(formData.get("student_id") ?? "");
 
   // Soft delete: set is_active to false
-  const { supabase } = await requireAdmin();
   await supabase
     .from("profiles")
     .update({ is_active: false })
@@ -96,12 +93,10 @@ export async function createClass(formData: FormData) {
 }
 
 export async function updateClass(formData: FormData) {
-  await requireAdmin();
+  const { supabase } = await requireAdmin();
   const classId = String(formData.get("class_id") ?? "");
   const name = String(formData.get("name") ?? "");
   const description = String(formData.get("description") ?? "");
-
-  const { supabase } = await requireAdmin();
   await supabase
     .from("class_groups")
     .update({ name, description })
@@ -111,9 +106,8 @@ export async function updateClass(formData: FormData) {
 }
 
 export async function toggleClassStatus(formData: FormData) {
-  await requireAdmin();
-  const classId = String(formData.get("class_id") ?? "");
   const { supabase } = await requireAdmin();
+  const classId = String(formData.get("class_id") ?? "");
 
   // Get current status
   const { data: classData } = await supabase
@@ -167,9 +161,8 @@ export async function addRecording(formData: FormData) {
 }
 
 export async function updateRecording(formData: FormData) {
-  await requireAdmin();
-  const recordingId = String(formData.get("recording_id") ?? "");
   const { supabase } = await requireAdmin();
+  const recordingId = String(formData.get("recording_id") ?? "");
 
   const updateData: Record<string, any> = {
     class_id: String(formData.get("class_id") ?? ""),
@@ -209,9 +202,8 @@ export async function updateRecording(formData: FormData) {
 }
 
 export async function toggleRecordingStatus(formData: FormData) {
-  await requireAdmin();
-  const recordingId = String(formData.get("recording_id") ?? "");
   const { supabase } = await requireAdmin();
+  const recordingId = String(formData.get("recording_id") ?? "");
 
   const { data: recording } = await supabase
     .from("recordings")
@@ -228,9 +220,8 @@ export async function toggleRecordingStatus(formData: FormData) {
 }
 
 export async function deleteRecording(formData: FormData) {
-  await requireAdmin();
-  const recordingId = String(formData.get("recording_id") ?? "");
   const { supabase } = await requireAdmin();
+  const recordingId = String(formData.get("recording_id") ?? "");
 
   await supabase.from("recordings").delete().eq("id", recordingId);
 
@@ -282,9 +273,8 @@ export async function addMaterial(formData: FormData) {
 }
 
 export async function updateMaterial(formData: FormData) {
-  await requireAdmin();
-  const materialId = String(formData.get("material_id") ?? "");
   const { supabase } = await requireAdmin();
+  const materialId = String(formData.get("material_id") ?? "");
 
   const updateData: Record<string, any> = {
     class_id: String(formData.get("class_id") ?? ""),
@@ -328,9 +318,8 @@ export async function updateMaterial(formData: FormData) {
 }
 
 export async function toggleMaterialStatus(formData: FormData) {
-  await requireAdmin();
-  const materialId = String(formData.get("material_id") ?? "");
   const { supabase } = await requireAdmin();
+  const materialId = String(formData.get("material_id") ?? "");
 
   const { data: material } = await supabase
     .from("materials")
@@ -369,11 +358,9 @@ export async function addPaymentPeriod(formData: FormData) {
 }
 
 export async function updatePaymentPeriodStatus(formData: FormData) {
-  await requireAdmin();
+  const { supabase } = await requireAdmin();
   const periodId = String(formData.get("period_id") ?? "");
   const status = String(formData.get("status") ?? "pending");
-
-  const { supabase } = await requireAdmin();
   await supabase
     .from("student_class_payment_periods")
     .update({ status })

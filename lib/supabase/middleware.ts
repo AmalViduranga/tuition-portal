@@ -45,8 +45,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user) {
-    // Always resolve the user role on the server for any protected route.
+  if (user && (isPortal || isDashboard || isStudent || isAdmin || isAuthPage)) {
+    // Only resolve the user role on the server for protected or auth routes to save DB calls on public routes.
     const { data: profile } = await supabase
       .from("profiles")
       .select("role, must_change_password")

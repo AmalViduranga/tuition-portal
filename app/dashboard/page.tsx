@@ -10,28 +10,64 @@ export const dynamic = "force-dynamic";
 export default async function StudentDashboardPage() {
   const { supabase, user } = await requireUser();
 
-  // Load all user data securely
-  const [
-    { data: profile },
-    { data: enrollments },
-    { data: paymentPeriods },
-    { data: siteSettings },
-    recordingsPayload,
-    materialsPayload,
-  ] = await Promise.all([
-    supabase.from("profiles").select("full_name, email, phone").eq("id", user.id).single(),
-    supabase.from("student_class_enrollments").select("class_id, start_access_date, class_groups(id, name)").eq("student_id", user.id),
-    supabase.from("student_class_payment_periods").select("class_id, start_date, end_date, status, class_groups(name)").eq("student_id", user.id).order("end_date", { ascending: false }),
-    supabase.from("site_settings").select("key, value"),
-    loadStudentRecordings(supabase, user.id, null),
-    loadStudentMaterials(supabase, user.id, null),
-  ]);
+  let profilePayload, enrollmentsPayload, paymentPeriodsPayload, siteSettingsPayload, recordingsPayload, materialsPayload;
+  
+  try {
+    profilePayload = await supabase.from("profiles").select("full_name, email, phone").eq("id", user.id).single();
+    if (profilePayload.error) throw profilePayload.error;
+  } catch (e) {
+    console.error("Profiles error:", e);
+    throw e;
+  }
 
+  try {
+    enrollmentsPayload = await supabase.from("student_class_enrollments").select("class_id, start_access_date, class_groups(id, name)").eq("student_id", user.id);
+    if (enrollmentsPayload.error) throw enrollmentsPayload.error;
+  } catch (e) {
+    console.error("Enrollments error:", e);
+    throw e;
+  }
+
+  try {
+    paymentPeriodsPayload = await supabase.from("student_class_payment_periods").select("class_id, start_date, end_date, status, class_groups(name)").eq("student_id", user.id).order("end_date", { ascending: false });
+    if (paymentPeriodsPayload.error) throw paymentPeriodsPayload.error;
+  } catch (e) {
+    console.error("Payment periods error:", e);
+    throw e;
+  }
+
+  try {
+    siteSettingsPayload = await supabase.from("site_settings").select("key, value");
+    if (siteSettingsPayload.error) throw siteSettingsPayload.error;
+  } catch (e) {
+    console.error("Site settings error:", e);
+    throw e;
+  }
+
+  try {
+    recordingsPayload = await loadStudentRecordings(supabase, user.id, null);
+  } catch (e) {
+    console.error("Recordings error:", e);
+    throw e;
+  }
+
+  try {
+    materialsPayload = await loadStudentMaterials(supabase, user.id, null);
+  } catch (e) {
+    console.error("Materials error:", e);
+    throw e;
+  }
+
+  const { data: profile } = profilePayload;
+  const { data: enrollments } = enrollmentsPayload;
+  const { data: paymentPeriods } = paymentPeriodsPayload;
+  const { data: siteSettings } = siteSettingsPayload;
+  
   const whatsappPhone = siteSettings?.find(s => s.key === "contact_phone")?.value || "";
 
   // Compute easy variables
-  const recentRecordings = recordingsPayload.recordings.slice(0, 3);
-  const recentMaterials = materialsPayload.materials.slice(0, 3);
+  const recentRecordings = recordingsPayload?.recordings?.slice(0, 3) || [];
+  const recentMaterials = materialsPayload?.materials?.slice(0, 3) || [];
   const activePayments = paymentPeriods?.filter(p => p.status === "approved" || p.status === "pending") || [];
   
   return (
@@ -65,7 +101,7 @@ export default async function StudentDashboardPage() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Quick Actions Navigation */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-3 gap-4">
             <Link href="/portal/recordings" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-indigo-100">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-2xl text-indigo-600 transition-colors group-hover:bg-indigo-100">🎥</span>
               <span className="text-sm font-semibold text-slate-700">Recordings</span>
@@ -77,10 +113,6 @@ export default async function StudentDashboardPage() {
             <Link href="/portal/classes" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-indigo-100">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-2xl text-emerald-600 transition-colors group-hover:bg-emerald-100">🏛️</span>
               <span className="text-sm font-semibold text-slate-700">My Classes</span>
-            </Link>
-            <Link href="/portal" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-indigo-100">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 text-2xl text-amber-600 transition-colors group-hover:bg-amber-100">⭐</span>
-              <span className="text-sm font-semibold text-slate-700">Legacy UI</span>
             </Link>
           </div>
 

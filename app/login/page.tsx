@@ -1,25 +1,21 @@
 import Link from "next/link";
-import { login } from "./actions";
-import { LoginSubmitButton } from "./login-submit-button";
+import { LoginForm } from "./login-form";
 
 type Props = {
   searchParams: Promise<{ error?: string; next?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: Props) {
-  const [showPassword, setShowPassword] = useState(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
   const params = await searchParams;
+  const nextPath = params?.next ?? "/dashboard";
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-      <div className="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm">
+      <div className="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm border border-slate-100">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-slate-900">Student Portal Login</h1>
           <p className="mt-2 text-sm text-slate-600">
-            Admin and students both sign in here. Accounts are created by admin only.
+            Sign in to access your classes, study materials, and recordings. Accounts are securely created by your instructor.
           </p>
         </div>
 
@@ -29,47 +25,7 @@ export default async function LoginPage({ searchParams }: Props) {
           </div>
         ) : null}
 
-        <form action={login} className="mt-6 space-y-4">
-          <input type="hidden" name="next" value={params.next ?? "/dashboard"} />
-          <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
-              Email Address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              placeholder="your.email@example.com"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 pr-10"
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-transparent border-none p-0 text-slate-400 hover:text-slate-600"
-              >
-                {showPassword ? "👁️" : "🔒"}
-              </button>
-            </div>
-          </div>
-          <LoginSubmitButton />
-        </form>
+        <LoginForm nextPath={nextPath} />
 
         <div className="mt-4 text-center">
           <Link
