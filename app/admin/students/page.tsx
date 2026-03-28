@@ -382,7 +382,7 @@ export default function AdminStudentsPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Full Name *"
               name="full_name"
@@ -400,7 +400,7 @@ export default function AdminStudentsPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Email Address *"
               name="email"
@@ -476,15 +476,16 @@ export default function AdminStudentsPage() {
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-200">
             <Button
               type="button"
               variant="secondary"
               onClick={() => setIsModalOpen(false)}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" loading={formLoading}>
+            <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
               Create Student Account
             </Button>
           </div>

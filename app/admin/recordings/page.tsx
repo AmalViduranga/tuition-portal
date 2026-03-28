@@ -429,7 +429,7 @@ export default function AdminRecordingsPage() {
               {formError}
             </div>
           )}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Class"
               name="class_id"
@@ -463,7 +463,7 @@ export default function AdminRecordingsPage() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Release Date"
               name="release_at"
@@ -496,15 +496,16 @@ export default function AdminRecordingsPage() {
             }}
             helperText="Upload custom thumbnail (otherwise auto-loaded from YouTube)"
           />
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
             <Button
               type="button"
               variant="secondary"
               onClick={() => setIsModalOpen(false)}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" loading={formLoading}>
+            <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
               Add Recording
             </Button>
           </div>
@@ -528,7 +529,7 @@ export default function AdminRecordingsPage() {
               {formError}
             </div>
           )}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Class"
               name="class_id"
@@ -559,7 +560,7 @@ export default function AdminRecordingsPage() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Release Date"
               name="release_at"
@@ -581,15 +582,16 @@ export default function AdminRecordingsPage() {
               </label>
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
             <Button
               type="button"
               variant="secondary"
               onClick={() => setIsEditModalOpen(false)}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" loading={formLoading}>
+            <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
               Update Recording
             </Button>
           </div>

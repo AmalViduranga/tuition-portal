@@ -30,7 +30,7 @@ export default function Table<T extends { id: string }>({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider ${column.className || ""}`}
+                className={`px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap ${column.className || ""}`}
               >
                 {column.header}
               </th>
@@ -52,7 +52,7 @@ export default function Table<T extends { id: string }>({
                 className={`${onRowClick ? "cursor-pointer hover:bg-slate-50" : ""} transition-colors`}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={`px-4 py-3 text-sm text-slate-900 ${column.className || ""}`}>
+                  <td key={column.key} className={`px-4 py-3 text-sm text-slate-900 whitespace-nowrap ${column.className || ""}`}>
                     {column.render
                       ? column.render(item)
                       : (item as Record<string, unknown>)[column.key] as ReactNode}

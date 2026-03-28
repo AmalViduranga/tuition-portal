@@ -387,7 +387,7 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-lg space-y-3">
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Select
           label="Student"
           value={formData.student_id}
@@ -414,7 +414,7 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
           />
         </div>
       </div>
-      <Button type="submit" loading={loading} size="sm">
+      <Button type="submit" loading={loading} size="sm" className="w-full sm:w-auto">
         Add Enrollment
       </Button>
     </form>
@@ -456,7 +456,7 @@ function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-lg space-y-3">
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <Select
           label="Student"
           value={formData.student_id}
@@ -488,7 +488,7 @@ function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
           required
         />
       </div>
-      <Button type="submit" loading={loading} size="sm">
+      <Button type="submit" loading={loading} size="sm" className="w-full sm:w-auto">
         Add Payment Period
       </Button>
     </form>
@@ -521,7 +521,7 @@ function UnlockForm({ students, items, itemLabel, onSubmit }: UnlockFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-lg space-y-3">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select
           label="Student"
           value={formData.student_id}
@@ -539,7 +539,7 @@ function UnlockForm({ students, items, itemLabel, onSubmit }: UnlockFormProps) {
           required
         />
       </div>
-      <Button type="submit" loading={loading} size="sm">
+      <Button type="submit" loading={loading} size="sm" className="w-full sm:w-auto">
         Unlock {itemLabel}
       </Button>
     </form>

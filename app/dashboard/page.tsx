@@ -101,7 +101,7 @@ export default async function StudentDashboardPage() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Quick Actions Navigation */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link href="/portal/recordings" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-indigo-100">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-2xl text-indigo-600 transition-colors group-hover:bg-indigo-100">🎥</span>
               <span className="text-sm font-semibold text-slate-700">Recordings</span>
