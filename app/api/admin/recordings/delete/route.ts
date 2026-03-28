@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const recordingId = String(formData.get("recording_id") ?? "");
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase.from("recordings").delete().eq("id", recordingId);
+    const { error } = await adminSupabase.from("recordings").delete().eq("id", recordingId);
 
     if (error) throw error;
 

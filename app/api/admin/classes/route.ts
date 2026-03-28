@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const activeOnly = url.searchParams.get("active") === "true";
 
-    let query = supabase.from("class_groups").select("id, name, description, is_active, created_at");
+    let query = adminSupabase.from("class_groups").select(
+      activeOnly ? "id, name" : "id, name, description, is_active, created_at"
+    );
 
     if (activeOnly) {
-      query = supabase.from("class_groups").select("id, name").eq("is_active", true);
+      query = query.eq("is_active", true);
     }
 
     const { data: classes, error } = await query.order("name", { ascending: true });
@@ -28,7 +32,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const name = String(formData.get("name") ?? "");
@@ -41,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase.from("class_groups").insert({
+    const { error } = await adminSupabase.from("class_groups").insert({
       name,
       description: description || null,
       is_active: true,
@@ -60,7 +65,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const classId = String(formData.get("class_id") ?? "");
@@ -74,7 +80,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from("class_groups")
       .update({ name, description: description || null })
       .eq("id", classId);

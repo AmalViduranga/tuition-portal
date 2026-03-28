@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
 
 export async function GET(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const limit = url.searchParams.get("limit") === "true";
 
-    let query = supabase
+    let query = adminSupabase
       .from("materials")
       .select(`
         id,
@@ -42,7 +45,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const classId = String(formData.get("class_id") ?? "");
@@ -70,7 +74,7 @@ export async function POST(request: NextRequest) {
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `materials/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await adminSupabase.storage
       .from("materials")
       .upload(filePath, file, {
         upsert: false,
@@ -81,11 +85,11 @@ export async function POST(request: NextRequest) {
       throw new Error(`File upload failed: ${uploadError.message}`);
     }
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = adminSupabase.storage
       .from("materials")
       .getPublicUrl(filePath);
 
-    const { error: insertError } = await supabase.from("materials").insert({
+    const { data: inserted, error: insertError } = await adminSupabase.from("materials").insert({
       class_id: classId,
       title,
       material_type: materialType,
@@ -94,9 +98,13 @@ export async function POST(request: NextRequest) {
       file_url: publicUrl,
       file_size: file.size,
       file_type: file.type || "application/pdf",
-    });
+    }).select("id").single();
 
     if (insertError) throw insertError;
+
+    if (published && inserted) {
+      await grantNewReleaseAccess(inserted.id, classId, releaseAt, "material", (await requireAdmin()).user.id);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -109,7 +117,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const materialId = String(formData.get("material_id") ?? "");
@@ -127,7 +136,16 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updateData = {
+    const updateData: {
+      class_id: string;
+      title: string;
+      material_type: string;
+      release_at: string;
+      published: boolean;
+      file_url?: string;
+      file_size?: number;
+      file_type?: string;
+    } = {
       class_id: classId,
       title,
       material_type: materialType,
@@ -147,7 +165,7 @@ export async function PUT(request: NextRequest) {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `materials/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await adminSupabase.storage
         .from("materials")
         .upload(filePath, file, {
           upsert: false,
@@ -158,7 +176,7 @@ export async function PUT(request: NextRequest) {
         throw new Error(`File upload failed: ${uploadError.message}`);
       }
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = adminSupabase.storage
         .from("materials")
         .getPublicUrl(filePath);
 
@@ -167,12 +185,16 @@ export async function PUT(request: NextRequest) {
       updateData.file_type = file.type || "application/pdf";
     }
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from("materials")
       .update(updateData)
       .eq("id", materialId);
 
     if (error) throw error;
+
+    if (published) {
+      await grantNewReleaseAccess(materialId, classId, releaseAt, "material", (await requireAdmin()).user.id);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -137,9 +137,6 @@ export default async function StudentDashboardPage() {
                         src={`https://img.youtube.com/vi/${rec.youtube_video_id}/mqdefault.jpg`}
                         alt={rec.title}
                         className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' fill='%23eee'%3E%3Crect width='320' height='180'/%3E%3C/svg%3E";
-                        }}
                       />
                       <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                     </div>

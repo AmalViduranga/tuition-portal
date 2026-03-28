@@ -15,15 +15,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  */
 
 export type AccessContext = {
-  enrollments: Array<{ class_id: string; start_access_date: string }>;
-  paymentPeriods: Array<{ class_id: string; start_date: string; end_date: string; status: string }>;
-  manualUnlocks: Set<string>; // set of recording IDs manually unlocked
-  materialUnlocks: Set<string>; // set of material IDs manually unlocked
+  recordingGrants: Set<string>; // set of recording IDs granted access
+  materialGrants: Set<string>; // set of material IDs granted access
 };
 
-/**
- * Determines if a student can access a specific item (recording or material) based on business rules.
- */
 export function isItemAccessible(
   item: { id: string; class_id: string; release_at: string; published: boolean },
   context: AccessContext,
@@ -31,32 +26,8 @@ export function isItemAccessible(
 ): boolean {
   if (!item.published) return false;
 
-  const enrollment = context.enrollments.find((e) => e.class_id === item.class_id);
-  if (!enrollment) return false;
-
-  const releaseAt = new Date(item.release_at).toISOString().split("T")[0];
-  const startAccess = new Date(enrollment.start_access_date).toISOString().split("T")[0];
-
-  const unlocks = itemType === "recording" ? context.manualUnlocks : context.materialUnlocks;
-  if (unlocks.has(item.id)) {
-    return true;
-  }
-
-  if (releaseAt < startAccess) {
-    return false;
-  }
-
-  const hasValidPaymentPeriod = context.paymentPeriods.some((period) => {
-    if (period.class_id !== item.class_id) return false;
-    if (period.status !== "approved") return false;
-    
-    const pStart = new Date(period.start_date).toISOString().split("T")[0];
-    const pEnd = new Date(period.end_date).toISOString().split("T")[0];
-    
-    return releaseAt >= pStart && releaseAt <= pEnd;
-  });
-
-  return hasValidPaymentPeriod;
+  const grants = itemType === "recording" ? context.recordingGrants : context.materialGrants;
+  return grants.has(item.id);
 }
 
 // Keep backward compatibility for existing code
@@ -71,30 +42,20 @@ export async function getStudentAccessContext(
   supabase: SupabaseClient, 
   studentId: string
 ): Promise<AccessContext> {
-  const { data: enrollments } = await supabase
-    .from("student_class_enrollments")
-    .select("class_id, start_access_date")
-    .eq("student_id", studentId);
-
-  const { data: paymentPeriods } = await supabase
-    .from("student_class_payment_periods")
-    .select("class_id, start_date, end_date, status")
-    .eq("student_id", studentId);
-
-  const { data: manualUnlocksDb } = await supabase
+  const { data: recordingGrantsDb } = await supabase
     .from("recording_manual_unlocks")
     .select("recording_id")
-    .eq("student_id", studentId);
+    .eq("student_id", studentId)
+    .is("revoked_at", null);
 
-  const { data: materialUnlocksDb } = await supabase
+  const { data: materialGrantsDb } = await supabase
     .from("material_manual_unlocks")
     .select("material_id")
-    .eq("student_id", studentId);
+    .eq("student_id", studentId)
+    .is("revoked_at", null);
 
   return {
-    enrollments: enrollments || [],
-    paymentPeriods: paymentPeriods || [],
-    manualUnlocks: new Set((manualUnlocksDb || []).map((u) => u.recording_id)),
-    materialUnlocks: new Set((materialUnlocksDb || []).map((u) => u.material_id)),
+    recordingGrants: new Set((recordingGrantsDb || []).map((u) => u.recording_id)),
+    materialGrants: new Set((materialGrantsDb || []).map((u) => u.material_id)),
   };
 }

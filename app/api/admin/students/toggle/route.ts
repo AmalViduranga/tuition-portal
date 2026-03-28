@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const studentId = String(formData.get("student_id") ?? "");
@@ -16,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from("profiles")
       .update({ is_active: !isActive })
       .eq("id", studentId);

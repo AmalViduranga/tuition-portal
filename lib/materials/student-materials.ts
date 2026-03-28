@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type StudentMaterialRow = {
   id: string;
@@ -74,7 +75,8 @@ export async function loadStudentMaterials(
 
   // Fetch all published materials for enrolled classes
   // We apply the business rules explicitly in Node via isItemAccessible
-  let query = supabase
+  const adminDb = createAdminClient();
+  let query = adminDb
     .from("materials")
     .select(
       `
@@ -115,7 +117,7 @@ export async function loadStudentMaterials(
   const list = accessibleMaterials.map((mat) => ({
     ...mat,
     class_groups: Array.isArray(mat.class_groups) ? mat.class_groups[0] : mat.class_groups,
-    is_manually_unlocked: accessContext.materialUnlocks.has(mat.id),
+    is_manually_unlocked: accessContext.materialGrants.has(mat.id),
   }));
 
   return {

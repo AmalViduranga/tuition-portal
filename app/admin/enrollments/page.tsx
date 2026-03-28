@@ -17,6 +17,8 @@ type Enrollment = {
   class_id: string;
   class_name?: string;
   start_access_date: string;
+  access_end_date?: string | null;
+  access_mode: "paid" | "free_card" | "manual";
   student_class_enrollments: { created_at: string };
 };
 
@@ -162,13 +164,27 @@ export default function AdminEnrollmentsPage() {
               render: (enr: Enrollment) => enr.class_name || "-",
             },
             {
+              key: "mode",
+              header: "Mode",
+              render: (enr: Enrollment) => (
+                <Badge variant={enr.access_mode === "free_card" ? "success" : "default"}>
+                  {enr.access_mode}
+                </Badge>
+              ),
+            },
+            {
               key: "start_date",
               header: "Access Start",
               render: (enr: Enrollment) => <DateFormat date={enr.start_access_date} format="short" />,
             },
             {
+              key: "end_date",
+              header: "Access End",
+              render: (enr: Enrollment) => enr.access_end_date ? <DateFormat date={enr.access_end_date} format="short" /> : <span className="text-slate-400">Indefinite</span>,
+            },
+            {
               key: "granted",
-              header: "Access Granted",
+              header: "Enrolled",
               render: (enr: Enrollment) => <DateFormat date={enr.student_class_enrollments.created_at} format="short" />,
             },
           ]}
@@ -360,7 +376,13 @@ interface EnrollmentFormProps {
 }
 
 function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
-  const [formData, setFormData] = useState({ student_id: "", class_id: "", start_access_date: "" });
+  const [formData, setFormData] = useState({ 
+    student_id: "", 
+    class_id: "", 
+    start_access_date: "",
+    access_mode: "paid",
+    access_end_date: ""
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -374,9 +396,13 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
       form.append("student_id", formData.student_id);
       form.append("class_id", formData.class_id);
       form.append("start_access_date", formData.start_access_date);
+      form.append("access_mode", formData.access_mode);
+      if (formData.access_end_date) {
+        form.append("access_end_date", formData.access_end_date);
+      }
 
       await onSubmit(form);
-      setFormData({ student_id: "", class_id: "", start_access_date: "" });
+      setFormData({ student_id: "", class_id: "", start_access_date: "", access_mode: "paid", access_end_date: "" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -404,7 +430,6 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
           placeholder="Select class"
           required
         />
-        <div>
           <Input
             label="Access Start Date"
             type="date"
@@ -412,7 +437,25 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
             onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
             required
           />
-        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Select
+          label="Access Mode"
+          value={formData.access_mode}
+          onChange={(e) => setFormData({ ...formData, access_mode: e.target.value })}
+          options={[
+            { value: "paid", label: "Paid" },
+            { value: "free_card", label: "Free Card" },
+            { value: "manual", label: "Manual Override" },
+          ]}
+          required
+        />
+        <Input
+          label="Access End Date (Optional)"
+          type="date"
+          value={formData.access_end_date}
+          onChange={(e) => setFormData({ ...formData, access_end_date: e.target.value })}
+        />
       </div>
       <Button type="submit" loading={loading} size="sm" className="w-full sm:w-auto">
         Add Enrollment
@@ -488,9 +531,30 @@ function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
           required
         />
       </div>
-      <Button type="submit" loading={loading} size="sm" className="w-full sm:w-auto">
-        Add Payment Period
-      </Button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" loading={loading} size="sm">
+          Add Payment Period
+        </Button>
+        <Button 
+          type="button" 
+          variant="outline" 
+          loading={loading} 
+          size="sm"
+          onClick={async () => {
+             if (!formData.student_id || !formData.class_id) {
+               setError("Please select student and class first");
+               return;
+             }
+             const form = new FormData();
+             form.append("student_id", formData.student_id);
+             form.append("class_id", formData.class_id);
+             form.append("quick_approve", "true");
+             await onSubmit(form);
+          }}
+        >
+          Quick Approve (1.5 Months)
+        </Button>
+      </div>
     </form>
   );
 }

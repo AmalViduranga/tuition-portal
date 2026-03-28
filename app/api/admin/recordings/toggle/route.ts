@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const recordingId = String(formData.get("recording_id") ?? "");
@@ -16,20 +19,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current status
-    const { data: recording, error: fetchError } = await supabase
+    const { data: recording, error: fetchError } = await adminSupabase
       .from("recordings")
-      .select("published")
+      .select("published, class_id, release_at")
       .eq("id", recordingId)
       .single();
 
     if (fetchError) throw fetchError;
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from("recordings")
       .update({ published: !recording?.published })
       .eq("id", recordingId);
 
     if (error) throw error;
+
+    if (!recording?.published) {
+      // It was draft, now published
+      await grantNewReleaseAccess(recordingId, recording.class_id, recording.release_at, "recording", (await requireAdmin()).user.id);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

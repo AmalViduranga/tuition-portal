@@ -22,6 +22,8 @@ create table if not exists public.student_class_enrollments (
   student_id uuid not null references public.profiles(id) on delete cascade,
   class_id uuid not null references public.class_groups(id) on delete cascade,
   start_access_date date not null,
+  access_end_date date,
+  access_mode text not null default 'paid' check (access_mode in ('paid', 'free_card', 'manual')),
   created_at timestamptz not null default now(),
   primary key (student_id, class_id)
 );
@@ -56,6 +58,10 @@ create table if not exists public.materials (
 create table if not exists public.recording_manual_unlocks (
   student_id uuid not null references public.profiles(id) on delete cascade,
   recording_id uuid not null references public.recordings(id) on delete cascade,
+  granted_by uuid references auth.users(id),
+  grant_type text not null default 'manual' check (grant_type in ('manual', 'payment', 'free_card')),
+  revoked_at timestamptz,
+  revoke_reason text,
   created_at timestamptz not null default now(),
   primary key (student_id, recording_id)
 );
@@ -63,6 +69,10 @@ create table if not exists public.recording_manual_unlocks (
 create table if not exists public.material_manual_unlocks (
   student_id uuid not null references public.profiles(id) on delete cascade,
   material_id uuid not null references public.materials(id) on delete cascade,
+  granted_by uuid references auth.users(id),
+  grant_type text not null default 'manual' check (grant_type in ('manual', 'payment', 'free_card')),
+  revoked_at timestamptz,
+  revoke_reason text,
   created_at timestamptz not null default now(),
   primary key (student_id, material_id)
 );
@@ -168,25 +178,12 @@ with check (public.is_admin());
 create policy "recordings: read eligible or admin" on public.recordings
 for select to authenticated
 using (
-  public.is_admin() or
-  exists (
+  public.is_admin() or exists (
     select 1
-    from public.student_class_enrollments e
-    where e.class_id = recordings.class_id
-      and e.student_id = auth.uid()
-      and recordings.release_at >= e.start_access_date
-  ) and (
-    exists (
-      select 1
-      from public.recording_manual_unlocks ru
-      where ru.student_id = auth.uid() and ru.recording_id = recordings.id
-    ) or exists (
-      select 1
-      from public.student_class_payment_periods pp
-      where pp.student_id = auth.uid()
-        and pp.class_id = recordings.class_id
-        and recordings.release_at between pp.start_date and pp.end_date
-    )
+    from public.recording_manual_unlocks ru
+    where ru.student_id = auth.uid() 
+      and ru.recording_id = recordings.id
+      and ru.revoked_at is null
   )
 );
 
@@ -198,25 +195,12 @@ with check (public.is_admin());
 create policy "materials: read eligible or admin" on public.materials
 for select to authenticated
 using (
-  public.is_admin() or
-  exists (
+  public.is_admin() or exists (
     select 1
-    from public.student_class_enrollments e
-    where e.class_id = materials.class_id
-      and e.student_id = auth.uid()
-      and materials.release_at >= e.start_access_date
-  ) and (
-    exists (
-      select 1
-      from public.material_manual_unlocks mu
-      where mu.student_id = auth.uid() and mu.material_id = materials.id
-    ) or exists (
-      select 1
-      from public.student_class_payment_periods pp
-      where pp.student_id = auth.uid()
-        and pp.class_id = materials.class_id
-        and materials.release_at between pp.start_date and pp.end_date
-    )
+    from public.material_manual_unlocks mu
+    where mu.student_id = auth.uid() 
+      and mu.material_id = materials.id
+      and mu.revoked_at is null
   )
 );
 

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type StudentRecordingRow = {
   id: string;
@@ -75,8 +76,8 @@ export async function loadStudentRecordings(
   // To securely enforce access logic on the server side:
   // We fetch ALL published and released recordings for the student's enrolled classes
   // and THEN apply the explicit business logic via isRecordingAccessible.
-  
-  let query = supabase
+  const adminDb = createAdminClient();
+  let query = adminDb
     .from("recordings")
     .select(
       `
@@ -119,7 +120,7 @@ export async function loadStudentRecordings(
   const list = accessibleRecordings.map((rec) => ({
     ...rec,
     class_groups: Array.isArray(rec.class_groups) ? rec.class_groups[0] : rec.class_groups,
-    is_manually_unlocked: accessContext.manualUnlocks.has(rec.id),
+    is_manually_unlocked: accessContext.recordingGrants.has(rec.id),
   }));
 
   return {

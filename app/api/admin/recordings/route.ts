@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
 
 export async function GET(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const limit = url.searchParams.get("limit") === "true";
 
-    let query = supabase
+    let query = adminSupabase
       .from("recordings")
       .select(`
         id,
@@ -42,7 +45,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const classId = String(formData.get("class_id") ?? "");
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `recordings/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await adminSupabase.storage
         .from("thumbnails")
         .upload(filePath, thumbnailFile, {
           upsert: false,
@@ -78,14 +82,14 @@ export async function POST(request: NextRequest) {
         throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
       }
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = adminSupabase.storage
         .from("thumbnails")
         .getPublicUrl(filePath);
 
       thumbnailUrl = publicUrl;
     }
 
-    const { error } = await supabase.from("recordings").insert({
+    const { data: inserted, error } = await adminSupabase.from("recordings").insert({
       class_id: classId,
       title,
       description: description || null,
@@ -93,14 +97,19 @@ export async function POST(request: NextRequest) {
       release_at: releaseAt,
       published,
       thumbnail_url: thumbnailUrl,
-    });
+    }).select("id").single();
 
     if (error) throw error;
 
+    if (published && inserted) {
+      await grantNewReleaseAccess(inserted.id, classId, releaseAt, "recording", (await requireAdmin()).user.id);
+    }
+
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Recordings POST Error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: error?.message || (typeof error === 'string' ? error : JSON.stringify(error)) },
       { status: 500 }
     );
   }
@@ -108,7 +117,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
     const recordingId = String(formData.get("recording_id") ?? "");
@@ -127,7 +137,15 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updateData = {
+    const updateData: {
+      class_id: string;
+      title: string;
+      description: string | null;
+      youtube_video_id: string;
+      release_at: string;
+      published: boolean;
+      thumbnail_url?: string;
+    } = {
       class_id: classId,
       title,
       description: description || null,
@@ -141,7 +159,7 @@ export async function PUT(request: NextRequest) {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `recordings/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await adminSupabase.storage
         .from("thumbnails")
         .upload(filePath, thumbnailFile, {
           upsert: false,
@@ -152,19 +170,23 @@ export async function PUT(request: NextRequest) {
         throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
       }
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = adminSupabase.storage
         .from("thumbnails")
         .getPublicUrl(filePath);
 
       updateData.thumbnail_url = publicUrl;
     }
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from("recordings")
       .update(updateData)
       .eq("id", recordingId);
 
     if (error) throw error;
+
+    if (published) {
+      await grantNewReleaseAccess(recordingId, classId, releaseAt, "recording", (await requireAdmin()).user.id);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

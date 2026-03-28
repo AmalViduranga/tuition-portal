@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createStudentAccount } from "@/lib/admin/create-student-account";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const simple = url.searchParams.get("simple") === "true";
 
     const { data: students, error } = simple
-      ? await supabase
+      ? await adminSupabase
           .from("profiles")
           .select("id, full_name")
           .eq("role", "student")
           .order("full_name", { ascending: true })
-      : await supabase
+      : await adminSupabase
           .from("profiles")
           .select("id, full_name, email, phone, is_active, created_at, role")
           .eq("role", "student")

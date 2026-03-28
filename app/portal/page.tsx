@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Card, DateFormat } from "@/components/ui";
 
 export default async function PortalHomePage() {
   const { supabase, user } = await requireUser();
+
+  const adminDb = createAdminClient();
 
   const [{ data: enrollments }, { data: recentRecordings }] = await Promise.all([
     supabase
@@ -11,7 +14,7 @@ export default async function PortalHomePage() {
       .select("class_id, start_access_date, class_groups(id, name)")
       .eq("student_id", user.id)
       .order("created_at", { ascending: false }),
-    supabase
+    adminDb
       .from("recordings")
       .select(`
         id,
@@ -28,15 +31,20 @@ export default async function PortalHomePage() {
 
   // Filter recordings to only those the student has access to
   const accessibleClassIds = new Set(
-    (enrollments ?? [].map((e) => {
+    (enrollments || []).map((e: any) => {
       const group = Array.isArray(e.class_groups) ? e.class_groups[0] : e.class_groups;
       return group?.id;
-    }))
+    })
   );
+
+  // Also verify against the strict access rules via student grants
+  const { getStudentAccessContext } = await import("@/lib/recordings/access-logic");
+  const accessContext = await getStudentAccessContext(supabase, user.id);
 
   const accessibleRecordings = (recentRecordings ?? []).filter((rec) => {
     const group = Array.isArray(rec.class_groups) ? rec.class_groups[0] : rec.class_groups;
-    return group && accessibleClassIds.has(group.id);
+    const isEnrolled = group && accessibleClassIds.has(group.id);
+    return isEnrolled && accessContext.recordingGrants.has(rec.id);
   });
 
   return (
@@ -101,7 +109,7 @@ export default async function PortalHomePage() {
           </Link>
         </div>
 
-        {(enrollments ?? []).length === 0 ? (
+        {(enrollments || []).length === 0 ? (
           <div className="text-center py-8">
             <div className="text-4xl mb-3">📚</div>
             <p className="text-slate-600">You are not enrolled in any classes yet.</p>
@@ -109,7 +117,7 @@ export default async function PortalHomePage() {
           </div>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
-            {(enrollments ?? []).slice(0, 4).map((enrollment) => {
+            {(enrollments || []).slice(0, 4).map((enrollment: any) => {
               const group = Array.isArray(enrollment.class_groups)
                 ? enrollment.class_groups[0]
                 : enrollment.class_groups;
@@ -171,9 +179,6 @@ export default async function PortalHomePage() {
                         src={`https://img.youtube.com/vi/${recording.youtube_video_id}/mqdefault.jpg`}
                         alt={recording.title}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' fill='%23ddd'%3E%3Crect width='320' height='180'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3ENo thumbnail%3C/text%3E%3C/svg%3E";
-                        }}
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
