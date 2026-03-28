@@ -142,7 +142,7 @@ export default async function StudentDashboardPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-slate-900 line-clamp-2 text-sm">{rec.title}</h3>
-                      <p className="mt-1 text-xs text-slate-500 truncate">{Array.isArray(rec.class_groups) ? rec.class_groups[0]?.name : rec.class_groups?.name}</p>
+                      <p className="mt-1 text-xs text-slate-500 truncate">{(rec.class_groups as any)?.name || Array.isArray(rec.class_groups) && (rec.class_groups as any)[0]?.name}</p>
                     </div>
                   </Link>
                 ))}
@@ -173,7 +173,7 @@ export default async function StudentDashboardPage() {
                       <div>
                         <h3 className="font-medium text-slate-900 text-sm">{mat.title}</h3>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {Array.isArray(mat.class_groups) ? mat.class_groups[0]?.name : mat.class_groups?.name} &middot; <DateFormat date={mat.release_at} format="short" />
+                          {((mat.class_groups as any)?.name || (Array.isArray(mat.class_groups) && (mat.class_groups as any)[0]?.name)) || "Class"} &middot; <DateFormat date={mat.release_at} format="short" />
                         </p>
                       </div>
                     </div>

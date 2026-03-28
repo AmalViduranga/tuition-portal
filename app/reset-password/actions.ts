@@ -8,15 +8,15 @@ export async function resetPassword(formData: FormData) {
   const token = String(formData.get("token") ?? "");
 
   if (!password) {
-    redirect("/reset-password?error=Password%20is%20required");
+    return { error: "Password is required" };
   }
 
   if (password.length < 8) {
-    redirect("/reset-password?error=Password%20must%20be%20at%20least%208%20characters");
+    return { error: "Password must be at least 8 characters" };
   }
 
   if (!token) {
-    redirect("/reset-password?error=Missing%20reset%20token");
+    return { error: "Missing reset token" };
   }
 
   const supabase = await createClient();
@@ -28,18 +28,18 @@ export async function resetPassword(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/reset-password?error=${encodeURIComponent(error.message)}`);
+    return { error: error.message };
   }
 
   // Update the password
   const { error: updateError } = await supabase.auth.updateUser({
     password,
     // Clear must_change_password flag if set
-    user_metadata: { must_change_password: false },
+    data: { must_change_password: false },
   });
 
   if (updateError) {
-    redirect(`/reset-password?error=${encodeURIComponent(updateError.message)}`);
+    return { error: updateError.message };
   }
 
   // Also clear the flag in profiles table
@@ -54,5 +54,5 @@ export async function resetPassword(formData: FormData) {
       .eq("id", user.id);
   }
 
-  redirect("/reset-password?success=true");
+  return { success: true };
 }

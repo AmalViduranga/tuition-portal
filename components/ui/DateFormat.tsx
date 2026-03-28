@@ -1,4 +1,11 @@
 import type { ReactNode } from "react";
+
+export interface DateFormatProps {
+  date: string | Date;
+  format?: "short" | "long" | "full" | "time";
+  className?: string;
+}
+
 export default function DateFormat({ date, format: formatType = "short", className = "" }: DateFormatProps) {
   const dateObj = typeof date === "string" ? new Date(date) : date;
 

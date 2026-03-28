@@ -81,7 +81,7 @@ export default async function AdminHomePage() {
                   <div className="flex items-start justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-900 truncate">{rec.title}</p>
-                      <p className="text-xs text-slate-500">{rec.class_groups?.name}</p>
+                      <p className="text-xs text-slate-500">{(rec.class_groups as any)?.name || Array.isArray(rec.class_groups) && (rec.class_groups as any)[0]?.name}</p>
                     </div>
                     <span className="text-sm text-slate-500">
                       <DateFormat date={rec.release_at} format="short" />
@@ -110,7 +110,7 @@ export default async function AdminHomePage() {
                   <div className="flex items-start justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-900 truncate">{mat.title}</p>
-                      <p className="text-xs text-slate-500">{mat.class_groups?.name}</p>
+                      <p className="text-xs text-slate-500">{(mat.class_groups as any)?.name || Array.isArray(mat.class_groups) && (mat.class_groups as any)[0]?.name}</p>
                     </div>
                     <span className="text-sm text-slate-500">
                       <DateFormat date={mat.release_at} format="short" />

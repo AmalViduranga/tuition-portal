@@ -1,0 +1,7 @@
+﻿app/api/admin/site-content/route.ts(35,11): error TS2304: Cannot find name 'CONTENT_KEYS'.
+app/api/admin/site-content/route.ts(35,44): error TS2304: Cannot find name 'CONTENT_KEYS'.
+app/reset-password/actions.ts(38,5): error TS2353: Object literal may only specify known properties, and 'user_metadata' does not exist in type 'UserAttributes'.
+app/reset-password/page.tsx(46,19): error TS2339: Property 'error' does not exist on type 'never'.
+app/reset-password/page.tsx(47,25): error TS2339: Property 'error' does not exist on type 'never'.
+components/admin/index.ts(3,42): error TS2307: Cannot find module './ActionButtons' or its corresponding type declarations.
+components/ui/DateFormat.tsx(2,92): error TS2304: Cannot find name 'DateFormatProps'.
