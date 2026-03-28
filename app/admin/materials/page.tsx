@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { addMaterial, updateMaterial, toggleMaterialStatus } from "@/app/admin/actions";
-import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table } from "@/components/ui";
+import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table, Select } from "@/components/ui";
 
 type Material = {
   id: string;
@@ -120,7 +120,7 @@ export default function AdminMaterialsPage() {
   const handleEdit = (material: Material) => {
     setSelectedMaterial(material);
     setFormData({
-      class_id: material.class_groups?.id || "",
+      class_id: (material.class_groups as any)?.id || "",
       title: material.title,
       material_type: material.material_type || "other",
       release_at: material.release_at,
@@ -275,7 +275,7 @@ export default function AdminMaterialsPage() {
           </Button>
           <Button
             size="sm"
-            variant={mat.published ? "warning" : "success"}
+            variant={mat.published ? "secondary" : "primary"}
             onClick={() => handleToggleStatus(mat)}
           >
             {mat.published ? "Unpublish" : "Publish"}

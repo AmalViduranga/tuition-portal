@@ -181,7 +181,7 @@ export default function AdminClassesPage() {
           </Button>
           <Button
             size="sm"
-            variant={cls.is_active ? "warning" : "success"}
+            variant={cls.is_active ? "danger" : "primary"}
             onClick={() => handleToggleStatus(cls)}
           >
             {cls.is_active ? "Deactivate" : "Activate"}
