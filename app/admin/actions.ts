@@ -148,7 +148,7 @@ export async function addRecording(formData: FormData) {
     thumbnailUrl = publicUrl;
   }
 
-  await supabase.from("recordings").insert({
+  const { data: insertedRecording, error: insertError } = await supabase.from("recordings").insert({
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
@@ -156,7 +156,22 @@ export async function addRecording(formData: FormData) {
     release_at: String(formData.get("release_at") ?? ""),
     published: formData.get("published") === "on",
     thumbnail_url: thumbnailUrl,
-  });
+  }).select().single();
+
+  if (insertError) {
+    throw new Error(`Failed to insert recording: ${insertError.message}`);
+  }
+
+  if (insertedRecording && insertedRecording.published) {
+    const { grantNewReleaseAccess } = await import("@/lib/admin/grant-manager");
+    await grantNewReleaseAccess(
+      insertedRecording.id,
+      insertedRecording.class_id,
+      insertedRecording.release_at,
+      "recording"
+    );
+  }
+
   revalidatePath("/admin/recordings");
 }
 
@@ -193,10 +208,24 @@ export async function updateRecording(formData: FormData) {
     updateData.thumbnail_url = publicUrl;
   }
 
-  await supabase
+  const { data: updatedRecording, error: updateError } = await supabase
     .from("recordings")
     .update(updateData)
-    .eq("id", recordingId);
+    .eq("id", recordingId)
+    .select()
+    .single();
+
+  if (updateError) throw new Error(`Recording update failed: ${updateError.message}`);
+
+  if (updatedRecording && updatedRecording.published) {
+    const { grantNewReleaseAccess } = await import("@/lib/admin/grant-manager");
+    await grantNewReleaseAccess(
+      updatedRecording.id,
+      updatedRecording.class_id,
+      updatedRecording.release_at,
+      "recording"
+    );
+  }
 
   revalidatePath("/admin/recordings");
 }
@@ -211,10 +240,24 @@ export async function toggleRecordingStatus(formData: FormData) {
     .eq("id", recordingId)
     .single();
 
-  await supabase
+  const { data: updatedRecording, error } = await supabase
     .from("recordings")
     .update({ published: !recording?.published })
-    .eq("id", recordingId);
+    .eq("id", recordingId)
+    .select()
+    .single();
+
+  if (error) throw new Error("Failed to toggle status");
+
+  if (updatedRecording && updatedRecording.published) {
+    const { grantNewReleaseAccess } = await import("@/lib/admin/grant-manager");
+    await grantNewReleaseAccess(
+      updatedRecording.id,
+      updatedRecording.class_id,
+      updatedRecording.release_at,
+      "recording"
+    );
+  }
 
   revalidatePath("/admin/recordings");
 }
@@ -258,7 +301,7 @@ export async function addMaterial(formData: FormData) {
     .from("materials")
     .getPublicUrl(filePath);
 
-  await supabase.from("materials").insert({
+  const { data: insertedMaterial, error: insertError } = await supabase.from("materials").insert({
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
     file_url: publicUrl,
@@ -267,7 +310,21 @@ export async function addMaterial(formData: FormData) {
     material_type: materialType,
     release_at: String(formData.get("release_at") ?? ""),
     published: formData.get("published") === "on",
-  });
+  }).select().single();
+
+  if (insertError) {
+    throw new Error(`Failed to insert material: ${insertError.message}`);
+  }
+
+  if (insertedMaterial && insertedMaterial.published) {
+    const { grantNewReleaseAccess } = await import("@/lib/admin/grant-manager");
+    await grantNewReleaseAccess(
+      insertedMaterial.id,
+      insertedMaterial.class_id,
+      insertedMaterial.release_at,
+      "material"
+    );
+  }
 
   revalidatePath("/admin/materials");
 }
@@ -309,10 +366,24 @@ export async function updateMaterial(formData: FormData) {
     updateData.file_type = file.type || "application/pdf";
   }
 
-  await supabase
+  const { data: updatedMaterial, error: updateError } = await supabase
     .from("materials")
     .update(updateData)
-    .eq("id", materialId);
+    .eq("id", materialId)
+    .select()
+    .single();
+
+  if (updateError) throw new Error(`Material update failed: ${updateError.message}`);
+
+  if (updatedMaterial && updatedMaterial.published) {
+    const { grantNewReleaseAccess } = await import("@/lib/admin/grant-manager");
+    await grantNewReleaseAccess(
+      updatedMaterial.id,
+      updatedMaterial.class_id,
+      updatedMaterial.release_at,
+      "material"
+    );
+  }
 
   revalidatePath("/admin/materials");
 }
@@ -327,10 +398,24 @@ export async function toggleMaterialStatus(formData: FormData) {
     .eq("id", materialId)
     .single();
 
-  await supabase
+  const { data: updatedMaterial, error } = await supabase
     .from("materials")
     .update({ published: !material?.published })
-    .eq("id", materialId);
+    .eq("id", materialId)
+    .select()
+    .single();
+
+  if (error) throw new Error("Failed to toggle status");
+
+  if (updatedMaterial && updatedMaterial.published) {
+    const { grantNewReleaseAccess } = await import("@/lib/admin/grant-manager");
+    await grantNewReleaseAccess(
+      updatedMaterial.id,
+      updatedMaterial.class_id,
+      updatedMaterial.release_at,
+      "material"
+    );
+  }
 
   revalidatePath("/admin/materials");
 }
@@ -389,8 +474,9 @@ export async function addManualMaterialUnlock(formData: FormData) {
 
 // Site content management
 export async function updateSiteContent(formData: FormData) {
-  await requireAdmin();
   const { supabase } = await requireAdmin();
+
+  const teacherImageUrl = String(formData.get("teacher_image_url") ?? "");
 
   const updates = [
     { key: "site_name", value: String(formData.get("site_name") ?? "") },
@@ -402,6 +488,10 @@ export async function updateSiteContent(formData: FormData) {
     { key: "subject_description", value: String(formData.get("subject_description") ?? "") },
   ];
 
+  if (teacherImageUrl || formData.has("teacher_image_url")) {
+    updates.push({ key: "teacher_image_url", value: teacherImageUrl });
+  }
+
   const promises = updates.map(({ key, value }) =>
     supabase
       .from("site_settings")
@@ -410,4 +500,6 @@ export async function updateSiteContent(formData: FormData) {
 
   await Promise.all(promises);
   revalidatePath("/admin/site-content");
+  revalidatePath("/");
+  revalidatePath("/about");
 }

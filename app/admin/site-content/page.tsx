@@ -51,18 +51,14 @@ export default function AdminSiteContentPage() {
     setSaving(true);
 
     try {
-      const response = await fetch("/api/admin/site-content", {
-        method: "POST",
-        body: new URLSearchParams(Object.entries(content) as [string, string][]),
-      });
+      const formData = new FormData();
+      Object.entries(content).forEach(([key, val]) => formData.append(key, val));
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to save content");
-      }
+      await updateSiteContent(formData);
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
+      fetchContent(); // Reload the updated image URL from server
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -109,6 +105,12 @@ export default function AdminSiteContentPage() {
             <div className="border-t border-slate-200 pt-6">
               <h2 className="text-lg font-semibold mb-4">Teacher Information</h2>
               <div className="space-y-4">
+                <Input
+                  label="Teacher Image URL (e.g. /teacher.jpg)"
+                  value={content.teacher_image_url || ""}
+                  onChange={(e) => handleChange("teacher_image_url", e.target.value)}
+                  placeholder="e.g., /images/teacher.jpg or https://... "
+                />
                 <Input
                   label="Teacher Name"
                   value={content.teacher_name || ""}

@@ -36,6 +36,9 @@ export default async function DashboardLayout({
             <Link href="/dashboard" className="text-xl font-bold tracking-tight text-indigo-700">
               Student Dashboard
             </Link>
+            <span className="rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
+              Beta
+            </span>
           </div>
           <div className="flex items-center gap-4">
             {profile?.role === "admin" && (

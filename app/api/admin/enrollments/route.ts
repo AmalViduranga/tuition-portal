@@ -3,12 +3,15 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncFreeCardGrantsForStudent } from "@/lib/admin/grant-manager";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await requireAdmin();
     const adminSupabase = createAdminClient();
+    
+    const { searchParams } = new URL(request.url);
+    const studentId = searchParams.get('student_id');
 
-    const { data, error } = await adminSupabase
+    let query = adminSupabase
       .from("student_class_enrollments")
       .select(`
         id,
@@ -22,6 +25,12 @@ export async function GET() {
         class_groups (name)
       `)
       .order("created_at", { ascending: false });
+
+    if (studentId) {
+      query = query.eq('student_id', studentId);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 

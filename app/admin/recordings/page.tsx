@@ -44,6 +44,7 @@ export default function AdminRecordingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
   const [formData, setFormData] = useState({
     class_id: "",
@@ -53,6 +54,12 @@ export default function AdminRecordingsPage() {
     release_at: "",
     published: true,
     thumbnail: null as File | null,
+  });
+  const [bulkFormData, setBulkFormData] = useState({
+    class_id: "",
+    urls: "",
+    default_published: true,
+    default_release_date: new Date().toISOString().split("T")[0],
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
@@ -192,6 +199,69 @@ export default function AdminRecordingsPage() {
     }
   };
 
+  const extractVideoIds = (text: string) => {
+    const ids: string[] = [];
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/gi;
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      if (!ids.includes(match[1])) ids.push(match[1]);
+    }
+    return ids;
+  };
+
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    
+    const ids = extractVideoIds(bulkFormData.urls);
+    if (ids.length === 0) {
+      setFormError("No valid YouTube URLs found.");
+      return;
+    }
+
+    setFormLoading(true);
+
+    try {
+      const recordings = ids.map((id, index) => {
+        const releaseDate = new Date(bulkFormData.default_release_date);
+        releaseDate.setDate(releaseDate.getDate() + index); // Auto-increment date by 1 day per video
+        return {
+          youtube_video_id: id,
+          title: `Video ${id}`, 
+          release_at: releaseDate.toISOString(),
+        };
+      });
+
+      const response = await fetch("/api/admin/recordings/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          class_id: bulkFormData.class_id,
+          default_published: bulkFormData.default_published,
+          recordings,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to bulk create recordings");
+      }
+
+      setIsBulkModalOpen(false);
+      setBulkFormData({
+        class_id: "",
+        urls: "",
+        default_published: true,
+        default_release_date: new Date().toISOString().split("T")[0],
+      });
+      await fetchRecordings();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   const handleDelete = async (recording: Recording) => {
     if (!confirm(`Are you sure you want to delete "${recording.title}"? This action cannot be undone.`)) {
       return;
@@ -265,9 +335,14 @@ export default function AdminRecordingsPage() {
             Manage class videos and YouTube content
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} size="sm">
-          + Add Recording
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsBulkModalOpen(true)} size="sm" variant="outline">
+            Bulk Add
+          </Button>
+          <Button onClick={() => setIsModalOpen(true)} size="sm">
+            + Add Recording
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -593,6 +668,96 @@ export default function AdminRecordingsPage() {
             </Button>
             <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
               Update Recording
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Bulk Add Recording Modal */}
+      <Modal
+        isOpen={isBulkModalOpen}
+        onClose={() => {
+          setIsBulkModalOpen(false);
+          setFormError(null);
+          setBulkFormData({
+            class_id: "",
+            urls: "",
+            default_published: true,
+            default_release_date: new Date().toISOString().split("T")[0],
+          });
+        }}
+        title="Bulk Add Recordings"
+        size="lg"
+      >
+        <form onSubmit={handleBulkSubmit} className="space-y-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-600 leading-relaxed">
+            <p className="font-medium text-slate-700">How it works</p>
+            <p className="mt-1">
+              Paste multiple YouTube links (comma-separated or one per line). We will extract the Video IDs and create a recording for each, automatically incrementing the release date by 1 day for each subsequent video.
+            </p>
+          </div>
+          {formError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              {formError}
+            </div>
+          )}
+          
+          <Select
+            label="Target Class"
+            name="class_id"
+            value={bulkFormData.class_id}
+            onChange={(e) => setBulkFormData({ ...bulkFormData, class_id: e.target.value })}
+            options={classes.filter((c) => c.is_active).map((cls) => ({ value: cls.id, label: cls.name }))}
+            required
+          />
+
+          <Textarea
+            label="YouTube URLs"
+            name="urls"
+            value={bulkFormData.urls}
+            onChange={(e) => setBulkFormData({ ...bulkFormData, urls: e.target.value })}
+            placeholder="https://www.youtube.com/watch?v=...&#10;https://youtu.be/..."
+            rows={5}
+            required
+          />
+          <div className="text-xs text-slate-500">
+            Detected Videos: <span className="font-medium text-slate-800">{extractVideoIds(bulkFormData.urls).length}</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Starting Release Date"
+              name="default_release_date"
+              type="date"
+              value={bulkFormData.default_release_date}
+              onChange={(e) => setBulkFormData({ ...bulkFormData, default_release_date: e.target.value })}
+              required
+            />
+            <div className="flex items-center">
+              <label className="flex items-center gap-2 cursor-pointer mt-7">
+                <input
+                  type="checkbox"
+                  name="default_published"
+                  checked={bulkFormData.default_published}
+                  onChange={(e) => setBulkFormData({ ...bulkFormData, default_published: e.target.checked })}
+                  className="rounded border-slate-300 text-indigo-600"
+                />
+                <span className="text-sm text-slate-700">Publish all automatically</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsBulkModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
+              Save {extractVideoIds(bulkFormData.urls).length} Recordings
             </Button>
           </div>
         </form>

@@ -215,14 +215,21 @@ export default function StudentMaterialsClient({
                             </div>
                           </div>
                         </div>
-                        <div className="mt-5 w-full">
+                        <div className="mt-4 flex gap-2 w-full">
                           <a
                             href={mat.file_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex w-full min-h-[44px] items-center justify-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors group-hover:bg-indigo-50 group-hover:text-indigo-700"
+                            className="inline-flex flex-1 items-center justify-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
                           >
-                            Open Material
+                            Open
+                          </a>
+                          <a
+                            href={`${mat.file_url}?download=`}
+                            download
+                            className="inline-flex flex-1 items-center justify-center rounded-lg bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-100"
+                          >
+                            Download
                           </a>
                         </div>
                       </div>

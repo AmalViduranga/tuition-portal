@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createStudent } from "@/app/admin/actions";
-import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table } from "@/components/ui";
+import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table, Select } from "@/components/ui";
 
 type Student = {
   id: string;
@@ -44,6 +44,81 @@ export default function AdminStudentsPage() {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+
+  // Enrollments Modal State
+  const [isEnrollmentModalOpen, setIsEnrollmentModalOpen] = useState(false);
+  const [selectedStudentForEnrollments, setSelectedStudentForEnrollments] = useState<Student | null>(null);
+  const [studentEnrollments, setStudentEnrollments] = useState<any[]>([]);
+  const [enrollmentLoading, setEnrollmentLoading] = useState(false);
+  const [enrollmentFormData, setEnrollmentFormData] = useState({
+    class_id: "",
+    start_access_date: "",
+    access_mode: "paid",
+    access_end_date: "",
+  });
+
+  const fetchStudentEnrollments = async (studentId: string) => {
+    try {
+      setEnrollmentLoading(true);
+      const res = await fetch(`/api/admin/enrollments?student_id=${studentId}`);
+      if (!res.ok) throw new Error("Failed to fetch enrollments");
+      const data = await res.json();
+      setStudentEnrollments(data);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error fetching enrollments");
+    } finally {
+      setEnrollmentLoading(false);
+    }
+  };
+
+  const openEnrollmentsModal = (student: Student) => {
+    setSelectedStudentForEnrollments(student);
+    setIsEnrollmentModalOpen(true);
+    fetchStudentEnrollments(student.id);
+  };
+
+  const handleAddEnrollment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudentForEnrollments) return;
+    setEnrollmentLoading(true);
+    try {
+      const form = new FormData();
+      form.append("student_id", selectedStudentForEnrollments.id);
+      form.append("class_id", enrollmentFormData.class_id);
+      form.append("start_access_date", enrollmentFormData.start_access_date);
+      form.append("access_mode", enrollmentFormData.access_mode);
+      if (enrollmentFormData.access_end_date) {
+        form.append("access_end_date", enrollmentFormData.access_end_date);
+      }
+
+      const res = await fetch("/api/admin/enrollments", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Failed to add enrollment");
+      
+      setEnrollmentFormData({ class_id: "", start_access_date: "", access_mode: "paid", access_end_date: "" });
+      await fetchStudentEnrollments(selectedStudentForEnrollments.id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error saving enrollment");
+    } finally {
+      setEnrollmentLoading(false);
+    }
+  };
+
+  const handleDeleteEnrollment = async (enrollmentId: string) => {
+    if (!confirm("Are you sure you want to delete this enrollment?")) return;
+    if (!selectedStudentForEnrollments) return;
+    setEnrollmentLoading(true);
+    try {
+      const form = new FormData();
+      form.append("enrollment_id", enrollmentId);
+      const res = await fetch("/api/admin/enrollments/delete", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Failed to delete enrollment");
+      await fetchStudentEnrollments(selectedStudentForEnrollments.id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error deleting enrollment");
+    } finally {
+      setEnrollmentLoading(false);
+    }
+  };
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -250,6 +325,13 @@ export default function AdminStudentsPage() {
       className: "text-right",
       render: (student: Student) => (
         <div className="flex items-center justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openEnrollmentsModal(student)}
+          >
+            Enrollments
+          </Button>
           <Button
             size="sm"
             variant="ghost"
@@ -490,6 +572,99 @@ export default function AdminStudentsPage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Enrollments Modal */}
+      <Modal
+        isOpen={isEnrollmentModalOpen}
+        onClose={() => {
+          setIsEnrollmentModalOpen(false);
+          setSelectedStudentForEnrollments(null);
+        }}
+        title={`Manage Enrollments - ${selectedStudentForEnrollments?.full_name}`}
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* List existing enrollments */}
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Current Enrollments</h3>
+            {enrollmentLoading && studentEnrollments.length === 0 ? (
+              <p className="text-sm text-slate-500">Loading...</p>
+            ) : studentEnrollments.length === 0 ? (
+              <p className="text-sm text-slate-500">No active enrollments for this student.</p>
+            ) : (
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <Table
+                  columns={[
+                    { key: "class", header: "Class", render: (e: any) => e.class_name || "-" },
+                    { key: "mode", header: "Mode", render: (e: any) => <Badge variant={e.access_mode === "free_card" ? "success" : "default"}>{e.access_mode}</Badge> },
+                    { key: "start_date", header: "Start", render: (e: any) => <DateFormat date={e.start_access_date} format="short" /> },
+                    { key: "end_date", header: "End", render: (e: any) => e.access_end_date ? <DateFormat date={e.access_end_date} format="short" /> : <span className="text-slate-400">Indefinite</span> },
+                    { 
+                      key: "actions", 
+                      header: "", 
+                      className: "text-right",
+                      render: (e: any) => (
+                        <Button size="sm" variant="danger" onClick={() => handleDeleteEnrollment(e.id)} loading={enrollmentLoading}>
+                          Remove
+                        </Button>
+                      )
+                    }
+                  ]}
+                  data={studentEnrollments}
+                  emptyMessage=""
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-slate-200 pt-4">
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Add / Update Enrollment</h3>
+            <form onSubmit={handleAddEnrollment} className="space-y-4 bg-slate-50 p-4 rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select
+                  label="Class"
+                  value={enrollmentFormData.class_id}
+                  onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, class_id: e.target.value })}
+                  options={classes.map((c) => ({ value: c.id, label: c.name }))}
+                  placeholder="Select class"
+                  required
+                />
+                <Select
+                  label="Access Mode"
+                  value={enrollmentFormData.access_mode}
+                  onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, access_mode: e.target.value })}
+                  options={[
+                    { value: "paid", label: "Paid" },
+                    { value: "free_card", label: "Free Card" },
+                    { value: "manual", label: "Manual Override" },
+                  ]}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Start Access Date"
+                  type="date"
+                  value={enrollmentFormData.start_access_date}
+                  onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, start_access_date: e.target.value })}
+                  required
+                />
+                <Input
+                  label="Access End Date (Optional)"
+                  type="date"
+                  value={enrollmentFormData.access_end_date}
+                  onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, access_end_date: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button type="submit" loading={enrollmentLoading}>
+                  Save Enrollment
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
       </Modal>
     </div>
   );

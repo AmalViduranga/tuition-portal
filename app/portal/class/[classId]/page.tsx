@@ -107,9 +107,14 @@ export default async function ClassDetailPage({ params }: Props) {
             <article key={material.id} className="rounded-md border border-slate-200 p-3">
               <p className="font-medium">{material.title}</p>
               <p className="text-sm text-slate-600">Released: {material.release_at}</p>
-              <a href={material.file_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-blue-600">
-                Open PDF
-              </a>
+              <div className="mt-3 flex items-center gap-4">
+                <a href={material.file_url} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+                  Open PDF
+                </a>
+                <a href={`${material.file_url}?download=`} download className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+                  Download
+                </a>
+              </div>
             </article>
           ))}
           {visibleMaterials.length === 0 ? <p className="text-sm text-slate-600">No materials available yet.</p> : null}

@@ -32,9 +32,14 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[radial-gradient(circle_at_top,_#eef2ff_0%,_#f8fafc_40%,_#f8fafc_100%)] text-slate-900">
         <header className="sticky top-0 z-40 border-b border-indigo-100 bg-white/85 backdrop-blur-xl">
           <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-            <Link href="/" className="text-base font-bold tracking-tight text-indigo-700 md:text-lg">
-              {SITE_NAME}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/" className="text-base font-bold tracking-tight text-indigo-700 md:text-lg">
+                {SITE_NAME}
+              </Link>
+              <span className="rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
+                Beta
+              </span>
+            </div>
 
             <div className="hidden items-center gap-2 text-sm md:flex">
               <Link href="/about" className="rounded-lg px-3 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">

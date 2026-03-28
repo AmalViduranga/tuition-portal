@@ -54,12 +54,25 @@ type Material = {
   title: string;
 };
 
+type Unlock = {
+  id: string;
+  student_id: string;
+  student_name: string;
+  created_at: string;
+  recording_id?: string;
+  recording_title?: string;
+  material_id?: string;
+  material_title?: string;
+};
+
 type TabType = "enrollments" | "payments" | "recording-unlocks" | "material-unlocks";
 
 export default function AdminEnrollmentsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("enrollments");
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [payments, setPayments] = useState<PaymentPeriod[]>([]);
+  const [recordingUnlocks, setRecordingUnlocks] = useState<Unlock[]>([]);
+  const [materialUnlocks, setMaterialUnlocks] = useState<Unlock[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [recordings, setRecordings] = useState<Recording[]>([]);
@@ -71,13 +84,15 @@ export default function AdminEnrollmentsPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [enrRes, payRes, studentsRes, classesRes, recRes, matRes] = await Promise.all([
+      const [enrRes, payRes, studentsRes, classesRes, recRes, matRes, recUnlockRes, matUnlockRes] = await Promise.all([
         fetch("/api/admin/enrollments"),
         fetch("/api/admin/payments"),
         fetch("/api/admin/students?simple=true"),
         fetch("/api/admin/classes?active=true"),
         fetch("/api/admin/recordings?limit=true"),
         fetch("/api/admin/materials?limit=true"),
+        fetch("/api/admin/unlocks/recording"),
+        fetch("/api/admin/unlocks/material"),
       ]);
 
       if (!enrRes.ok || !payRes.ok) throw new Error("Failed to fetch data");
@@ -89,6 +104,8 @@ export default function AdminEnrollmentsPage() {
       if (classesRes.ok) setClasses(await classesRes.json());
       if (recRes.ok) setRecordings(await recRes.json());
       if (matRes.ok) setMaterials(await matRes.json());
+      if (recUnlockRes.ok) setRecordingUnlocks(await recUnlockRes.json());
+      if (matUnlockRes.ok) setMaterialUnlocks(await matUnlockRes.json());
 
       setEnrollments(enrData);
       setPayments(payData);
@@ -315,10 +332,16 @@ export default function AdminEnrollmentsPage() {
     const items = type === "recording" ? recordings : materials;
     const title = type === "recording" ? "Recording" : "Material";
     const endpoint = type === "recording" ? "/api/admin/unlocks/recording" : "/api/admin/unlocks/material";
+    const unlocksData = type === "recording" ? recordingUnlocks : materialUnlocks;
+
+    const filteredUnlocks = unlocksData.filter((u) => 
+      u.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (type === "recording" ? u.recording_title : u.material_title)?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
       <Card>
-        <div className="mb-4">
+        <div className="mb-8">
           <p className="text-sm text-slate-600 mb-3">
             Manually unlock {title.toLowerCase()}s for specific students (overrides restrictions).
           </p>
@@ -331,6 +354,62 @@ export default function AdminEnrollmentsPage() {
               await fetchData();
             }}
           />
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Active {title} Unlocks</h3>
+          {loading ? (
+            <div className="flex items-center justify-center py-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+          ) : (
+            <Table
+              columns={[
+                {
+                  key: "student",
+                  header: "Student",
+                  render: (u: Unlock) => (
+                    <div>
+                      <p className="font-medium">{u.student_name}</p>
+                    </div>
+                  ),
+                },
+                {
+                  key: "item",
+                  header: title,
+                  render: (u: Unlock) => type === "recording" ? u.recording_title || "-" : u.material_title || "-",
+                },
+                {
+                  key: "granted",
+                  header: "Granted",
+                  render: (u: Unlock) => <DateFormat date={u.created_at} format="short" />,
+                },
+                {
+                  key: "actions",
+                  header: "Actions",
+                  className: "text-right",
+                  render: (u: Unlock) => (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={async () => {
+                        if (!confirm(`Revoke access to this ${title.toLowerCase()}?`)) return;
+                        const form = new FormData();
+                        form.append("unlock_id", u.id);
+                        await fetch(endpoint, { method: "DELETE", body: form });
+                        await fetchData();
+                      }}
+                    >
+                      Revoke
+                    </Button>
+                  ),
+                },
+              ]}
+              data={filteredUnlocks}
+              emptyMessage={`No ${title.toLowerCase()} manually unlocked yet`}
+              className="border border-slate-200 rounded-lg overflow-hidden"
+            />
+          )}
         </div>
       </Card>
     );
@@ -540,19 +619,20 @@ function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
           variant="outline" 
           loading={loading} 
           size="sm"
-          onClick={async () => {
-             if (!formData.student_id || !formData.class_id) {
-               setError("Please select student and class first");
-               return;
-             }
-             const form = new FormData();
-             form.append("student_id", formData.student_id);
-             form.append("class_id", formData.class_id);
-             form.append("quick_approve", "true");
-             await onSubmit(form);
+          onClick={() => {
+             const start = new Date();
+             const end = new Date();
+             end.setMonth(end.getMonth() + 1);
+             end.setDate(end.getDate() + 15);
+             
+             setFormData(prev => ({
+               ...prev,
+               start_date: start.toISOString().split("T")[0],
+               end_date: end.toISOString().split("T")[0]
+             }));
           }}
         >
-          Quick Approve (1.5 Months)
+          Approve 1.5 months from today
         </Button>
       </div>
     </form>
