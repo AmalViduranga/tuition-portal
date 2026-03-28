@@ -11,6 +11,7 @@ export default function PortalNav() {
     { href: "/portal", label: "Dashboard", icon: "🏠" },
     { href: "/portal/classes", label: "My Classes", icon: "📚" },
     { href: "/portal/recordings", label: "Recordings", icon: "🎥" },
+    { href: "/portal/materials", label: "Materials", icon: "📄" },
   ];
 
   return (

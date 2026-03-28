@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
         release_at,
         published,
         thumbnail_url,
+        views_count,
         class_groups (id, name),
         created_at
       `)

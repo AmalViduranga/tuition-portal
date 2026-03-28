@@ -1,99 +1,41 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createStudentAccount } from "@/lib/admin/create-student-account";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
 export async function createStudent(formData: FormData) {
   await requireAdmin();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+
+  const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
-  const fullName = String(formData.get("full_name") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
+  const fullName = String(formData.get("full_name") ?? "");
+  const phone = String(formData.get("phone") ?? "");
   const startAccessDate = String(formData.get("start_access_date") ?? "");
   const mustChangePassword = formData.get("must_change_password") === "on";
 
-  // Get multiple class IDs (can be multiple values)
-  const classIds = formData.getAll("class_ids");
-  const validClassIds = classIds.filter((id) => id && String(id).trim() !== "");
+  const classIds = formData
+    .getAll("class_ids")
+    .map((id) => String(id).trim())
+    .filter(Boolean);
 
-  // Validation
-  if (!email || !password || !fullName) {
-    throw new Error("Email, password, and full name are required");
-  }
-
-  if (password.length < 6) {
-    throw new Error("Password must be at least 6 characters");
-  }
-
-  // Check for duplicate email
-  const { data: existingUser } = await createAdminClient()
-    .from("profiles")
-    .select("id")
-    .eq("email", email)
-    .maybeSingle();
-
-  if (existingUser) {
-    throw new Error("A student with this email already exists");
-  }
-
-  const adminClient = createAdminClient();
-
-  // Create user in Supabase Auth
-  const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+  const result = await createStudentAccount({
     email,
     password,
-    email_confirm: true,
-    user_metadata: {
-      full_name: fullName,
-      phone: phone || null,
-    },
+    fullName,
+    phone,
+    classIds,
+    startAccessDate,
+    mustChangePassword,
   });
 
-  if (authError) {
-    if (authError.message.includes("already registered")) {
-      throw new Error("This email is already registered in the system");
-    }
-    throw new Error(authError.message);
+  if (result.ok) {
+    revalidatePath("/admin/students");
+    revalidatePath("/admin/enrollments");
   }
 
-  // Create profile record with must_change_password flag
-  await adminClient.from("profiles").upsert({
-    id: authData.user.id,
-    full_name: fullName,
-    email: email,
-    phone: phone || null,
-    role: "student",
-    is_active: true,
-    must_change_password: mustChangePassword,
-  });
-
-  // Create enrollments for each selected class
-  if (validClassIds.length > 0 && startAccessDate) {
-    const enrollmentPromises = validClassIds.map((classId) =>
-      adminClient.from("student_class_enrollments").upsert({
-        student_id: authData.user.id,
-        class_id: String(classId),
-        start_access_date: startAccessDate,
-      })
-    );
-    await Promise.all(enrollmentPromises);
-  } else if (validClassIds.length > 0 && !startAccessDate) {
-    // If classes selected but no start date, use today
-    const enrollmentPromises = validClassIds.map((classId) =>
-      adminClient.from("student_class_enrollments").upsert({
-        student_id: authData.user.id,
-        class_id: String(classId),
-        start_access_date: new Date().toISOString().split("T")[0],
-      })
-    );
-    await Promise.all(enrollmentPromises);
-  }
-
-  revalidatePath("/admin/students");
-  revalidatePath("/admin/enrollments");
-  return { success: true, studentId: authData.user.id };
+  return result;
 }
 
 export async function toggleStudentStatus(formData: FormData) {
@@ -128,16 +70,14 @@ export async function updateStudent(formData: FormData) {
   await requireAdmin();
   const studentId = String(formData.get("student_id") ?? "");
   const fullName = String(formData.get("full_name") ?? "");
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim();
 
   const adminClient = createAdminClient();
 
-  // Update profile
-  await supabase.from("profiles").update({
+  await adminClient.from("profiles").update({
     full_name: fullName,
   }).eq("id", studentId);
 
-  // Update auth email if changed
   if (email) {
     await adminClient.auth.admin.updateUserById(studentId, { email });
   }
@@ -231,7 +171,7 @@ export async function updateRecording(formData: FormData) {
   const recordingId = String(formData.get("recording_id") ?? "");
   const { supabase } = await requireAdmin();
 
-  const updateData = {
+  const updateData: Record<string, any> = {
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
@@ -346,7 +286,7 @@ export async function updateMaterial(formData: FormData) {
   const materialId = String(formData.get("material_id") ?? "");
   const { supabase } = await requireAdmin();
 
-  const updateData = {
+  const updateData: Record<string, any> = {
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
     material_type: String(formData.get("material_type") ?? "other"),

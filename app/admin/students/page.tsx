@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createStudent, toggleStudentStatus, deleteStudent } from "@/app/admin/actions";
+import { createStudent } from "@/app/admin/actions";
 import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table } from "@/components/ui";
 
 type Student = {
@@ -20,6 +20,8 @@ type Class = {
   is_active: boolean;
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
@@ -27,7 +29,10 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<{
+    temporaryPassword?: string;
+    mustChangePassword?: boolean;
+  } | null>(null);
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -73,34 +78,57 @@ export default function AdminStudentsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setCreateSuccess(null);
+
+    const trimmedName = formData.full_name.trim();
+    const trimmedEmail = formData.email.trim();
+    if (trimmedName.length < 2) {
+      setFormError("Please enter the student’s full name (at least 2 characters).");
+      return;
+    }
+    if (!trimmedEmail || !EMAIL_RE.test(trimmedEmail)) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+    if (formData.class_ids.length > 0 && !formData.start_access_date.trim()) {
+      setFormError("Choose a start access date when assigning one or more classes.");
+      return;
+    }
+    if (formData.password.trim().length > 0 && formData.password.trim().length < 6) {
+      setFormError("Password must be at least 6 characters, or leave blank to auto-generate.");
+      return;
+    }
+
     setFormLoading(true);
 
     try {
       const form = new FormData();
-      form.append("full_name", formData.full_name);
-      form.append("email", formData.email);
-      form.append("phone", formData.phone);
-      form.append("password", formData.password);
-      form.append("start_access_date", formData.start_access_date);
+      form.append("full_name", trimmedName);
+      form.append("email", trimmedEmail);
+      form.append("phone", formData.phone.trim());
+      form.append("password", formData.password.trim());
+      form.append("start_access_date", formData.start_access_date.trim());
       if (formData.must_change_password) {
         form.append("must_change_password", "on");
       }
 
-      // Append all selected class IDs (can be multiple)
       formData.class_ids.forEach((classId) => {
         form.append("class_ids", classId);
       });
 
-      const response = await fetch("/api/admin/students", {
-        method: "POST",
-        body: form,
-      });
+      const result = await createStudent(form);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to create student");
+      if (!result.ok) {
+        setFormError(result.error);
+        return;
       }
 
+      const mustChange = formData.must_change_password;
+      setCreateSuccess(
+        result.temporaryPassword
+          ? { temporaryPassword: result.temporaryPassword, mustChangePassword: mustChange }
+          : { mustChangePassword: mustChange },
+      );
       setFormData({
         full_name: "",
         email: "",
@@ -248,10 +276,50 @@ export default function AdminStudentsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Students</h1>
           <p className="text-sm text-slate-600 mt-1">Manage student accounts and access</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} size="sm">
+        <Button
+          onClick={() => {
+            setCreateSuccess(null);
+            setIsModalOpen(true);
+          }}
+          size="sm"
+        >
           + Add Student
         </Button>
       </div>
+
+      {createSuccess && (
+        <div
+          className="rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm text-emerald-950 shadow-sm"
+          role="status"
+        >
+          <p className="font-medium">Student account created successfully.</p>
+          {createSuccess.temporaryPassword ? (
+            <div className="mt-2 space-y-1">
+              <p>
+                A temporary password was generated. Share it with the student securely (this message is
+                not shown again):
+              </p>
+              <code className="block rounded-md bg-white/80 px-3 py-2 font-mono text-xs text-slate-800 ring-1 ring-emerald-100">
+                {createSuccess.temporaryPassword}
+              </code>
+            </div>
+          ) : (
+            <p className="mt-1 text-emerald-900/90">
+              They can sign in with the password you entered.
+              {createSuccess.mustChangePassword
+                ? " They will be prompted to set a new password on first login."
+                : ""}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => setCreateSuccess(null)}
+            className="mt-3 text-xs font-medium text-emerald-800 underline underline-offset-2 hover:text-emerald-950"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <Card>
         <div className="mb-4">
@@ -298,6 +366,16 @@ export default function AdminStudentsPage() {
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-600 leading-relaxed">
+            <p className="font-medium text-slate-700">How this works</p>
+            <p className="mt-1">
+              Only admins can add students; there is no public signup. Submitting this form runs on the
+              server: a Supabase Auth user is created, a row is written to{" "}
+              <code className="rounded bg-white px-1 py-0.5 text-[11px]">profiles</code> with role{" "}
+              <code className="rounded bg-white px-1 py-0.5 text-[11px]">student</code>, and
+              enrollments are added if you pick classes. Secrets never leave the server.
+            </p>
+          </div>
           {formError && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
               {formError}
@@ -332,14 +410,14 @@ export default function AdminStudentsPage() {
               required
             />
             <Input
-              label="Temporary Password *"
+              label="Password"
               name="password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
+              autoComplete="new-password"
               minLength={6}
-              helperText="Minimum 6 characters"
+              helperText="Optional: min. 6 characters. Leave blank to generate a secure temporary password (shown once after creation)."
             />
           </div>
 

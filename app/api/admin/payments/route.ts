@@ -22,12 +22,12 @@ export async function GET() {
 
     if (error) throw error;
 
-    const formatted = (data || []).map((item) => ({
+    const formatted = (data || []).map((item: any) => ({
       id: item.id,
       student_id: item.student_id,
-      student_name: item.profiles?.full_name,
+      student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : item.profiles?.full_name,
       class_id: item.class_id,
-      class_name: item.class_groups?.name,
+      class_name: Array.isArray(item.class_groups) ? item.class_groups[0]?.name : item.class_groups?.name,
       start_date: item.start_date,
       end_date: item.end_date,
       status: item.status,
@@ -60,13 +60,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Set status to approved by default
+    // Set status to pending by default to require explicit approval
     const { error } = await supabase.from("student_class_payment_periods").insert({
       student_id: studentId,
       class_id: classId,
       start_date: startDate,
       end_date: endDate,
-      status: "approved",
+      status: "pending",
     });
 
     if (error) throw error;

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { addRecording, updateRecording, toggleRecordingStatus, deleteRecording } from "@/app/admin/actions";
-import { Card, Button, Input, Textarea, SearchBar, Badge, DateFormat, Modal, Select, Table } from "@/components/ui";
+import { Card, Button, Input, Textarea, SearchBar, Badge, DateFormat, Modal, Select } from "@/components/ui";
+import { youtubeThumbnailFallbackUrl, youtubeThumbnailUrl } from "@/lib/recordings/youtube";
 
 type Recording = {
   id: string;
@@ -12,10 +13,17 @@ type Recording = {
   release_at: string;
   published: boolean;
   thumbnail_url?: string;
-  class_groups: { id: string; name: string } | null;
+  class_groups: { id: string; name: string } | { id: string; name: string }[] | null;
   created_at: string;
   views_count?: number;
 };
+
+function recordingClassLabel(rec: Recording): string {
+  const g = rec.class_groups;
+  if (!g) return "Unassigned";
+  const row = Array.isArray(g) ? g[0] : g;
+  return row?.name ?? "Unassigned";
+}
 
 type Class = {
   id: string;
@@ -123,8 +131,10 @@ export default function AdminRecordingsPage() {
 
   const handleEdit = (recording: Recording) => {
     setSelectedRecording(recording);
+    const cg = recording.class_groups;
+    const classId = Array.isArray(cg) ? cg[0]?.id : cg?.id;
     setFormData({
-      class_id: recording.class_groups?.id || "",
+      class_id: classId || "",
       title: recording.title,
       description: recording.description || "",
       youtube_video_id: recording.youtube_video_id,
@@ -220,18 +230,15 @@ export default function AdminRecordingsPage() {
     }
   };
 
-  const getYouTubeThumbnail = (videoId: string) => {
-    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-  };
-
-  // Apply filters
   const filteredRecordings = recordings.filter((rec) => {
+    const classId = Array.isArray(rec.class_groups) ? rec.class_groups[0]?.id : rec.class_groups?.id;
+    const className = recordingClassLabel(rec);
     const matchesSearch =
       rec.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-      rec.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-      rec.class_groups?.name.toLowerCase().includes(filters.search.toLowerCase());
+      (rec.description || "").toLowerCase().includes(filters.search.toLowerCase()) ||
+      className.toLowerCase().includes(filters.search.toLowerCase());
 
-    const matchesClass = !filters.classFilter || rec.class_groups?.id === filters.classFilter;
+    const matchesClass = !filters.classFilter || classId === filters.classFilter;
     const matchesPublished =
       filters.publishedFilter === "all" ||
       (filters.publishedFilter === "published" && rec.published) ||
@@ -240,92 +247,14 @@ export default function AdminRecordingsPage() {
     return matchesSearch && matchesClass && matchesPublished;
   });
 
-  const columns = [
-    {
-      key: "preview",
-      header: "Preview",
-      render: (rec: Recording) => (
-        <a
-          href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <img
-            src={getYouTubeThumbnail(rec.youtube_video_id)}
-            alt={rec.title}
-            className="w-24 h-16 object-cover rounded-lg"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${rec.youtube_video_id}/hqdefault.jpg`;
-            }}
-          />
-        </a>
-      ),
-    },
-    {
-      key: "title",
-      header: "Title & Description",
-      render: (rec: Recording) => (
-        <div className="max-w-md">
-          <p className="font-medium text-slate-900">{rec.title}</p>
-          {rec.description && (
-            <p className="text-xs text-slate-600 mt-1 line-clamp-2">{rec.description}</p>
-          )}
-          <div className="flex items-center gap-2 mt-2">
-            <Badge variant="info">{rec.class_groups?.name || "No class"}</Badge>
-            {rec.views_count !== undefined && (
-              <span className="text-xs text-slate-500">👁️ {rec.views_count}</span>
-            )}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "release_at",
-      header: "Release Date",
-      render: (rec: Recording) => (
-        <div>
-          <p className="text-sm"><DateFormat date={rec.release_at} format="short" /></p>
-          <p className="text-xs text-slate-500">{rec.published ? "Published" : "Draft"}</p>
-        </div>
-      ),
-    },
-    {
-      key: "created_at",
-      header: "Created",
-      render: (rec: Recording) => <DateFormat date={rec.created_at} format="short" />,
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      className: "text-right",
-      render: (rec: Recording) => (
-        <div className="flex items-center justify-end gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
-            target="_blank"
-          >
-            Watch
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => handleEdit(rec)}>
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant={rec.published ? "warning" : "success"}
-            onClick={() => handleToggleStatus(rec)}
-          >
-            {rec.published ? "Unpublish" : "Publish"}
-          </Button>
-          <Button size="sm" variant="danger" onClick={() => handleDelete(rec)}>
-            Delete
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  const recordingsByClass = filteredRecordings.reduce<Record<string, Recording[]>>((acc, rec) => {
+    const label = recordingClassLabel(rec);
+    if (!acc[label]) acc[label] = [];
+    acc[label].push(rec);
+    return acc;
+  }, {});
+
+  const recordingSections = Object.entries(recordingsByClass).sort(([a], [b]) => a.localeCompare(b));
 
   return (
     <div className="space-y-6">
@@ -372,26 +301,108 @@ export default function AdminRecordingsPage() {
         </div>
       </Card>
 
-      <Card>
+      <div className="space-y-8">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="flex items-center justify-center py-16">
+            <div className="h-9 w-9 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
           </div>
         ) : error ? (
-          <div className="text-center py-12 text-red-600">{error}</div>
+          <Card>
+            <div className="py-12 text-center text-red-600">{error}</div>
+          </Card>
+        ) : filteredRecordings.length === 0 ? (
+          <Card>
+            <div className="py-16 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+                🎥
+              </div>
+              <h2 className="text-lg font-semibold text-slate-900">No recordings</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+                {filters.search || filters.classFilter || filters.publishedFilter !== "all"
+                  ? "Nothing matches your filters. Try adjusting search or class."
+                  : "Add a recording to attach a YouTube lesson to a class."}
+              </p>
+            </div>
+          </Card>
         ) : (
-          <Table
-            columns={columns}
-            data={filteredRecordings}
-            emptyMessage={
-              filters.search || filters.classFilter || filters.publishedFilter !== "all"
-                ? "No recordings match your filters"
-                : "No recordings found. Add your first recording to get started."
-            }
-            className="border border-slate-200 rounded-lg overflow-hidden"
-          />
+          recordingSections.map(([className, recs]) => (
+            <section key={className} className="space-y-4">
+              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+                <h2 className="text-base font-semibold text-slate-900">{className}</h2>
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                  {recs.length}
+                </span>
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {recs.map((rec) => (
+                  <article
+                    key={rec.id}
+                    className="flex flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm"
+                  >
+                    <a
+                      href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative block aspect-video bg-slate-100"
+                    >
+                      <img
+                        src={rec.thumbnail_url || youtubeThumbnailUrl(rec.youtube_video_id)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          const el = e.target as HTMLImageElement;
+                          el.src = rec.thumbnail_url
+                            ? youtubeThumbnailFallbackUrl(rec.youtube_video_id)
+                            : youtubeThumbnailFallbackUrl(rec.youtube_video_id);
+                        }}
+                      />
+                    </a>
+                    <div className="flex flex-1 flex-col p-4">
+                      <h3 className="font-semibold text-slate-900 line-clamp-2">{rec.title}</h3>
+                      {rec.description ? (
+                        <p className="mt-2 line-clamp-2 text-sm text-slate-600">{rec.description}</p>
+                      ) : null}
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                        <DateFormat date={rec.release_at} format="short" />
+                        <Badge variant={rec.published ? "success" : "warning"}>
+                          {rec.published ? "Published" : "Draft"}
+                        </Badge>
+                        {typeof rec.views_count === "number" ? (
+                          <span className="text-slate-500">{rec.views_count} views</span>
+                        ) : null}
+                      </div>
+                      <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+                        <a
+                          href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:flex-none"
+                        >
+                          Watch
+                        </a>
+                        <Button size="sm" variant="ghost" type="button" onClick={() => handleEdit(rec)}>
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={rec.published ? "outline" : "primary"}
+                          type="button"
+                          onClick={() => handleToggleStatus(rec)}
+                        >
+                          {rec.published ? "Unpublish" : "Publish"}
+                        </Button>
+                        <Button size="sm" variant="danger" type="button" onClick={() => handleDelete(rec)}>
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))
         )}
-      </Card>
+      </div>
 
       {/* Create Recording Modal */}
       <Modal

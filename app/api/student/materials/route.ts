@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
-import { loadStudentRecordings } from "@/lib/recordings/student-recordings";
+import { loadStudentMaterials } from "@/lib/materials/student-materials";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Account is inactive" }, { status: 403 });
     }
 
-    const data = await loadStudentRecordings(supabase, user.id, classId || undefined);
+    const data = await loadStudentMaterials(supabase, user.id, classId || undefined);
 
     return NextResponse.json({
-      recordings: data.recordings,
+      materials: data.materials,
       accessible_classes: data.accessible_classes,
     });
   } catch (error) {
