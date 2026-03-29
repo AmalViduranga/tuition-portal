@@ -190,7 +190,12 @@ export default async function StudentDashboardPage() {
           
           {/* 6. Profile Section */}
           <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-md">
-            <h2 className="text-lg font-bold mb-4">Profile Details</h2>
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-lg font-bold">Profile Details</h2>
+              <Link href="/dashboard/profile" className="text-xs font-semibold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors">
+                Edit Profile
+              </Link>
+            </div>
             <div className="space-y-3 text-sm">
               <div className="flex flex-col">
                 <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Name</span>

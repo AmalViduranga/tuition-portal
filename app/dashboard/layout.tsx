@@ -49,6 +49,12 @@ export default async function DashboardLayout({
                 Admin Panel
               </Link>
             )}
+            <Link
+              href="/dashboard/profile"
+              className="inline-flex items-center rounded-lg bg-white border border-slate-200 shadow-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              Profile
+            </Link>
             <form action={logout}>
               <button
                 type="submit"
