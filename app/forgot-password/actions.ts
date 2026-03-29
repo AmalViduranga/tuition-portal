@@ -11,9 +11,18 @@ export async function forgotPassword(formData: FormData) {
     redirect("/forgot-password?error=Email%20is%20required");
   }
 
+  // Construct the correct callback URL
+  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL ?? "http://localhost:3000";
+  // Make sure it has http prefix
+  if (!siteUrl.startsWith("http")) {
+    siteUrl = `https://${siteUrl}`;
+  }
+  // Make sure to remove trailing slash
+  siteUrl = siteUrl.replace(/\/$/, "");
+
   // Send password reset email via Supabase
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/reset-password`,
+    redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
   });
 
   if (error) {

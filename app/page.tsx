@@ -1,8 +1,20 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { classGroups, pastResults, subject, teacher, contactData } from "@/lib/content";
 import { ArrowRight, BookOpen, CheckCircle, Clock, GraduationCap, MapPin, Phone, Star, TrendingUp, Users } from "lucide-react";
 
-export default function Home() {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export default async function Home(props: { searchParams: SearchParams }) {
+  const searchParams = await props.searchParams;
+  
+  // Fallback interceptor: If Supabase stripped the `redirectTo` parameter because of dashboard settings
+  // and sent the user to the Site URL root with a `code` instead, we catch it here.
+  if (searchParams?.code) {
+    const nextUrl = typeof searchParams.next === "string" ? searchParams.next : "/reset-password";
+    redirect(`/auth/callback?code=${searchParams.code}&next=${nextUrl}`);
+  }
+
   return (
     <div className="flex flex-col gap-16 md:gap-24 pb-10">
       {/* Hero Section */}

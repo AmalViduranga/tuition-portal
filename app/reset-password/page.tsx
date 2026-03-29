@@ -5,21 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { resetPassword } from "./actions";
 
 function ResetPasswordForm() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token") || "";
-  const type = searchParams.get("type") || "";
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!token) {
-      setError("Invalid or missing reset token");
-    }
-  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +30,6 @@ function ResetPasswordForm() {
     try {
       const formData = new FormData();
       formData.append("password", password);
-      formData.append("token", token);
 
       const result = await resetPassword(formData);
       if (result?.error) {
@@ -54,28 +43,6 @@ function ResetPasswordForm() {
       setLoading(false);
     }
   };
-
-  if (!token) {
-    return (
-      <div className="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm">
-        <div className="text-center">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-semibold text-slate-900">Invalid Request</h1>
-          <p className="mt-4 text-sm text-slate-600">
-            This password reset link is invalid or has expired. Please request a new one.
-          </p>
-          <div className="mt-6">
-            <a
-              href="/forgot-password"
-              className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-            >
-              Request New Reset Link
-            </a>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (success) {
     return (

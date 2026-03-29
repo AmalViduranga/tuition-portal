@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/content";
+import Navbar from "@/components/Navbar";
+import { createClient } from "@/lib/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,73 +21,30 @@ export const metadata: Metadata = {
   description: "Tuition class website and student portal",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  let profile = null;
+  if (user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    profile = data;
+  }
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[radial-gradient(circle_at_top,_#eef2ff_0%,_#f8fafc_40%,_#f8fafc_100%)] text-slate-900">
-        <header className="sticky top-0 z-40 border-b border-indigo-100 bg-white/85 backdrop-blur-xl">
-          <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Link href="/" className="text-base font-bold tracking-tight text-indigo-700 md:text-lg">
-                {SITE_NAME}
-              </Link>
-              <span className="rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
-                Beta
-              </span>
-            </div>
-
-            <div className="hidden items-center gap-2 text-sm md:flex">
-              <Link href="/about" className="rounded-lg px-3 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">
-                About
-              </Link>
-              <Link href="/results" className="rounded-lg px-3 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">
-                Results
-              </Link>
-              <Link href="/schedule" className="rounded-lg px-3 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">
-                Schedule
-              </Link>
-              <Link href="/contact" className="rounded-lg px-3 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">
-                Contact
-              </Link>
-              <Link
-                href="/login"
-                className="ml-1 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-indigo-700"
-              >
-                Student Login
-              </Link>
-            </div>
-
-            <details className="relative md:hidden">
-              <summary className="list-none rounded-lg border border-indigo-100 bg-white px-3 py-2 text-sm font-medium text-indigo-700">
-                Menu
-              </summary>
-              <div className="absolute right-0 mt-2 w-48 rounded-xl border border-indigo-100 bg-white p-2 shadow-xl">
-                <Link href="/about" className="block rounded-lg px-3 py-2 text-sm hover:bg-indigo-50">
-                  About
-                </Link>
-                <Link href="/results" className="block rounded-lg px-3 py-2 text-sm hover:bg-indigo-50">
-                  Results
-                </Link>
-                <Link href="/schedule" className="block rounded-lg px-3 py-2 text-sm hover:bg-indigo-50">
-                  Schedule
-                </Link>
-                <Link href="/contact" className="block rounded-lg px-3 py-2 text-sm hover:bg-indigo-50">
-                  Contact
-                </Link>
-                <Link href="/login" className="mt-1 block rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
-                  Student Login
-                </Link>
-              </div>
-            </details>
-          </nav>
-        </header>
+        <Navbar siteName={SITE_NAME} user={user} profile={profile} />
         <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-10">
           {children}
         </main>
@@ -146,12 +105,12 @@ export default function RootLayout({
                 Terms & Conditions
               </Link>
               <a
-                href="https://www.linkedin.com/in/amal-viduranga"
+                href="https://www.linkedin.com/in/amal-viduranga-3a681b27b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="font-medium text-indigo-600 hover:text-indigo-700"
               >
-                Design by Amal Viduranga
+                Designed by Amal Viduranga
               </a>
             </div>
           </div>

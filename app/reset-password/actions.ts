@@ -15,20 +15,13 @@ export async function resetPassword(formData: FormData) {
     return { error: "Password must be at least 8 characters" };
   }
 
-  if (!token) {
-    return { error: "Missing reset token" };
-  }
-
   const supabase = await createClient();
 
-  // Verify the token and update password
-  const { error } = await supabase.auth.verifyOtp({
-    token_hash: token,
-    type: "recovery",
-  });
+  // The user should already be signed in via the auth callback
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  if (error) {
-    return { error: error.message };
+  if (authError || !user) {
+    return { error: "You must be authenticated to reset your password. Please request a new reset link." };
   }
 
   // Update the password
@@ -43,16 +36,10 @@ export async function resetPassword(formData: FormData) {
   }
 
   // Also clear the flag in profiles table
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    await supabase
-      .from("profiles")
-      .update({ must_change_password: false })
-      .eq("id", user.id);
-  }
+  await supabase
+    .from("profiles")
+    .update({ must_change_password: false })
+    .eq("id", user.id);
 
   return { success: true };
 }
