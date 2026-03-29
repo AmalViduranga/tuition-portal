@@ -5,8 +5,8 @@ import { classGroups, pastResults, subject, teacher, contactData } from "@/lib/c
 import { ArrowRight, BookOpen, CheckCircle, Clock, GraduationCap, MapPin, Phone, Star, TrendingUp, Users } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "A/L Maths Classes Sri Lanka | MathsLK",
-  description: "Join the best A/L Mathematics online and physical classes. Proven results, individual attention, and structured lessons.",
+  title: "A/L Maths Sri Lanka | Best Mathematics Tuition | MathsLK",
+  description: "Looking for A/L Maths Sri Lanka? Join MathsLK for top-tier online and physical mathematics classes. Proven results, individual attention, and structured lessons by Amal Viduranga.",
 };
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -33,10 +33,10 @@ export default async function Home(props: { searchParams: SearchParams }) {
         <div className="relative mx-auto max-w-4xl text-white">
           <div className="mb-6 inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 backdrop-blur-sm text-center">
             <span className="flex h-2 w-2 rounded-full bg-indigo-400"></span>
-            2026 A/L Theory & Revision and 2027 A/L Theory classes are now open for enrollment.
+            #1 A/L Maths Sri Lanka • 2026/2027 Enrollments Open
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-7xl lg:leading-[1.1]">
-            Master A/L Mathematics with <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Confidence</span>
+            Master A/L Maths in Sri Lanka with <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Confidence</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300 md:text-xl">
             Join the most comprehensive structured lesson delivery with {teacher.name}. Clear concepts, proven results, and individual guidance.

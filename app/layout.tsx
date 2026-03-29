@@ -18,9 +18,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mathslk.online"),
-  title: "A/L Mathematics Classes Sri Lanka | MathsLK",
-  description: "Join MathsLK for A/L Mathematics (07) classes in Sri Lanka. Theory, revision, past papers, and online recordings with structured learning.",
+  title: "A/L Maths Sri Lanka | Best Mathematics Tuition | MathsLK",
+  description: "Join MathsLK for top tier A/L Maths Sri Lanka classes. Access structured theory, revision, past papers, and online recordings with Amal Viduranga.",
   keywords: [
+    "A/L Maths Sri Lanka",
     "A/L Mathematics",
     "Maths 07",
     "Sri Lanka tuition",
@@ -30,8 +31,8 @@ export const metadata: Metadata = {
     "A/L exam preparation",
   ],
   openGraph: {
-    title: "A/L Mathematics Classes Sri Lanka | MathsLK",
-    description: "Join MathsLK for A/L Mathematics (07). Best structured learning environment, active revision, and online past papers access.",
+    title: "A/L Maths Sri Lanka | Best Mathematics Tuition | MathsLK",
+    description: "Looking for A/L Maths Sri Lanka? Join MathsLK for the best structured learning environment, active revision, and online past papers access.",
     url: "https://mathslk.online",
     siteName: "MathsLK",
     type: "website",
