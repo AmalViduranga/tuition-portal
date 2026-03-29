@@ -1,9 +1,15 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { requireUser } from "@/lib/auth";
 import { Card, DateFormat, Badge } from "@/components/ui";
 import { loadStudentRecordings } from "@/lib/recordings/student-recordings";
 import { loadStudentMaterials } from "@/lib/materials/student-materials";
 import { PasswordChangeForm, WhatsAppButton } from "./ClientFeatures";
+
+export const metadata: Metadata = {
+  title: "Student Dashboard | MathsLK",
+  description: "Access your A/L Mathematics classes, materials, recordings, and account settings.",
+};
 
 export const dynamic = "force-dynamic";
 

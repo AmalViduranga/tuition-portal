@@ -1,6 +1,12 @@
+import { Metadata } from "next";
 import { teacher as defaultTeacher } from "@/lib/content";
 import { BookOpen, GraduationCap, Award, Briefcase } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "About Amal Viduranga | MathsLK Educator Profile",
+  description: "Learn about Amal Viduranga, the educator behind MathsLK. Specializing in A/L Mathematics with proven results and structured teaching methodologies.",
+};
 
 export default async function AboutPage() {
   const supabase = await createClient();

@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
 import { classGroups, pastResults, subject, teacher, contactData } from "@/lib/content";
 import { ArrowRight, BookOpen, CheckCircle, Clock, GraduationCap, MapPin, Phone, Star, TrendingUp, Users } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "A/L Maths Classes Sri Lanka | MathsLK",
+  description: "Join the best A/L Mathematics online and physical classes. Proven results, individual attention, and structured lessons.",
+};
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 

@@ -1,5 +1,11 @@
+import { Metadata } from "next";
 import { contactData } from "@/lib/content";
-import { MessageSquare, Phone, Mail, MapPin, Send } from "lucide-react";
+import { MessageSquare, Phone, Mail, MapPin, Send, ArrowRight } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Contact MathsLK | A/L Mathematics Classes Sri Lanka",
+  description: "Get in touch with MathsLK for A/L Mathematics classes. Contact Amal Viduranga via WhatsApp, phone, or email to join theory or revision classes.",
+};
 
 export default function ContactPage() {
   const whatsappNumber = contactData.whatsapp.replace('+', '');
@@ -63,6 +69,47 @@ export default function ContactPage() {
           <p className="mt-3 text-base font-bold text-slate-900">{contactData.location}</p>
         </article>
       </div>
+
+      <section className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-8 md:p-12 text-center mt-4">
+        <h2 className="text-2xl font-bold text-slate-900 md:text-3xl mb-2">Connect with us</h2>
+        <p className="text-slate-600 max-w-lg mx-auto mb-8">Follow our social media channels for updates, past paper discussions, and free educational content.</p>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a
+            href="https://www.youtube.com/@amalvidu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-sm border border-slate-200 hover:border-[#FF0000] hover:text-[#FF0000] transition-colors"
+          >
+            <svg className="h-6 w-6 text-[#FF0000]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path fillRule="evenodd" d="M21.764 7.218a2.536 2.536 0 00-1.782-1.8C18.411 5 12 5 12 5s-6.411 0-7.982.418a2.536 2.536 0 00-1.782 1.8C1.818 8.813 1.818 12 1.818 12s0 3.187.418 4.782A2.536 2.536 0 004.018 18.582C5.589 19 12 19 12 19s6.411 0 7.982-.418a2.536 2.536 0 001.782-1.8C22.182 15.187 22.182 12 22.182 12s0-3.187-.418-4.782zM9.75 14.99V9l5.528 2.99-5.528 3z" clipRule="evenodd" />
+            </svg> YouTube Channel
+          </a>
+          
+          <a
+            href="https://www.facebook.com/share/1FadraTpVk/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-sm border border-slate-200 hover:border-[#1877F2] hover:text-[#1877F2] transition-colors"
+          >
+            <svg className="h-6 w-6 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+            </svg> Facebook Page
+          </a>
+        </div>
+        
+        <div className="mt-10 pt-8 border-t border-indigo-100/60 max-w-2xl mx-auto flex flex-col items-center">
+          <p className="text-lg font-bold text-indigo-900 mb-4">Registration is open for the new intake</p>
+          <a
+            href={`https://wa.me/${whatsappNumber}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-md hover:bg-indigo-700 transition-all"
+          >
+            Join the Class <ArrowRight className="h-5 w-5" />
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
