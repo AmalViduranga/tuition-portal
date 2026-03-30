@@ -21,8 +21,13 @@ export async function POST(request: NextRequest) {
 
     const { error } = await adminSupabase
       .from("student_class_payment_periods")
-      .update({ status })
+      .update({ 
+        status,
+        reviewed_by: (await requireAdmin()).user.id,
+        reviewed_at: new Date().toISOString()
+      })
       .eq("id", periodId);
+
 
     if (error) throw error;
 

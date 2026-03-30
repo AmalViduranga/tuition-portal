@@ -84,11 +84,12 @@ export default function AdminEnrollmentsPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [enrRes, payRes, studentsRes, classesRes, recRes, matRes, recUnlockRes, matUnlockRes] = await Promise.all([
+      const [enrRes, payRes, studentsRes, classesRes, plansRes, recRes, matRes, recUnlockRes, matUnlockRes] = await Promise.all([
         fetch("/api/admin/enrollments"),
         fetch("/api/admin/payments"),
         fetch("/api/admin/students?simple=true"),
         fetch("/api/admin/classes?active=true"),
+        fetch("/api/admin/plans"),
         fetch("/api/admin/recordings?limit=true"),
         fetch("/api/admin/materials?limit=true"),
         fetch("/api/admin/unlocks/recording"),
@@ -102,6 +103,7 @@ export default function AdminEnrollmentsPage() {
       // Only fetch other data if needed for forms
       if (studentsRes.ok) setStudents(await studentsRes.json());
       if (classesRes.ok) setClasses(await classesRes.json());
+      if (plansRes.ok) setPlans(await plansRes.json());
       if (recRes.ok) setRecordings(await recRes.json());
       if (matRes.ok) setMaterials(await matRes.json());
       if (recUnlockRes.ok) setRecordingUnlocks(await recUnlockRes.json());
@@ -115,6 +117,8 @@ export default function AdminEnrollmentsPage() {
       setLoading(false);
     }
   }, []);
+
+  const [plans, setPlans] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -132,7 +136,7 @@ export default function AdminEnrollmentsPage() {
     enr.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredPayments = payments.filter((pay) =>
+  const filteredPayments = payments.filter((pay: any) =>
     pay.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     pay.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -141,7 +145,7 @@ export default function AdminEnrollmentsPage() {
     <Card>
       <div className="mb-4">
         <p className="text-sm text-slate-600 mb-3">
-          Grant students access to classes with a start date. Access ends when the next payment period is approved.
+          Enrolled students represent their current class memberships. Use Payment Periods for access control.
         </p>
         <EnrollmentForm
           students={students}
@@ -191,16 +195,6 @@ export default function AdminEnrollmentsPage() {
             },
             {
               key: "start_date",
-              header: "Access Start",
-              render: (enr: Enrollment) => <DateFormat date={enr.start_access_date} format="short" />,
-            },
-            {
-              key: "end_date",
-              header: "Access End",
-              render: (enr: Enrollment) => enr.access_end_date ? <DateFormat date={enr.access_end_date} format="short" /> : <span className="text-slate-400">Indefinite</span>,
-            },
-            {
-              key: "granted",
               header: "Enrolled",
               render: (enr: Enrollment) => <DateFormat date={enr.student_class_enrollments.created_at} format="short" />,
             },
@@ -215,13 +209,22 @@ export default function AdminEnrollmentsPage() {
 
   const renderPayments = () => (
     <Card>
-      <div className="mb-4">
-        <p className="text-sm text-slate-600 mb-3">
-          Approve payment periods to grant students continued access to class content.
-        </p>
+      <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <p className="text-sm text-slate-600">
+             Log payments, grant manual access, or manage free-card periods. 1.5 months access is default.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => window.location.href = "/admin/reports/monthly-payments"}>
+          Monthly Report
+        </Button>
+      </div>
+
+      <div className="mb-6">
         <PaymentForm
           students={students}
           classes={classes}
+          plans={plans}
           onSubmit={async (formData) => {
             await fetch("/api/admin/payments", {
               method: "POST",
@@ -244,31 +247,36 @@ export default function AdminEnrollmentsPage() {
             {
               key: "student",
               header: "Student",
-              render: (pay: PaymentPeriod) => (
+              render: (pay: any) => (
                 <div>
                   <p className="font-medium">{pay.student_name || "Unknown"}</p>
-                  <p className="text-xs text-slate-500">{pay.student_id.slice(0, 8)}...</p>
+                  <p className="text-xs text-slate-500">{pay.student_phone || pay.student_id.slice(0, 8)}</p>
                 </div>
               ),
             },
             {
               key: "class",
-              header: "Class",
-              render: (pay: PaymentPeriod) => pay.class_name || "-",
+              header: "Class/Plan",
+              render: (pay: any) => pay.class_name || "-",
+            },
+            {
+              key: "amount",
+              header: "Amount",
+              render: (pay: any) => pay.access_mode === 'paid' ? `Rs. ${pay.amount_paid}` : <span className="text-slate-400">{pay.access_mode}</span>,
             },
             {
               key: "period",
               header: "Period",
-              render: (pay: PaymentPeriod) => (
-                <div>
-                  <p className="text-sm"><DateFormat date={pay.start_date} format="short" /> - <DateFormat date={pay.end_date} format="short" /></p>
+              render: (pay: any) => (
+                <div className="text-sm">
+                  <DateFormat date={pay.start_date} format="short" /> - <DateFormat date={pay.end_date} format="short" />
                 </div>
               ),
             },
             {
               key: "status",
               header: "Status",
-              render: (pay: PaymentPeriod) => (
+              render: (pay: any) => (
                 <Badge variant={
                   pay.status === "approved" ? "success" :
                   pay.status === "rejected" ? "danger" :
@@ -282,7 +290,7 @@ export default function AdminEnrollmentsPage() {
               key: "actions",
               header: "Actions",
               className: "text-right",
-              render: (pay: PaymentPeriod) => (
+              render: (pay: any) => (
                 <div className="flex items-center justify-end gap-2">
                   {pay.status === "pending" && (
                     <>
@@ -417,9 +425,14 @@ export default function AdminEnrollmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Enrollments & Payments</h1>
-        <p className="text-sm text-slate-600 mt-1">Manage student access and payment approvals</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Access Management</h1>
+          <p className="text-sm text-slate-600 mt-1">Manage enrollments, payments, and manual unlocks</p>
+        </div>
+        <div className="w-64">
+           <SearchBar placeholder="Search by student or class..." value={searchQuery} onChange={(v) => setSearchQuery(v)} />
+        </div>
       </div>
 
       <div className="border-b border-slate-200">
@@ -428,10 +441,10 @@ export default function AdminEnrollmentsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? "border-indigo-500 text-indigo-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               }`}
             >
               {tab.label}
@@ -458,8 +471,8 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
   const [formData, setFormData] = useState({ 
     student_id: "", 
     class_id: "", 
-    start_access_date: "",
-    access_mode: "paid",
+    start_access_date: new Date().toISOString().split('T')[0],
+    access_mode: "paid" as const,
     access_end_date: ""
   });
   const [loading, setLoading] = useState(false);
@@ -481,7 +494,7 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
       }
 
       await onSubmit(form);
-      setFormData({ student_id: "", class_id: "", start_access_date: "", access_mode: "paid", access_end_date: "" });
+      setFormData({ student_id: "", class_id: "", start_access_date: new Date().toISOString().split('T')[0], access_mode: "paid", access_end_date: "" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -490,9 +503,9 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-lg space-y-3">
+    <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-lg space-y-4 border border-slate-200">
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Select
           label="Student"
           value={formData.student_id}
@@ -509,36 +522,28 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
           placeholder="Select class"
           required
         />
-          <Input
-            label="Access Start Date"
-            type="date"
-            value={formData.start_access_date}
-            onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
-            required
-          />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select
           label="Access Mode"
           value={formData.access_mode}
-          onChange={(e) => setFormData({ ...formData, access_mode: e.target.value })}
+          onChange={(e) => setFormData({ ...formData, access_mode: e.target.value as any })}
           options={[
             { value: "paid", label: "Paid" },
             { value: "free_card", label: "Free Card" },
-            { value: "manual", label: "Manual Override" },
+            { value: "manual", label: "Manual" },
           ]}
-          required
-        />
-        <Input
-          label="Access End Date (Optional)"
-          type="date"
-          value={formData.access_end_date}
-          onChange={(e) => setFormData({ ...formData, access_end_date: e.target.value })}
         />
       </div>
-      <Button type="submit" loading={loading} size="sm" className="w-full sm:w-auto">
-        Add Enrollment
-      </Button>
+      <div className="flex flex-wrap items-end gap-4">
+         <Input
+            label="Enrollment Date"
+            type="date"
+            value={formData.start_access_date}
+            onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
+          />
+          <Button type="submit" loading={loading} className="px-8">
+            Add Enrollment
+          </Button>
+      </div>
     </form>
   );
 }
@@ -546,13 +551,44 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
 interface PaymentFormProps {
   students: Student[];
   classes: Class[];
+  plans: any[];
   onSubmit: (formData: FormData) => Promise<void>;
 }
 
-function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
-  const [formData, setFormData] = useState({ student_id: "", class_id: "", start_date: "", end_date: "" });
+function PaymentForm({ students, classes, plans, onSubmit }: PaymentFormProps) {
+  const [formData, setFormData] = useState({ 
+    student_id: "", 
+    class_id: "", 
+    payment_plan_id: "",
+    amount_paid: "",
+    access_mode: "paid",
+    start_date: new Date().toISOString().split('T')[0], 
+    end_date: "",
+    admin_note: "",
+    quick_approve: false
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-calculate end date (1.5 months) and amount when plan selected
+  const handlePlanChange = (val: string) => {
+    const plan = plans.find(p => p.id === val);
+    const updates: any = { payment_plan_id: val, class_id: "" };
+    
+    if (plan) {
+      updates.amount_paid = plan.fee;
+      
+      // Auto set 1.5 months if not set
+      if (!formData.end_date) {
+        const start = formData.start_date ? new Date(formData.start_date) : new Date();
+        const end = new Date(start);
+        end.setDate(end.getDate() + 45); // 1.5 months appx
+        updates.end_date = end.toISOString().split('T')[0];
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, ...updates }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -562,12 +598,27 @@ function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
     try {
       const form = new FormData();
       form.append("student_id", formData.student_id);
-      form.append("class_id", formData.class_id);
+      if (formData.class_id) form.append("class_id", formData.class_id);
+      if (formData.payment_plan_id) form.append("payment_plan_id", formData.payment_plan_id);
+      form.append("amount_paid", formData.amount_paid || "0");
+      form.append("access_mode", formData.access_mode);
       form.append("start_date", formData.start_date);
       form.append("end_date", formData.end_date);
+      form.append("admin_note", formData.admin_note);
+      if (formData.quick_approve) form.append("quick_approve", "true");
 
       await onSubmit(form);
-      setFormData({ student_id: "", class_id: "", start_date: "", end_date: "" });
+      setFormData({ 
+        student_id: "", 
+        class_id: "", 
+        payment_plan_id: "", 
+        amount_paid: "", 
+        access_mode: "paid",
+        start_date: new Date().toISOString().split('T')[0], 
+        end_date: "",
+        admin_note: "",
+        quick_approve: false
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -576,9 +627,24 @@ function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-lg space-y-3">
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+      <div className="flex items-center justify-between">
+         <h3 className="text-lg font-semibold text-slate-900">Add New Payment / Period</h3>
+         <div className="flex items-center gap-2">
+           <input 
+             type="checkbox" 
+             id="quick_approve" 
+             checked={formData.quick_approve} 
+             onChange={(e) => setFormData({...formData, quick_approve: e.target.checked})}
+             className="rounded text-indigo-600 focus:ring-indigo-500"
+            />
+           <label htmlFor="quick_approve" className="text-sm font-medium text-slate-700">Quick Approve (1.5mo from today)</label>
+         </div>
+      </div>
+
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Select
           label="Student"
           value={formData.student_id}
@@ -587,57 +653,81 @@ function PaymentForm({ students, classes, onSubmit }: PaymentFormProps) {
           placeholder="Select student"
           required
         />
+        
+        <div className="grid grid-cols-1 gap-2">
+          <label className="text-sm font-medium text-slate-700">Target (Select Class OR Plan)</label>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Select
+                value={formData.payment_plan_id}
+                onChange={(e) => handlePlanChange(e.target.value)}
+                options={plans.map((p) => ({ value: p.id, label: p.name }))}
+                placeholder="Choose Plan (Theory/Revision/Both)"
+              />
+            </div>
+            <div className="flex-1">
+              <Select
+                value={formData.class_id}
+                onChange={(e) => setFormData({ ...formData, class_id: e.target.value, payment_plan_id: "" })}
+                options={classes.map((c) => ({ value: c.id, label: c.name }))}
+                placeholder="Choose Class"
+              />
+            </div>
+          </div>
+        </div>
+
         <Select
-          label="Class"
-          value={formData.class_id}
-          onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
-          options={classes.map((c) => ({ value: c.id, label: c.name }))}
-          placeholder="Select class"
-          required
+          label="Access Mode"
+          value={formData.access_mode}
+          onChange={(e) => setFormData({ ...formData, access_mode: e.target.value })}
+          options={[
+            { value: "paid", label: "Paid Student" },
+            { value: "free_card", label: "Free Card" },
+            { value: "manual", label: "Manual Override" },
+          ]}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Input
+          label="Amount (Rs.)"
+          type="number"
+          value={formData.amount_paid}
+          onChange={(e) => setFormData({ ...formData, amount_paid: e.target.value })}
+          disabled={formData.access_mode !== 'paid'}
+          placeholder="0.00"
         />
         <Input
-          label="Start Date"
+          label="Payment/Start Date"
           type="date"
           value={formData.start_date}
           onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
           required
         />
         <Input
-          label="End Date"
+          label="Expiry/End Date"
           type="date"
           value={formData.end_date}
           onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-          required
+          required={!formData.quick_approve}
+        />
+        <Input
+          label="Admin Note"
+          value={formData.admin_note}
+          onChange={(e) => setFormData({ ...formData, admin_note: e.target.value })}
+          placeholder="E.g. Bank proof #123"
         />
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" loading={loading} size="sm">
-          Add Payment Period
-        </Button>
-        <Button 
-          type="button" 
-          variant="outline" 
-          loading={loading} 
-          size="sm"
-          onClick={() => {
-             const start = new Date();
-             const end = new Date();
-             end.setMonth(end.getMonth() + 1);
-             end.setDate(end.getDate() + 15);
-             
-             setFormData(prev => ({
-               ...prev,
-               start_date: start.toISOString().split("T")[0],
-               end_date: end.toISOString().split("T")[0]
-             }));
-          }}
-        >
-          Approve 1.5 months from today
+
+      <div className="flex justify-end border-t pt-6">
+        <Button type="submit" loading={loading} className="px-10">
+          Save Record
         </Button>
       </div>
     </form>
   );
 }
+
 
 interface UnlockFormProps {
   students: Student[];

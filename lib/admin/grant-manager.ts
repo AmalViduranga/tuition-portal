@@ -7,62 +7,83 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export async function grantPaymentAccess(paymentPeriodId: string, adminId?: string) {
   const supabase = createAdminClient();
 
-  // 1. Fetch payment details
+  // 1. Fetch payment details (including plan classes if applicable)
   const { data: payment, error: fetchErr } = await supabase
     .from("student_class_payment_periods")
-    .select("*")
+    .select(`
+      *,
+      payment_plans (
+        id,
+        payment_plan_classes (
+          class_id
+        )
+      )
+    `)
     .eq("id", paymentPeriodId)
     .single();
 
   if (fetchErr || !payment) throw new Error("Payment not found");
   if (payment.status !== "approved") return;
 
-  const { student_id, class_id, start_date, end_date } = payment;
+  const { student_id, class_id, start_date, end_date, payment_plans } = payment;
 
-  // 2. Fetch all recordings released in this period
-  const { data: recordings } = await supabase
-    .from("recordings")
-    .select("id")
-    .eq("class_id", class_id)
-    .gte("release_at", start_date)
-    .lte("release_at", end_date);
-
-  // 3. Grant recording access
-  if (recordings && recordings.length > 0) {
-    const recordingGrants = recordings.map((r) => ({
-      student_id,
-      recording_id: r.id,
-      granted_by: adminId || null,
-      grant_type: "payment",
-    }));
-
-    await supabase.from("recording_manual_unlocks").upsert(recordingGrants, {
-      onConflict: "student_id, recording_id",
-      ignoreDuplicates: true, // we don't want to overwrite manual grants
+  // 2. Determine all class IDs covered by this payment
+  let targetClassIds: string[] = [];
+  if (class_id) targetClassIds.push(class_id);
+  
+  if (payment_plans && Array.isArray(payment_plans.payment_plan_classes)) {
+    payment_plans.payment_plan_classes.forEach((ppc: any) => {
+      if (!targetClassIds.includes(ppc.class_id)) targetClassIds.push(ppc.class_id);
     });
   }
 
-  // 4. Fetch all materials released in this period
-  const { data: materials } = await supabase
-    .from("materials")
-    .select("id")
-    .eq("class_id", class_id)
-    .gte("release_at", start_date)
-    .lte("release_at", end_date);
+  if (targetClassIds.length === 0) return;
 
-  // 5. Grant material access
-  if (materials && materials.length > 0) {
-    const materialGrants = materials.map((m) => ({
-      student_id,
-      material_id: m.id,
-      granted_by: adminId || null,
-      grant_type: "payment",
-    }));
+  // 3. Grant access for each class
+  for (const tid of targetClassIds) {
+    // A. Recordings
+    const { data: recordings } = await supabase
+      .from("recordings")
+      .select("id")
+      .eq("class_id", tid)
+      .gte("release_at", start_date)
+      .lte("release_at", end_date);
 
-    await supabase.from("material_manual_unlocks").upsert(materialGrants, {
-      onConflict: "student_id, material_id",
-      ignoreDuplicates: true,
-    });
+    if (recordings && recordings.length > 0) {
+      const recordingGrants = recordings.map((r) => ({
+        student_id,
+        recording_id: r.id,
+        granted_by: adminId || payment.reviewed_by || null,
+        grant_type: payment.access_mode === "free_card" ? "free_card" : "payment",
+      }));
+
+      await supabase.from("recording_manual_unlocks").upsert(recordingGrants, {
+        onConflict: "student_id, recording_id",
+        ignoreDuplicates: true,
+      });
+    }
+
+    // B. Materials
+    const { data: materials } = await supabase
+      .from("materials")
+      .select("id")
+      .eq("class_id", tid)
+      .gte("release_at", start_date)
+      .lte("release_at", end_date);
+
+    if (materials && materials.length > 0) {
+      const materialGrants = materials.map((m) => ({
+        student_id,
+        material_id: m.id,
+        granted_by: adminId || payment.reviewed_by || null,
+        grant_type: payment.access_mode === "free_card" ? "free_card" : "payment",
+      }));
+
+      await supabase.from("material_manual_unlocks").upsert(materialGrants, {
+        onConflict: "student_id, material_id",
+        ignoreDuplicates: true,
+      });
+    }
   }
 }
 
@@ -79,9 +100,7 @@ export async function grantNewReleaseAccess(
 ) {
   const supabase = createAdminClient();
 
-  // 1. Find all students enrolled in this class whose access_mode = 'free_card'
-  // AND whose start_access_date <= release_at
-  // AND either access_end_date is NULL or access_end_date >= release_at
+  // 1. Find students directly enrolled in this class whose access_mode = 'free_card'
   const { data: freeCardEnrollments } = await supabase
     .from("student_class_enrollments")
     .select("student_id")
@@ -90,8 +109,11 @@ export async function grantNewReleaseAccess(
     .lte("start_access_date", releaseAt)
     .or(`access_end_date.is.null,access_end_date.gte.${releaseAt}`);
 
-  // 2. Find all students enrolled with payment periods that cover this release_at date
-  const { data: coveredPayments } = await supabase
+  // 2. Find students with approved payment periods covering this release_at for this class
+  // We need to check both direct class links and plan-based links.
+  
+  // Option A: Direct class link in payment period
+  const { data: directPayments } = await supabase
     .from("student_class_payment_periods")
     .select("student_id")
     .eq("class_id", classId)
@@ -99,15 +121,38 @@ export async function grantNewReleaseAccess(
     .lte("start_date", releaseAt)
     .gte("end_date", releaseAt);
 
+  // Option B: Plan-based link (the plan includes this class)
+  const { data: planPayments } = await supabase
+    .from("student_class_payment_periods")
+    .select(`
+      student_id,
+      payment_plans!inner (
+        payment_plan_classes!inner (
+          class_id
+        )
+      )
+    `)
+    .eq("status", "approved")
+    .lte("start_date", releaseAt)
+    .gte("end_date", releaseAt)
+    .eq("payment_plans.payment_plan_classes.class_id", classId);
+
   const studentIdsToGrant: { id: string; type: string }[] = [];
 
   if (freeCardEnrollments) {
     freeCardEnrollments.forEach((e) => studentIdsToGrant.push({ id: e.student_id, type: "free_card" }));
   }
   
-  if (coveredPayments) {
-    coveredPayments.forEach((p) => {
-      // Avoid granting duplicate if student somehow has both payment and free card overlapping
+  if (directPayments) {
+    directPayments.forEach((p) => {
+      if (!studentIdsToGrant.some((s) => s.id === p.student_id)) {
+        studentIdsToGrant.push({ id: p.student_id, type: "payment" });
+      }
+    });
+  }
+
+  if (planPayments) {
+    planPayments.forEach((p: any) => {
       if (!studentIdsToGrant.some((s) => s.id === p.student_id)) {
         studentIdsToGrant.push({ id: p.student_id, type: "payment" });
       }
@@ -123,7 +168,7 @@ export async function grantNewReleaseAccess(
     student_id: s.id,
     [idField]: contentId,
     granted_by: adminId || null,
-    grant_type: s.type,
+    grant_type: s.type === "free_card" ? "free_card" : "payment",
   }));
 
   await supabase.from(targetTable).upsert(grants, {
@@ -131,6 +176,7 @@ export async function grantNewReleaseAccess(
     ignoreDuplicates: true,
   });
 }
+
 
 /**
  * Reprocesses ALL free-card grants for a student if their free_card status is added

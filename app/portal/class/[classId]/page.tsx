@@ -32,11 +32,30 @@ export default async function ClassDetailPage({ params }: Props) {
     .eq("class_id", classId)
     .order("release_at", { ascending: false });
 
-  const { data: paidPeriods } = await supabase
+  const { data: directPaidPeriods } = await supabase
     .from("student_class_payment_periods")
     .select("start_date, end_date")
     .eq("student_id", user.id)
-    .eq("class_id", classId);
+    .eq("class_id", classId)
+    .eq("status", "approved");
+
+  const { data: planPaidPeriods } = await supabase
+    .from("student_class_payment_periods")
+    .select(`
+      start_date,
+      end_date,
+      payment_plans!inner (
+        payment_plan_classes!inner (
+          class_id
+        )
+      )
+    `)
+    .eq("student_id", user.id)
+    .eq("status", "approved")
+    .eq("payment_plans.payment_plan_classes.class_id", classId);
+
+  const paidPeriods = [...(directPaidPeriods ?? []), ...(planPaidPeriods ?? [])];
+
 
   const { data: manualRecordingUnlocks } = await supabase
     .from("recording_manual_unlocks")
