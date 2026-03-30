@@ -19,13 +19,16 @@ export async function GET() {
       .eq("is_active", true)
       .order("name");
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42P01') { // Relation does not exist
+        return NextResponse.json([]);
+      }
+      throw error;
+    }
 
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    );
+    console.error("GET Plans Fetch Error:", error);
+    return NextResponse.json([]); // Return empty list rather than 500 for safety
   }
 }

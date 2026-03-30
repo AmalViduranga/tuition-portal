@@ -84,35 +84,53 @@ export default function AdminEnrollmentsPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [enrRes, payRes, studentsRes, classesRes, plansRes, recRes, matRes, recUnlockRes, matUnlockRes] = await Promise.all([
-        fetch("/api/admin/enrollments"),
-        fetch("/api/admin/payments"),
-        fetch("/api/admin/students?simple=true"),
-        fetch("/api/admin/classes?active=true"),
-        fetch("/api/admin/plans"),
-        fetch("/api/admin/recordings?limit=true"),
-        fetch("/api/admin/materials?limit=true"),
-        fetch("/api/admin/unlocks/recording"),
-        fetch("/api/admin/unlocks/material"),
+      setError(null);
+
+      // Separate fetches into two groups: Critical and Optional
+      // We use individual await/fetch to prevent Promise.all from failing everything if one fails
+      const fetchJson = async (url: string) => {
+        const res = await fetch(url);
+        if (!res.ok) {
+           console.warn(`Fetch to ${url} failed with status ${res.status}`);
+           return null;
+        }
+        return res.json();
+      };
+
+      // 1. Mandatory Data
+      const [enrData, studentsData, classesData] = await Promise.all([
+        fetchJson("/api/admin/enrollments"),
+        fetchJson("/api/admin/students?simple=true"),
+        fetchJson("/api/admin/classes?active=true"),
       ]);
 
-      if (!enrRes.ok || !payRes.ok) throw new Error("Failed to fetch data");
-
-      const [enrData, payData] = await Promise.all([enrRes.json(), payRes.json()]);
-
-      // Only fetch other data if needed for forms
-      if (studentsRes.ok) setStudents(await studentsRes.json());
-      if (classesRes.ok) setClasses(await classesRes.json());
-      if (plansRes.ok) setPlans(await plansRes.json());
-      if (recRes.ok) setRecordings(await recRes.json());
-      if (matRes.ok) setMaterials(await matRes.json());
-      if (recUnlockRes.ok) setRecordingUnlocks(await recUnlockRes.json());
-      if (matUnlockRes.ok) setMaterialUnlocks(await matUnlockRes.json());
+      if (!enrData) throw new Error("Could not load enrollments");
+      if (!studentsData || !classesData) throw new Error("Could not load student or class lists");
 
       setEnrollments(enrData);
-      setPayments(payData);
+      setStudents(studentsData);
+      setClasses(classesData);
+
+      // 2. Optional Data (Don't throw if these fail)
+      const [payData, plansData, recData, matData, recUnlockData, matUnlockData] = await Promise.all([
+        fetchJson("/api/admin/payments"),
+        fetchJson("/api/admin/plans"),
+        fetchJson("/api/admin/recordings?limit=true"),
+        fetchJson("/api/admin/materials?limit=true"),
+        fetchJson("/api/admin/unlocks/recording"),
+        fetchJson("/api/admin/unlocks/material"),
+      ]);
+
+      if (payData) setPayments(payData);
+      if (plansData) setPlans(plansData);
+      if (recData) setRecordings(recData);
+      if (matData) setMaterials(matData);
+      if (recUnlockData) setRecordingUnlocks(recUnlockData);
+      if (matUnlockData) setMaterialUnlocks(matUnlockData);
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      console.error("Admin Enrollments Fetch Error:", err);
+      setError(err instanceof Error ? err.message : "Failed to load management dashboard");
     } finally {
       setLoading(false);
     }
