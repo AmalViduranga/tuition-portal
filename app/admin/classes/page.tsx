@@ -238,8 +238,28 @@ export default function AdminClassesPage() {
         }}
         title="Create Class Group"
         size="md"
+        footer={
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              form="create-class-form"
+              loading={formLoading} 
+              className="w-full sm:w-auto"
+            >
+              Create Class
+            </Button>
+          </div>
+        }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form id="create-class-form" onSubmit={handleSubmit} className="space-y-6">
           {formError && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
               {formError}
@@ -259,21 +279,8 @@ export default function AdminClassesPage() {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Optional class description"
-            rows={3}
+            rows={4}
           />
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setIsModalOpen(false)}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
-              Create Class
-            </Button>
-          </div>
         </form>
       </Modal>
 
@@ -288,8 +295,28 @@ export default function AdminClassesPage() {
         }}
         title="Edit Class"
         size="md"
+        footer={
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsEditModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              form="edit-class-form"
+              loading={formLoading} 
+              className="w-full sm:w-auto"
+            >
+              Update Class
+            </Button>
+          </div>
+        }
       >
-        <form onSubmit={handleUpdate} className="space-y-4">
+        <form id="edit-class-form" onSubmit={handleUpdate} className="space-y-6">
           {formError && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
               {formError}
@@ -307,21 +334,8 @@ export default function AdminClassesPage() {
             name="description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={3}
+            rows={4}
           />
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setIsEditModalOpen(false)}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
-              Update Class
-            </Button>
-          </div>
         </form>
       </Modal>
     </div>

@@ -8,10 +8,11 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  footer?: ReactNode;
   size?: "sm" | "md" | "lg";
 }
 
-export default function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, footer, size = "md" }: ModalProps) {
   const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") onClose();
   }, [onClose]);
@@ -38,12 +39,13 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" }:
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
       <div
-        className={`w-full ${sizes[size]} transform rounded-xl bg-white shadow-2xl transition-all`}
+        className={`flex flex-col w-full ${sizes[size]} max-h-[90vh] transform rounded-xl bg-white shadow-2xl transition-all`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        {/* Header - Fixed at Top */}
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <h2 id="modal-title" className="text-lg font-semibold text-slate-900">
             {title}
           </h2>
@@ -57,7 +59,18 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" }:
             </svg>
           </button>
         </div>
-        <div className="overflow-y-auto p-6">{children}</div>
+
+        {/* Body - Scrollable Area */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {children}
+        </div>
+
+        {/* Footer - Optional Sticky Footer */}
+        {footer && (
+          <div className="border-t border-slate-200 px-6 py-4 bg-slate-50 rounded-b-xl shrink-0">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

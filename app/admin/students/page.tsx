@@ -473,119 +473,8 @@ export default function AdminStudentsPage() {
         }}
         title="Create Student Account"
         size="lg"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-600 leading-relaxed">
-            <p className="font-medium text-slate-700">How this works</p>
-            <p className="mt-1">
-              Only admins can add students; there is no public signup. Submitting this form runs on the
-              server: a Supabase Auth user is created, a row is written to{" "}
-              <code className="rounded bg-white px-1 py-0.5 text-[11px]">profiles</code> with role{" "}
-              <code className="rounded bg-white px-1 py-0.5 text-[11px]">student</code>, and
-              enrollments are added if you pick classes. Secrets never leave the server.
-            </p>
-          </div>
-          {formError && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-              {formError}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Full Name *"
-              name="full_name"
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              required
-            />
-            <Input
-              label="Phone Number"
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="Optional"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Email Address *"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
-            <Input
-              label="Password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              autoComplete="new-password"
-              minLength={6}
-              helperText="Optional: min. 6 characters. Leave blank to generate a secure temporary password (shown once after creation)."
-            />
-          </div>
-
-          <div className="border-t border-slate-200 pt-4 space-y-3">
-            <div>
-              <h3 className="text-sm font-medium text-slate-700 mb-2">Class Assignments (Optional)</h3>
-              <p className="text-xs text-slate-500 mb-3">Select one or more classes for this student</p>
-              <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-2">
-                {classes.length === 0 ? (
-                  <p className="text-sm text-slate-500">No active classes available</p>
-                ) : (
-                  classes.map((cls) => (
-                    <label key={cls.id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-slate-50 rounded">
-                      <input
-                        type="checkbox"
-                        checked={formData.class_ids.includes(cls.id)}
-                        onChange={() => handleToggleClass(cls.id)}
-                        className="rounded border-slate-300 text-indigo-600"
-                      />
-                      <span className="text-sm text-slate-700">{cls.name}</span>
-                    </label>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {formData.class_ids.length > 0 && (
-              <div>
-                <Input
-                  label="Start Access Date"
-                  name="start_access_date"
-                  type="date"
-                  value={formData.start_access_date}
-                  onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
-                  helperText="Date when student can access selected classes"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="border-t border-slate-200 pt-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="must_change_password"
-                checked={formData.must_change_password}
-                onChange={(e) => setFormData({ ...formData, must_change_password: e.target.checked })}
-                className="rounded border-slate-300 text-indigo-600"
-              />
-              <span className="text-sm font-medium text-slate-700">
-                Require password change on first login
-              </span>
-            </label>
-            <p className="text-xs text-slate-500 mt-1">
-              Recommended for security. Student will be prompted to set a new password on first login.
-            </p>
-          </div>
-
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-200">
+        footer={
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
             <Button
               type="button"
               variant="secondary"
@@ -594,9 +483,142 @@ export default function AdminStudentsPage() {
             >
               Cancel
             </Button>
-            <Button type="submit" loading={formLoading} className="w-full sm:w-auto">
+            <Button 
+              type="submit" 
+              form="create-student-form"
+              loading={formLoading} 
+              className="w-full sm:w-auto"
+            >
               Create Student Account
             </Button>
+          </div>
+        }
+      >
+        <form id="create-student-form" onSubmit={handleSubmit} className="space-y-6">
+          <div className="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 text-xs text-blue-700 leading-relaxed shadow-sm">
+            <p className="font-semibold text-blue-800">How this works</p>
+            <p className="mt-1">
+              Only admins can add students; there is no public signup. Submitting this form creates a Supabase Auth user, 
+              adds a record to <code className="rounded bg-blue-100/50 px-1 py-0.5 text-[11px]">profiles</code>, and 
+              sets up initial class enrollments.
+            </p>
+          </div>
+          
+          {formError && (
+            <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg text-sm text-red-700 shadow-sm animate-shake">
+              <p className="font-medium">Error creating account</p>
+              <p className="mt-1 opacity-90">{formError}</p>
+            </div>
+          )}
+
+          <div className="space-y-6">
+            <section>
+              <h3 className="text-sm font-semibold text-slate-800 mb-4 border-b border-slate-100 pb-2">Basic Information</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <Input
+                  label="Full Name *"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  required
+                  placeholder="e.g. John Doe"
+                />
+                <Input
+                  label="Phone Number"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="Optional"
+                />
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold text-slate-800 mb-4 border-b border-slate-100 pb-2">Credentials</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <Input
+                  label="Email Address *"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  placeholder="name@example.com"
+                />
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  autoComplete="new-password"
+                  minLength={6}
+                  helperText="Optional: Leave blank to generate secure password."
+                />
+              </div>
+            </section>
+
+            <section>
+              <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
+                <h3 className="text-sm font-semibold text-slate-800">Class Assignments (Optional)</h3>
+                {formData.class_ids.length > 0 && (
+                  <Badge variant="default" className="text-[10px]">{formData.class_ids.length} selected</Badge>
+                )}
+              </div>
+              <div className="max-h-56 overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/30 p-2 grid grid-cols-1 sm:grid-cols-2 gap-1">
+                {classes.length === 0 ? (
+                  <p className="text-sm text-slate-500 p-4 text-center italic">No active classes available</p>
+                ) : (
+                  classes.map((cls) => (
+                    <label key={cls.id} className={`flex items-center gap-3 cursor-pointer p-3 rounded-lg transition-all ${
+                      formData.class_ids.includes(cls.id) ? "bg-indigo-50 border-indigo-100 shadow-sm" : "hover:bg-slate-100/50 border-transparent"
+                    } border`}>
+                      <input
+                        type="checkbox"
+                        checked={formData.class_ids.includes(cls.id)}
+                        onChange={() => handleToggleClass(cls.id)}
+                        className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                      />
+                      <span className={`text-sm ${formData.class_ids.includes(cls.id) ? "font-semibold text-indigo-900" : "text-slate-700"}`}>
+                        {cls.name}
+                      </span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </section>
+
+            {formData.class_ids.length > 0 && (
+              <section className="bg-indigo-50/30 p-4 rounded-xl border border-indigo-100 animate-fadeIn">
+                <Input
+                  label="Start Access Date"
+                  name="start_access_date"
+                  type="date"
+                  value={formData.start_access_date}
+                  onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
+                  helperText="When the student will gain access to content."
+                />
+              </section>
+            )}
+
+            <section className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="must_change_password"
+                  checked={formData.must_change_password}
+                  onChange={(e) => setFormData({ ...formData, must_change_password: e.target.checked })}
+                  className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
+                />
+                <span className="text-sm font-semibold text-slate-800">
+                  Require password change on first login
+                </span>
+              </label>
+              <p className="text-xs text-slate-500 mt-2 ml-8">
+                Recommended for security. Forces the student to set their own private password immediately.
+              </p>
+            </section>
           </div>
         </form>
       </Modal>
@@ -610,29 +632,53 @@ export default function AdminStudentsPage() {
         }}
         title={`Manage Enrollments - ${selectedStudentForEnrollments?.full_name}`}
         size="lg"
+        footer={
+          <div className="flex justify-end">
+             <Button variant="secondary" onClick={() => setIsEnrollmentModalOpen(false)}>
+               Close
+             </Button>
+          </div>
+        }
       >
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* List existing enrollments */}
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Current Enrollments</h3>
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Current Enrollments</h3>
+              {studentEnrollments.length > 0 && (
+                <Badge variant="success">{studentEnrollments.length} Active</Badge>
+              )}
+            </div>
+            
             {enrollmentLoading && studentEnrollments.length === 0 ? (
-              <p className="text-sm text-slate-500">Loading...</p>
+              <div className="flex items-center justify-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mr-2"></div>
+                <span className="text-sm text-slate-500 font-medium">Loading enrollments...</span>
+              </div>
             ) : studentEnrollments.length === 0 ? (
-              <p className="text-sm text-slate-500">No active enrollments for this student.</p>
+              <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <p className="text-sm text-slate-500 font-medium italic">No active enrollments found.</p>
+              </div>
             ) : (
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                 <Table
                   columns={[
-                    { key: "class", header: "Class", render: (e: any) => e.class_name || "-" },
+                    { key: "class", header: "Class", render: (e: any) => <span className="font-semibold text-slate-900">{e.class_name || "-"}</span> },
                     { key: "mode", header: "Mode", render: (e: any) => <Badge variant={e.access_mode === "free_card" ? "success" : "default"}>{e.access_mode}</Badge> },
                     { key: "start_date", header: "Start", render: (e: any) => <DateFormat date={e.start_access_date} format="short" /> },
-                    { key: "end_date", header: "End", render: (e: any) => e.access_end_date ? <DateFormat date={e.access_end_date} format="short" /> : <span className="text-slate-400">Indefinite</span> },
+                    { key: "end_date", header: "End", render: (e: any) => e.access_end_date ? <DateFormat date={e.access_end_date} format="short" /> : <span className="text-slate-400">Lifetime</span> },
                     { 
                       key: "actions", 
                       header: "", 
                       className: "text-right",
                       render: (e: any) => (
-                        <Button size="sm" variant="danger" onClick={() => handleDeleteEnrollment(e.id)} loading={enrollmentLoading}>
+                        <Button 
+                          size="sm" 
+                          variant="danger" 
+                          onClick={() => handleDeleteEnrollment(e.id)} 
+                          loading={enrollmentLoading}
+                          className="px-3"
+                        >
                           Remove
                         </Button>
                       )
@@ -643,18 +689,18 @@ export default function AdminStudentsPage() {
                 />
               </div>
             )}
-          </div>
+          </section>
 
-          <div className="border-t border-slate-200 pt-4">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Add / Update Enrollment</h3>
-            <form onSubmit={handleAddEnrollment} className="space-y-4 bg-slate-50 p-4 rounded-lg">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <section className="bg-slate-50/50 p-6 rounded-2xl border border-slate-200 shadow-inner">
+            <h3 className="text-sm font-bold text-slate-800 mb-5 uppercase tracking-wider">Add New Enrollment</h3>
+            <form id="add-enrollment-form" onSubmit={handleAddEnrollment} className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <Select
                   label="Class"
                   value={enrollmentFormData.class_id}
                   onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, class_id: e.target.value })}
                   options={classes.map((c) => ({ value: c.id, label: c.name }))}
-                  placeholder="Select class"
+                  placeholder="Select a class"
                   required
                 />
                 <Select
@@ -669,7 +715,7 @@ export default function AdminStudentsPage() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <Input
                   label="Start Access Date"
                   type="date"
@@ -682,15 +728,16 @@ export default function AdminStudentsPage() {
                   type="date"
                   value={enrollmentFormData.access_end_date}
                   onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, access_end_date: e.target.value })}
+                  placeholder="Leave empty for lifetime"
                 />
               </div>
               <div className="flex justify-end pt-2">
-                <Button type="submit" loading={enrollmentLoading}>
-                  Save Enrollment
+                <Button type="submit" loading={enrollmentLoading} className="px-8 shadow-sm">
+                  Add Enrollment
                 </Button>
               </div>
             </form>
-          </div>
+          </section>
         </div>
       </Modal>
     </div>
