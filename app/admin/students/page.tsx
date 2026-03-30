@@ -277,6 +277,30 @@ export default function AdminStudentsPage() {
     }
   };
 
+  const handlePermanentDelete = async (student: Student) => {
+    const doubleConfirm = confirm(`DANGER: Are you sure you want to PERMANENTLY delete ${student.full_name}? This will remove all their records, access, and login account. This CANNOT be undone.`);
+    if (!doubleConfirm) return;
+
+    try {
+      const form = new FormData();
+      form.append("student_id", student.id);
+
+      const response = await fetch("/api/admin/students/delete-permanent", {
+        method: "POST",
+        body: form,
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to delete student");
+      }
+      
+      await fetchStudents();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Unknown error");
+    }
+  };
+
   const filteredStudents = students.filter(
     (student) =>
       student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -336,20 +360,23 @@ export default function AdminStudentsPage() {
             size="sm"
             variant="ghost"
             onClick={() => handleToggleStatus(student)}
+            title={student.is_active ? "Block Login" : "Unblock Login"}
           >
             {student.is_active ? "Deactivate" : "Activate"}
           </Button>
           <Button
             size="sm"
             variant="danger"
-            onClick={() => handleDelete(student)}
+            onClick={() => handlePermanentDelete(student)}
+            title="Wipe from system"
           >
-            Deactivate
+            Delete
           </Button>
         </div>
       ),
     },
   ];
+
 
   return (
     <div className="space-y-6">

@@ -81,9 +81,11 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                 className="flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
-                  {profile.full_name?.charAt(0) || user.email?.charAt(0) || "U"}
+                  {profile.full_name?.charAt(0) || user.email?.charAt(0) || (profile.role === 'admin' ? "A" : "S")}
                 </div>
-                <span className="max-w-[120px] truncate">{profile.full_name || "Student"}</span>
+                <span className="max-w-[120px] truncate">
+                  {profile.full_name || (profile.role === 'admin' ? "Admin" : "Student")}
+                </span>
                 <svg className={`h-4 w-4 text-slate-400 transition-transform ${profileMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -94,6 +96,11 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                   <div className="border-b border-slate-100 px-4 py-2">
                     <p className="text-xs text-slate-500">Signed in as</p>
                     <p className="truncate text-sm font-medium text-slate-900">{user.email}</p>
+                    {profile.role === 'admin' && (
+                      <span className="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold uppercase text-indigo-700">
+                        Admin
+                      </span>
+                    )}
                   </div>
                   <Link href="/dashboard" className="block px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50">
                     Dashboard
@@ -101,6 +108,11 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                   <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50">
                     Profile
                   </Link>
+                  {profile.role === 'admin' && (
+                    <Link href="/admin" className="block px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
+                      Admin Panel
+                    </Link>
+                  )}
                   <form action={logout} className="border-t border-slate-100">
                     <button type="submit" className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
                       Sign out
@@ -143,10 +155,18 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
             <div className="absolute right-4 top-16 mt-2 w-56 origin-top-right rounded-xl border border-indigo-100 bg-white p-2 shadow-xl ring-1 ring-black ring-opacity-5">
               {user && profile && (
                 <div className="mb-2 border-b border-slate-100 px-3 pb-2">
-                  <p className="text-sm font-medium text-slate-900">{profile.full_name || "Student"}</p>
+                  <p className="text-sm font-medium text-slate-900">
+                    {profile.full_name || (profile.role === 'admin' ? "Admin" : "Student")}
+                  </p>
                   <p className="truncate text-xs text-slate-500">{user.email}</p>
+                  {profile.role === 'admin' && (
+                    <span className="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold uppercase text-indigo-700">
+                      Admin
+                    </span>
+                  )}
                 </div>
               )}
+
 
               {navLinks.map((link) => (
                 <Link
@@ -171,7 +191,13 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                     <Link href="/dashboard/profile" className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50">
                       Profile
                     </Link>
+                    {profile.role === 'admin' && (
+                      <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
+                        Admin Panel
+                      </Link>
+                    )}
                     <form action={logout}>
+
                       <button type="submit" className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 mt-1">
                         Sign out
                       </button>
