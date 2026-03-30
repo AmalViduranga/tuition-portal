@@ -36,7 +36,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
             #1 A/L Maths Sri Lanka • 2026/2027 Enrollments Open
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-7xl lg:leading-[1.1]">
-            Master A/L Maths in Sri Lanka with <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Confidence</span>
+            Master A/L Mathematics (07) with <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Confidence</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300 md:text-xl">
             Join the most comprehensive structured lesson delivery with {teacher.name}. Clear concepts, proven results, and individual guidance.
