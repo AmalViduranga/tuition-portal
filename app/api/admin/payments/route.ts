@@ -11,33 +11,27 @@ export async function GET() {
     const { data, error } = await adminSupabase
       .from("student_class_payment_periods")
       .select(`
-        id,
-        student_id,
-        class_id,
-        payment_plan_id,
-        amount_paid,
-        access_mode,
-        start_date,
-        end_date,
-        status,
-        created_at,
-        profiles!inner (full_name, phone),
+        *,
+        profiles (full_name, phone),
         class_groups (name),
         payment_plans (name)
       `)
       .order("start_date", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error("GET Payments Error:", error);
+      throw error;
+    }
 
     const formatted = (data || []).map((item: any) => ({
       id: item.id,
       student_id: item.student_id,
-      student_name: item.profiles?.full_name,
-      student_phone: item.profiles?.phone,
+      student_name: item.profiles?.full_name || (Array.isArray(item.profiles) ? item.profiles[0]?.full_name : "Unknown"),
+      student_phone: item.profiles?.phone || (Array.isArray(item.profiles) ? item.profiles[0]?.phone : ""),
       class_id: item.class_id,
-      class_name: item.class_groups?.name || item.payment_plans?.name || "Multiple Classes",
+      class_name: item.class_groups?.name || (Array.isArray(item.class_groups) ? item.class_groups[0]?.name : "") || item.payment_plans?.name || (Array.isArray(item.payment_plans) ? item.payment_plans[0]?.name : "") || "Multiple Classes",
       payment_plan_id: item.payment_plan_id,
-      plan_name: item.payment_plans?.name,
+      plan_name: item.payment_plans?.name || (Array.isArray(item.payment_plans) ? item.payment_plans[0]?.name : ""),
       amount_paid: item.amount_paid,
       access_mode: item.access_mode,
       start_date: item.start_date,

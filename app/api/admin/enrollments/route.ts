@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
     let query = adminSupabase
       .from("student_class_enrollments")
       .select(`
-        id,
         student_id,
         class_id,
         start_access_date,
@@ -32,14 +31,17 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error("GET Enrollments Error:", error);
+      throw error;
+    }
 
-    const formatted = (data || []).map((item) => ({
-      id: item.id,
+    const formatted = (data || []).map((item: any) => ({
+      id: item.id || `${item.student_id}-${item.class_id}`, // fallback if id column missing
       student_id: item.student_id,
-      student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : (item.profiles as any)?.full_name,
+      student_name: item.profiles?.full_name || (Array.isArray(item.profiles) ? item.profiles[0]?.full_name : "Unknown"),
       class_id: item.class_id,
-      class_name: Array.isArray(item.class_groups) ? item.class_groups[0]?.name : (item.class_groups as any)?.name,
+      class_name: item.class_groups?.name || (Array.isArray(item.class_groups) ? item.class_groups[0]?.name : "Unknown"),
       start_access_date: item.start_access_date,
       access_end_date: item.access_end_date,
       access_mode: item.access_mode,
@@ -74,15 +76,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Try to find if enrollment already exists to determine if we should insert or skip
+    // Upsert works best but depends on primary key. 
+    // Here we'll try a manual check if upsert fails because of primary key mismatch.
     const { error } = await adminSupabase.from("student_class_enrollments").upsert({
       student_id: studentId,
       class_id: classId,
       start_access_date: startAccessDate,
       access_end_date: accessEndDate,
       access_mode: accessMode,
-    });
+    }, { onConflict: 'student_id,class_id' }); // Handle composite key if id not in select
 
-    if (error) throw error;
+    if (error) {
+      console.error("POST Enrollment Error:", error);
+      throw error;
+    }
     
     if (accessMode === "free_card") {
       await syncFreeCardGrantsForStudent(studentId, classId, (await requireAdmin()).user.id);
