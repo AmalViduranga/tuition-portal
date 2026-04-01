@@ -57,6 +57,18 @@ export default function AdminStudentsPage() {
     access_end_date: "",
   });
 
+  // Track which student is being updated for snappier UI feedback
+  const [updatingStudentId, setUpdatingStudentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Auto-calculate end date (45 days) when start date is changed
+    if (enrollmentFormData.start_access_date && !enrollmentFormData.access_end_date) {
+      const d = new Date(enrollmentFormData.start_access_date);
+      d.setDate(d.getDate() + 45);
+      setEnrollmentFormData(prev => ({ ...prev, access_end_date: d.toISOString().split('T')[0] }));
+    }
+  }, [enrollmentFormData.start_access_date]);
+
   const fetchStudentEnrollments = async (studentId: string) => {
     try {
       setEnrollmentLoading(true);
@@ -239,6 +251,7 @@ export default function AdminStudentsPage() {
       return;
     }
 
+    setUpdatingStudentId(student.id);
     try {
       const form = new FormData();
       form.append("student_id", student.id);
@@ -253,6 +266,8 @@ export default function AdminStudentsPage() {
       await fetchStudents();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setUpdatingStudentId(null);
     }
   };
 
@@ -281,6 +296,7 @@ export default function AdminStudentsPage() {
     const doubleConfirm = confirm(`DANGER: Are you sure you want to PERMANENTLY delete ${student.full_name}? This will remove all their records, access, and login account. This CANNOT be undone.`);
     if (!doubleConfirm) return;
 
+    setUpdatingStudentId(student.id);
     try {
       const form = new FormData();
       form.append("student_id", student.id);
@@ -298,6 +314,8 @@ export default function AdminStudentsPage() {
       await fetchStudents();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setUpdatingStudentId(null);
     }
   };
 
@@ -353,6 +371,7 @@ export default function AdminStudentsPage() {
             size="sm"
             variant="outline"
             onClick={() => openEnrollmentsModal(student)}
+            disabled={updatingStudentId === student.id}
           >
             Enrollments
           </Button>
@@ -361,6 +380,7 @@ export default function AdminStudentsPage() {
             variant="ghost"
             onClick={() => handleToggleStatus(student)}
             title={student.is_active ? "Block Login" : "Unblock Login"}
+            loading={updatingStudentId === student.id}
           >
             {student.is_active ? "Deactivate" : "Activate"}
           </Button>
@@ -369,6 +389,7 @@ export default function AdminStudentsPage() {
             variant="danger"
             onClick={() => handlePermanentDelete(student)}
             title="Wipe from system"
+            disabled={updatingStudentId === student.id}
           >
             Delete
           </Button>

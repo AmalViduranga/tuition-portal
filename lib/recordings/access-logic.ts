@@ -33,23 +33,31 @@ export function isItemAccessible(
   // 1. Explicitly granted (covers manual unlocks, and successful event-based grants)
   if (grants.has(item.id)) return true;
 
-  // 2. Fallback dynamic evaluation (in case event-based grants failed or weren't backfilled)
-  const enrollment = context.enrollments.find((e) => e.class_id === item.class_id);
-  if (!enrollment) return false;
-
-  if (enrollment.start_access_date > item.release_at) return false;
-
-  if (enrollment.access_mode === "free_card") {
-    if (!enrollment.access_end_date || enrollment.access_end_date >= item.release_at) {
-      return true;
+  // 2. Fallback dynamic evaluation
+  // Check if any enrollment window (45 days) covers the item's release date
+  const hasValidEnrollment = context.enrollments.some((e) => {
+    if (e.class_id !== item.class_id) return false;
+    
+    const start = e.start_access_date;
+    // If access_end_date is missing, fall back to start + 45 days
+    let end = e.access_end_date;
+    if (!end) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + 45);
+      end = d.toISOString().split("T")[0];
     }
-  }
+    
+    return item.release_at >= start && item.release_at <= end;
+  });
 
-  const validPayment = context.paymentPeriods.find(
+  if (hasValidEnrollment) return true;
+
+  // 3. Check payment periods (keeping for backward compatibility if data exists here)
+  const hasValidPayment = context.paymentPeriods.some(
     (p) => p.class_id === item.class_id && p.status === "approved" && p.start_date <= item.release_at && p.end_date >= item.release_at
   );
 
-  if (validPayment) return true;
+  if (hasValidPayment) return true;
 
   return false;
 }

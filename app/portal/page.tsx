@@ -47,16 +47,35 @@ export default async function PortalHomePage() {
     return isEnrolled && accessContext.recordingGrants.has(rec.id);
   });
 
+  // Get current time-based greeting
+  const hour = new Date().getHours();
+  let greetingMsg = "Good morning";
+  if (hour >= 12 && hour < 17) greetingMsg = "Good afternoon";
+  else if (hour >= 17) greetingMsg = "Good evening";
+
+  // Calculate latest expiry for paid periods
+  const paidEnrollments = (enrollments || []).filter((e: any) => e.access_mode !== "free_card");
+  const latestExpiry = paidEnrollments.reduce((latest: string | null, e: any) => {
+    if (!e.access_end_date) return latest;
+    if (!latest) return e.access_end_date;
+    return e.access_end_date > latest ? e.access_end_date : latest;
+  }, null);
+
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+  const studentName = profile?.full_name || "Student";
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <Card>
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-2xl">
-            👋
+            {hour < 12 ? "🌅" : hour < 18 ? "☀️" : "🌙"}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Welcome back!</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {greetingMsg}, {studentName}!
+            </h1>
             <p className="text-slate-600">
               Access your classes, recordings, and study materials.
             </p>

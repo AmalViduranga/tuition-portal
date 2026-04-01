@@ -192,6 +192,27 @@ export default function AdminMaterialsPage() {
     }
   };
 
+  const handleDelete = async (material: Material) => {
+    if (!confirm(`Are you sure you want to delete "${material.title}"? This will also remove the file from storage.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/materials?id=${material.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete material");
+      }
+
+      await fetchMaterials();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Unknown error");
+    }
+  };
+
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "-";
     const mb = bytes / (1024 * 1024);
@@ -268,7 +289,7 @@ export default function AdminMaterialsPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded hover:bg-slate-200"
           >
-            Download
+            Open
           </a>
           <Button size="sm" variant="ghost" onClick={() => handleEdit(mat)}>
             Edit
@@ -279,6 +300,14 @@ export default function AdminMaterialsPage() {
             onClick={() => handleToggleStatus(mat)}
           >
             {mat.published ? "Unpublish" : "Publish"}
+          </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            className="bg-red-50 text-red-600 hover:bg-red-100 border-none"
+            onClick={() => handleDelete(mat)}
+          >
+            Delete
           </Button>
         </div>
       ),

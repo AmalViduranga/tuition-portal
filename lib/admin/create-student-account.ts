@@ -122,15 +122,23 @@ export async function createStudentAccount(input: {
   }
 
   if (classIds.length > 0) {
-    const rows = classIds.map((classId) => ({
-      student_id: userId,
-      class_id: classId,
-      start_access_date: startAccessDate,
-    }));
+    const rows = classIds.map((classId) => {
+      const startDate = new Date(startAccessDate);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 45);
 
-    const { error: enrollError } = await adminClient.from("student_class_enrollments").upsert(rows, {
-      onConflict: "student_id,class_id",
+      return {
+        student_id: userId,
+        class_id: classId,
+        start_access_date: startAccessDate,
+        access_end_date: endDate.toISOString().split("T")[0],
+        access_mode: "paid", // Default to paid for new account creation
+      };
     });
+
+    // Use insert instead of upsert to potentially keep history if PK allows
+    // But since we are creating a new user, conflict is unlikely on student_id.
+    const { error: enrollError } = await adminClient.from("student_class_enrollments").insert(rows);
 
     if (enrollError) {
       await adminClient.auth.admin.deleteUser(userId);

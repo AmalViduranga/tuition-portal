@@ -18,6 +18,15 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
+  // Hide main navbar on internal dashboard/portal/admin routes to prevent duplication
+  const isInternalRoute = 
+    pathname.startsWith("/admin") || 
+    pathname.startsWith("/portal") || 
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/change-password");
+
+  if (isInternalRoute) return null;
+
   // Close mobile menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

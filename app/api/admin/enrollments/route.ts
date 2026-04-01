@@ -76,24 +76,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try to find if enrollment already exists to determine if we should insert or skip
-    // Upsert works best but depends on primary key. 
-    // Here we'll try a manual check if upsert fails because of primary key mismatch.
-    const { error } = await adminSupabase.from("student_class_enrollments").upsert({
+    // Calculate access_end_date if not provided (always should be start + 45 days)
+    let finalEndDate = accessEndDate;
+    if (!finalEndDate) {
+      const startDate = new Date(startAccessDate);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 45);
+      finalEndDate = endDate.toISOString().split('T')[0];
+    }
+
+    // Use insert instead of upsert to keep enrollment history
+    const { error } = await adminSupabase.from("student_class_enrollments").insert({
       student_id: studentId,
       class_id: classId,
       start_access_date: startAccessDate,
-      access_end_date: accessEndDate,
+      access_end_date: finalEndDate,
       access_mode: accessMode,
-    }, { onConflict: 'student_id,class_id' }); // Handle composite key if id not in select
+    });
 
     if (error) {
       console.error("POST Enrollment Error:", error);
       throw error;
     }
     
+    // syncFreeCardGrantsForStudent logic is still relevant if we want manual unlock fallbacks
     if (accessMode === "free_card") {
-      await syncFreeCardGrantsForStudent(studentId, classId, (await requireAdmin()).user.id);
+      const { user } = await requireAdmin();
+      await syncFreeCardGrantsForStudent(studentId, classId, user.id);
     }
 
     return NextResponse.json({ success: true });

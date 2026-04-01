@@ -204,3 +204,63 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+export async function DELETE(request: NextRequest) {
+  try {
+    await requireAdmin();
+    const adminSupabase = createAdminClient();
+    const url = new URL(request.url);
+    const materialId = url.searchParams.get("id");
+
+    if (!materialId) {
+      return NextResponse.json({ error: "Material ID is required" }, { status: 400 });
+    }
+
+    // 1. Get the material to find the file_url
+    const { data: material, error: fetchError } = await adminSupabase
+      .from("materials")
+      .select("file_url")
+      .eq("id", materialId)
+      .single();
+
+    if (fetchError || !material) {
+      throw new Error("Material not found or already deleted");
+    }
+
+    // 2. Delete the file from storage if it exists
+    if (material.file_url) {
+      try {
+        // Sample URL: https://xxx.supabase.co/storage/v1/object/public/materials/materials/filename.pdf
+        // We need 'materials/filename.pdf'
+        const urlParts = material.file_url.split('/public/materials/');
+        if (urlParts.length > 1) {
+          const filePath = urlParts[1];
+          const { error: storageError } = await adminSupabase.storage
+            .from("materials")
+            .remove([filePath]);
+          
+          if (storageError) {
+            console.error("Storage delete error:", storageError);
+            // We continue even if storage delete fails to ensure DB is cleaned up
+          }
+        }
+      } catch (storageErr) {
+        console.error("Storage cleanup error:", storageErr);
+      }
+    }
+
+    // 3. Delete from DB
+    const { error: deleteError } = await adminSupabase
+      .from("materials")
+      .delete()
+      .eq("id", materialId);
+
+    if (deleteError) throw deleteError;
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
+}

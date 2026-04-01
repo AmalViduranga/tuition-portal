@@ -1,5 +1,6 @@
 import { updatePassword } from "@/app/login/actions";
 import Link from "next/link";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type Props = {
   searchParams: Promise<{ error?: string; required?: string }>;
@@ -61,12 +62,10 @@ export default async function ChangePasswordPage({ searchParams }: Props) {
               placeholder="Re-enter your new password"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            {isRequired ? "Continue to Dashboard" : "Update Password"}
-          </button>
+          <SubmitButton 
+            label={isRequired ? "Continue to Dashboard" : "Update Password"} 
+            loadingLabel={isRequired ? "Saving..." : "Updating..."} 
+          />
         </form>
 
         {isRequired && (
