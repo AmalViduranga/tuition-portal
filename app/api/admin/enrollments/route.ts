@@ -77,15 +77,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate access_end_date if not provided (always should be start + 45 days)
-    let finalEndDate = accessEndDate;
-    if (!finalEndDate) {
-      const startDate = new Date(startAccessDate);
-      const endDate = new Date(startDate);
-      // Admin said 45 days / 1.5 months
-      endDate.setDate(startDate.getDate() + 45);
-      finalEndDate = endDate.toISOString().split('T')[0];
-    }
+    // Always calculate Access End Date (start + 45 days)
+    const startDate = new Date(startAccessDate);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 45);
+    const finalEndDate = endDate.toISOString().split('T')[0];
 
     // Use insert instead of upsert to keep enrollment history
     const { error } = await adminSupabase.from("student_class_enrollments").insert({

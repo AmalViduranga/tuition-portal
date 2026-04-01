@@ -70,15 +70,9 @@ export default async function ChangePasswordPage({ searchParams }: Props) {
 
         {isRequired && (
           <p className="mt-4 text-center text-xs text-slate-500">
-            After setting your password, you'll be redirected to your student dashboard.
+            For security, please set your personal password before accessing your student dashboard.
           </p>
         )}
-
-        <div className="mt-6 text-center">
-          <Link href="/dashboard" className="text-sm text-indigo-600 hover:text-indigo-700">
-            Skip for now (return to dashboard)
-          </Link>
-        </div>
       </div>
     </div>
   );

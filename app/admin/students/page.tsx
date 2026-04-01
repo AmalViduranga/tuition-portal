@@ -678,11 +678,12 @@ export default function AdminStudentsPage() {
                   required
                 />
                 <Input
-                  label="Access End Date (Optional)"
+                  label="Access End Date (Auto-calculated)"
                   type="date"
                   value={enrollmentFormData.access_end_date}
                   onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, access_end_date: e.target.value })}
-                  placeholder="Leave empty for lifetime"
+                  readOnly
+                  helperText="Automatically set to 45 days from start date."
                 />
               </div>
               <div className="flex justify-end pt-2">
