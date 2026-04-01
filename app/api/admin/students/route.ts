@@ -42,21 +42,13 @@ export async function POST(request: NextRequest) {
     const password = String(formData.get("password") ?? "");
     const fullName = String(formData.get("full_name") ?? "");
     const phone = String(formData.get("phone") ?? "");
-    const startAccessDate = String(formData.get("start_access_date") ?? "");
     const mustChangePassword = formData.get("must_change_password") === "on";
-
-    const classIds = formData
-      .getAll("class_ids")
-      .map((id) => String(id).trim())
-      .filter(Boolean);
 
     const result = await createStudentAccount({
       email,
       password,
       fullName,
       phone,
-      classIds,
-      startAccessDate,
       mustChangePassword,
     });
 
