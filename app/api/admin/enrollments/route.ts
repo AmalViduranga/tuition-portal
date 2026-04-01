@@ -37,15 +37,15 @@ export async function GET(request: NextRequest) {
     }
 
     const formatted = (data || []).map((item: any) => ({
-      id: item.id || `${item.student_id}-${item.class_id}`, // fallback if id column missing
+      id: item.id || `${item.student_id}-${item.class_id}-${item.created_at}`,
       student_id: item.student_id,
-      student_name: item.profiles?.full_name || (Array.isArray(item.profiles) ? item.profiles[0]?.full_name : "Unknown"),
+      student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : (item.profiles?.full_name || "Unknown"),
       class_id: item.class_id,
-      class_name: item.class_groups?.name || (Array.isArray(item.class_groups) ? item.class_groups[0]?.name : "Unknown"),
+      class_name: Array.isArray(item.class_groups) ? item.class_groups[0]?.name : (item.class_groups?.name || "Unknown"),
       start_access_date: item.start_access_date,
       access_end_date: item.access_end_date,
       access_mode: item.access_mode,
-      student_class_enrollments: { created_at: item.created_at },
+      created_at: item.created_at,
     }));
 
     return NextResponse.json(formatted);
@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
     if (!finalEndDate) {
       const startDate = new Date(startAccessDate);
       const endDate = new Date(startDate);
+      // Admin said 45 days / 1.5 months
       endDate.setDate(startDate.getDate() + 45);
       finalEndDate = endDate.toISOString().split('T')[0];
     }

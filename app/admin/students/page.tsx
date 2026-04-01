@@ -38,8 +38,6 @@ export default function AdminStudentsPage() {
     email: "",
     phone: "",
     password: "",
-    class_ids: [] as string[],
-    start_access_date: "",
     must_change_password: true,
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -177,10 +175,6 @@ export default function AdminStudentsPage() {
       setFormError("Please enter a valid email address.");
       return;
     }
-    if (formData.class_ids.length > 0 && !formData.start_access_date.trim()) {
-      setFormError("Choose a start access date when assigning one or more classes.");
-      return;
-    }
     if (formData.password.trim().length > 0 && formData.password.trim().length < 6) {
       setFormError("Password must be at least 6 characters, or leave blank to auto-generate.");
       return;
@@ -194,14 +188,9 @@ export default function AdminStudentsPage() {
       form.append("email", trimmedEmail);
       form.append("phone", formData.phone.trim());
       form.append("password", formData.password.trim());
-      form.append("start_access_date", formData.start_access_date.trim());
       if (formData.must_change_password) {
         form.append("must_change_password", "on");
       }
-
-      formData.class_ids.forEach((classId) => {
-        form.append("class_ids", classId);
-      });
 
       const result = await createStudent(form);
 
@@ -221,8 +210,6 @@ export default function AdminStudentsPage() {
         email: "",
         phone: "",
         password: "",
-        class_ids: [],
-        start_access_date: "",
         must_change_password: true,
       });
       setIsModalOpen(false);
@@ -232,18 +219,6 @@ export default function AdminStudentsPage() {
     } finally {
       setFormLoading(false);
     }
-  };
-
-  const handleToggleClass = (classId: string) => {
-    setFormData((prev) => {
-      const isSelected = prev.class_ids.includes(classId);
-      return {
-        ...prev,
-        class_ids: isSelected
-          ? prev.class_ids.filter((id) => id !== classId)
-          : [...prev.class_ids, classId],
-      };
-    });
   };
 
   const handleToggleStatus = async (student: Student) => {
@@ -487,8 +462,6 @@ export default function AdminStudentsPage() {
             email: "",
             phone: "",
             password: "",
-            class_ids: [],
-            start_access_date: "",
             must_change_password: true,
           });
         }}
@@ -516,12 +489,11 @@ export default function AdminStudentsPage() {
         }
       >
         <form id="create-student-form" onSubmit={handleSubmit} className="space-y-6">
-          <div className="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 text-xs text-blue-700 leading-relaxed shadow-sm">
-            <p className="font-semibold text-blue-800">How this works</p>
+          <div className="rounded-xl border-blue-100 bg-blue-50/50 px-4 py-3 text-xs text-blue-700 leading-relaxed shadow-sm">
+            <p className="font-semibold text-blue-800">Account Creation Only</p>
             <p className="mt-1">
-              Only admins can add students; there is no public signup. Submitting this form creates a Supabase Auth user, 
-              adds a record to <code className="rounded bg-blue-100/50 px-1 py-0.5 text-[11px]">profiles</code>, and 
-              sets up initial class enrollments.
+              Adding a student here creates their login credentials. Content access (recordings/materials) will only be granted 
+              after you **enroll them** in classes using the "Enrollments" button in the table below.
             </p>
           </div>
           
@@ -580,48 +552,7 @@ export default function AdminStudentsPage() {
               </div>
             </section>
 
-            <section>
-              <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
-                <h3 className="text-sm font-semibold text-slate-800">Class Assignments (Optional)</h3>
-                {formData.class_ids.length > 0 && (
-                  <Badge variant="default" className="text-[10px]">{formData.class_ids.length} selected</Badge>
-                )}
-              </div>
-              <div className="max-h-56 overflow-y-auto border border-slate-200 rounded-xl bg-slate-50/30 p-2 grid grid-cols-1 sm:grid-cols-2 gap-1">
-                {classes.length === 0 ? (
-                  <p className="text-sm text-slate-500 p-4 text-center italic">No active classes available</p>
-                ) : (
-                  classes.map((cls) => (
-                    <label key={cls.id} className={`flex items-center gap-3 cursor-pointer p-3 rounded-lg transition-all ${
-                      formData.class_ids.includes(cls.id) ? "bg-indigo-50 border-indigo-100 shadow-sm" : "hover:bg-slate-100/50 border-transparent"
-                    } border`}>
-                      <input
-                        type="checkbox"
-                        checked={formData.class_ids.includes(cls.id)}
-                        onChange={() => handleToggleClass(cls.id)}
-                        className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
-                      />
-                      <span className={`text-sm ${formData.class_ids.includes(cls.id) ? "font-semibold text-indigo-900" : "text-slate-700"}`}>
-                        {cls.name}
-                      </span>
-                    </label>
-                  ))
-                )}
-              </div>
-            </section>
-
-            {formData.class_ids.length > 0 && (
-              <section className="bg-indigo-50/30 p-4 rounded-xl border border-indigo-100 animate-fadeIn">
-                <Input
-                  label="Start Access Date"
-                  name="start_access_date"
-                  type="date"
-                  value={formData.start_access_date}
-                  onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
-                  helperText="When the student will gain access to content."
-                />
-              </section>
-            )}
+            {/* Class Assignments are now managed via Enrollments button after creation */}
 
             <section className="bg-slate-50 p-4 rounded-xl border border-slate-200">
               <label className="flex items-center gap-3 cursor-pointer">

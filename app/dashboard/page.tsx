@@ -16,66 +16,42 @@ export const dynamic = "force-dynamic";
 export default async function StudentDashboardPage() {
   const { supabase, user } = await requireUser();
 
-  let profilePayload, enrollmentsPayload, paymentPeriodsPayload, siteSettingsPayload, recordingsPayload, materialsPayload;
-  
-  try {
-    profilePayload = await supabase.from("profiles").select("full_name, email, phone").eq("id", user.id).single();
-    if (profilePayload.error) throw profilePayload.error;
-  } catch (e) {
-    console.error("Profiles error:", e);
-    throw e;
-  }
+  const [
+    profileRes,
+    enrollRes,
+    settingsRes,
+    recordingsPayload,
+    materialsPayload
+  ] = await Promise.all([
+    supabase.from("profiles").select("full_name, email, phone").eq("id", user.id).single(),
+    supabase.from("student_class_enrollments").select("class_id, start_access_date, access_end_date, access_mode, class_groups(id, name)").eq("student_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("site_settings").select("key, value"),
+    loadStudentRecordings(supabase, user.id, null),
+    loadStudentMaterials(supabase, user.id, null)
+  ]);
 
-  try {
-    enrollmentsPayload = await supabase.from("student_class_enrollments").select("class_id, start_access_date, class_groups(id, name)").eq("student_id", user.id);
-    if (enrollmentsPayload.error) throw enrollmentsPayload.error;
-  } catch (e) {
-    console.error("Enrollments error:", e);
-    throw e;
-  }
-
-  try {
-    paymentPeriodsPayload = await supabase.from("student_class_payment_periods").select("class_id, start_date, end_date, status, class_groups(name)").eq("student_id", user.id).order("end_date", { ascending: false });
-    if (paymentPeriodsPayload.error) throw paymentPeriodsPayload.error;
-  } catch (e) {
-    console.error("Payment periods error:", e);
-    throw e;
-  }
-
-  try {
-    siteSettingsPayload = await supabase.from("site_settings").select("key, value");
-    if (siteSettingsPayload.error) throw siteSettingsPayload.error;
-  } catch (e) {
-    console.error("Site settings error:", e);
-    throw e;
-  }
-
-  try {
-    recordingsPayload = await loadStudentRecordings(supabase, user.id, null);
-  } catch (e) {
-    console.error("Recordings error:", e);
-    throw e;
-  }
-
-  try {
-    materialsPayload = await loadStudentMaterials(supabase, user.id, null);
-  } catch (e) {
-    console.error("Materials error:", e);
-    throw e;
-  }
-
-  const { data: profile } = profilePayload;
-  const { data: enrollments } = enrollmentsPayload;
-  const { data: paymentPeriods } = paymentPeriodsPayload;
-  const { data: siteSettings } = siteSettingsPayload;
+  const profile = profileRes.data;
+  const enrollments = enrollRes.data || [];
+  const siteSettings = settingsRes.data;
   
   const whatsappPhone = siteSettings?.find(s => s.key === "contact_phone")?.value || "";
 
-  // Compute easy variables
-  const recentRecordings = recordingsPayload?.recordings?.slice(0, 3) || [];
-  const recentMaterials = materialsPayload?.materials?.slice(0, 3) || [];
-  const activePayments = paymentPeriods?.filter(p => p.status === "approved" || p.status === "pending") || [];
+  const accessibleRecordings = (recordingsPayload?.recordings || []).slice(0, 3);
+  const accessibleMaterials = (materialsPayload?.materials || []).slice(0, 3);
   
+  const today = new Date().toISOString().split('T')[0];
+
+  // Calculate latest expiry for the banner info if needed
+  const latestExpiry = enrollments.reduce((latest: string | null, e: any) => {
+    const end = e.access_end_date || new Date(new Date(e.start_access_date).getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    if (!latest) return end;
+    return end > latest ? end : latest;
+  }, null);
+
+  // Greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
   return (
     <div className="space-y-8 pb-12">
       {/* 1. Welcome Section */}
@@ -84,11 +60,13 @@ export default async function StudentDashboardPage() {
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="text-white">
+            <h2 className="text-indigo-100 font-medium uppercase tracking-wider text-sm mb-1">{greeting}</h2>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
               Welcome back, {profile?.full_name?.split(" ")[0]}!
             </h1>
             <p className="mt-2 max-w-xl text-indigo-100 text-lg">
-              You're enrolled in {(enrollments || []).length} classes. Pick up where you left off.
+              You have {enrollments.length} enrollment {enrollments.length === 1 ? 'record' : 'records'}. 
+              {latestExpiry && ` Your next access period ends around ${latestExpiry}.`}
             </p>
           </div>
           <div className="flex shrink-0">
@@ -130,13 +108,13 @@ export default async function StudentDashboardPage() {
                 View all →
               </Link>
             </div>
-            {recentRecordings.length === 0 ? (
+            {accessibleRecordings.length === 0 ? (
               <Card className="text-center py-12 bg-slate-50/50 border-dashed">
-                <p className="text-slate-500">No recent recordings available right now.</p>
+                <p className="text-slate-500">No recordings available for your current access periods.</p>
               </Card>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {recentRecordings.map((rec) => (
+                {accessibleRecordings.map((rec: any) => (
                   <Link key={rec.id} href="/portal/recordings" className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:shadow-md">
                     <div className="aspect-video w-full bg-slate-100 relative">
                       <img
@@ -148,7 +126,7 @@ export default async function StudentDashboardPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-slate-900 line-clamp-2 text-sm">{rec.title}</h3>
-                      <p className="mt-1 text-xs text-slate-500 truncate">{(rec.class_groups as any)?.name || Array.isArray(rec.class_groups) && (rec.class_groups as any)[0]?.name}</p>
+                      <p className="mt-1 text-xs text-slate-500 truncate">{rec.class_groups?.name}</p>
                     </div>
                   </Link>
                 ))}
@@ -164,13 +142,13 @@ export default async function StudentDashboardPage() {
                 View all →
               </Link>
             </div>
-            {recentMaterials.length === 0 ? (
+            {accessibleMaterials.length === 0 ? (
               <Card className="text-center py-12 bg-slate-50/50 border-dashed">
-                <p className="text-slate-500">No new materials uploaded yet.</p>
+                <p className="text-slate-500">No materials available for your current access periods.</p>
               </Card>
             ) : (
               <div className="grid gap-3 sm:grid-cols-1">
-                {recentMaterials.map((mat) => (
+                {accessibleMaterials.map((mat: any) => (
                   <a key={mat.id} href={mat.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-indigo-200 hover:shadow-sm">
                     <div className="flex items-center gap-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-xl text-indigo-600">
@@ -179,7 +157,7 @@ export default async function StudentDashboardPage() {
                       <div>
                         <h3 className="font-medium text-slate-900 text-sm">{mat.title}</h3>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {((mat.class_groups as any)?.name || (Array.isArray(mat.class_groups) && (mat.class_groups as any)[0]?.name)) || "Class"} &middot; <DateFormat date={mat.release_at} format="short" />
+                          {mat.class_groups?.name || "Class"} &middot; <DateFormat date={mat.release_at} format="short" />
                         </p>
                       </div>
                     </div>
@@ -199,7 +177,7 @@ export default async function StudentDashboardPage() {
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-lg font-bold">Profile Details</h2>
               <Link href="/dashboard/profile" className="text-xs font-semibold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors">
-                Edit Profile
+                Edit
               </Link>
             </div>
             <div className="space-y-3 text-sm">
@@ -211,39 +189,41 @@ export default async function StudentDashboardPage() {
                 <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Email</span>
                 <span className="font-medium text-slate-100">{profile?.email}</span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Phone</span>
-                <span className="font-medium text-slate-100">{profile?.phone || "Not provided"}</span>
-              </div>
             </div>
           </Card>
 
-          {/* 5. Payment/access summary */}
+          {/* 5. Enrollment/access summary */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Access & Payments</h2>
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Enrollment & Access</h2>
             <div className="space-y-4">
-              {activePayments.length === 0 ? (
+              {enrollments.length === 0 ? (
                 <div className="rounded-lg bg-amber-50 p-3 border border-amber-200 text-sm text-amber-800">
-                  <p className="font-semibold">No active access periods.</p>
-                  <p className="mt-1 opacity-90">Please contact the admin to approve your module payments to unlock contents securely.</p>
+                  <p className="font-semibold">No active enrollments.</p>
+                  <p className="mt-1 opacity-90">Please contact the admin to enroll in classes and unlock contents securely.</p>
                 </div>
               ) : (
                 <div className="space-y-3 text-sm">
-                  {activePayments.map((p, idx) => (
-                    <div key={idx} className="flex flex-col justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-slate-900 truncate pr-2">
-                          {Array.isArray(p.class_groups) ? (p.class_groups as any)[0]?.name : (p.class_groups as any)?.name}
+                  {enrollments.map((e: any, idx: number) => {
+                    const group = Array.isArray(e.class_groups) ? e.class_groups[0] : e.class_groups;
+                    const calculatedEnd = e.access_end_date || new Date(new Date(e.start_access_date).getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                    const isExpired = today > calculatedEnd;
+                    
+                    return (
+                      <div key={idx} className="flex flex-col justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={`${isExpired ? 'text-slate-500' : 'font-medium text-slate-900'} truncate pr-2`}>
+                            {group?.name || "Class"}
+                          </span>
+                          <Badge variant={isExpired ? "danger" : (e.access_mode === "free_card" ? "success" : "default")}>
+                            {isExpired ? "EXPIRED" : (e.access_mode === "free_card" ? "FREE" : "ACTIVE")}
+                          </Badge>
+                        </div>
+                        <span className="text-slate-500 text-xs">
+                          {e.start_access_date} → {calculatedEnd}
                         </span>
-                        <Badge variant={p.status === "approved" ? "success" : "warning"}>
-                          {p.status}
-                        </Badge>
                       </div>
-                      <span className="text-slate-500 text-xs">
-                        Valid: <DateFormat date={p.start_date} format="short" /> - <DateFormat date={p.end_date} format="short" />
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -264,7 +244,7 @@ export default async function StudentDashboardPage() {
           <Card className="bg-slate-50 border-slate-200 border-dashed">
             <h2 className="text-base font-bold text-slate-900 mb-2">Need Help?</h2>
             <p className="text-sm text-slate-600 mb-4">
-              If you have any questions regarding class access or technical issues, reach out to us!
+              If you have any questions, reach out to us!
             </p>
             <WhatsAppButton whatsappNumber={whatsappPhone} />
           </Card>
