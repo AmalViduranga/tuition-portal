@@ -414,12 +414,20 @@ export async function toggleMaterialStatus(formData: FormData) {
 
 export async function addEnrollment(formData: FormData) {
   const { supabase } = await requireAdmin();
-  await supabase.from("student_class_enrollments").upsert({
+  const startStr = String(formData.get("start_access_date") ?? "");
+  const startDate = new Date(startStr);
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 45);
+
+  await supabase.from("student_class_enrollments").insert({
     student_id: String(formData.get("student_id") ?? ""),
     class_id: String(formData.get("class_id") ?? ""),
-    start_access_date: String(formData.get("start_access_date") ?? ""),
+    start_access_date: startStr,
+    access_end_date: endDate.toISOString().split("T")[0],
+    access_mode: String(formData.get("access_mode") ?? "paid"),
   });
   revalidatePath("/admin/enrollments");
+  revalidatePath("/admin/students");
 }
 
 export async function addPaymentPeriod(formData: FormData) {

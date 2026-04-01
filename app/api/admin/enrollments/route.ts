@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     let query = adminSupabase
       .from("student_class_enrollments")
       .select(`
+        id,
         student_id,
         class_id,
         start_access_date,

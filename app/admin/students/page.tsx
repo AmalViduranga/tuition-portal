@@ -205,6 +205,8 @@ export default function AdminStudentsPage() {
           ? { temporaryPassword: result.temporaryPassword, mustChangePassword: mustChange }
           : { mustChangePassword: mustChange },
       );
+
+      // Reset form ONLY AFTER state is captured
       setFormData({
         full_name: "",
         email: "",
