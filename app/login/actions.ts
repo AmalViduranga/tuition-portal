@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -10,14 +11,12 @@ export async function login(formData: FormData) {
   const next = String(formData.get("next") ?? "/dashboard");
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = data.user;
 
   if (!user) {
     redirect("/login?error=Unable%20to%20load%20user%20session");
@@ -81,12 +80,53 @@ export async function login(formData: FormData) {
     return redirect("/dashboard");
   }
 
+  // --- SINGLE DEVICE RESTRICTION FOR STUDENTS ---
+  if (userRole === "student") {
+    const lockId = crypto.randomUUID();
+    const adminSupabase = createAdminClient();
+    await adminSupabase
+      .from("profiles")
+      .update({ current_session_lock: lockId })
+      .eq("id", user.id);
+
+    const cookieStore = await cookies();
+    cookieStore.set("student_session_lock", lockId, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", 
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7 // 1 week
+    });
+  }
+  // ----------------------------------------------
+
   // Students go to their intended destination or dashboard
   return redirect(next.startsWith("/") ? next : "/dashboard");
 }
 
 export async function logout() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (user) {
+    // Clear session lock on logout for students
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    
+    if (profile?.role === "student") {
+      const adminSupabase = createAdminClient();
+      await adminSupabase
+        .from("profiles")
+        .update({ current_session_lock: null })
+        .eq("id", user.id);
+      
+      const cookieStore = await cookies();
+      cookieStore.delete("student_session_lock");
+    }
+  }
+
   await supabase.auth.signOut();
   redirect("/");
 }

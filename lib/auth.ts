@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export type AppRole = "admin" | "student";
@@ -40,15 +41,28 @@ export async function requireUser() {
     redirect("/login");
   }
 
-  // Check if student account is active
+  // Check if student account is active and single session lock
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_active, role")
+    .select("is_active, role, current_session_lock")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role === "student" && !profile?.is_active) {
-    redirect("/inactive-account");
+  if (profile?.role === "student") {
+    if (!profile?.is_active) {
+      redirect("/inactive-account");
+    }
+
+    // --- SINGLE DEVICE LOCK CHECK ---
+    const cookieStore = await cookies();
+    const lockId = cookieStore.get("student_session_lock")?.value;
+
+    if (profile.current_session_lock && profile.current_session_lock !== lockId) {
+      // Current session was invalidated by another login on a different device
+      await supabase.auth.signOut();
+      redirect("/login?error=Your%20account%20was%20logged%20in%20from%20another%20device");
+    }
+    // --------------------------------
   }
 
   return { supabase, user };
