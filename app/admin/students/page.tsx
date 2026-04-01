@@ -366,7 +366,7 @@ export default function AdminStudentsPage() {
             variant="danger"
             onClick={() => handlePermanentDelete(student)}
             title="Wipe from system"
-            disabled={updatingStudentId === student.id}
+            loading={updatingStudentId === student.id}
           >
             Delete
           </Button>

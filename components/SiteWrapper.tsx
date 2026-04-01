@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { SITE_NAME } from "@/lib/content";
 import Link from "next/link";
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 
 interface SiteWrapperProps {
   children: React.ReactNode;
@@ -21,11 +22,27 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
     pathname.startsWith("/change-password");
 
   if (isInternalRoute) {
-    return <>{children}</>;
+    return (
+      <>
+        <ProgressBar
+          height="3px"
+          color="#4f46e5"
+          options={{ showSpinner: false }}
+          shallowRouting
+        />
+        {children}
+      </>
+    );
   }
 
   return (
     <>
+      <ProgressBar
+        height="3px"
+        color="#4f46e5"
+        options={{ showSpinner: false }}
+        shallowRouting
+      />
       <Navbar siteName={SITE_NAME} user={user} profile={profile} />
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-10">
         {children}

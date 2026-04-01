@@ -8,3 +8,4 @@ export { default as SearchBar } from "./SearchBar";
 export { default as Table } from "./Table";
 export { default as DateFormat } from "./DateFormat";
 export { default as Modal } from "./Modal";
+export { default as Skeleton } from "./Skeleton";

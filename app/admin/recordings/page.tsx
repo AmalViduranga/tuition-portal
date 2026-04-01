@@ -68,6 +68,8 @@ export default function AdminRecordingsPage() {
     classFilter: "",
     publishedFilter: "all",
   });
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchRecordings = useCallback(async () => {
     try {
@@ -267,6 +269,7 @@ export default function AdminRecordingsPage() {
       return;
     }
 
+    setDeletingId(recording.id);
     try {
       const form = new FormData();
       form.append("recording_id", recording.id);
@@ -280,10 +283,13 @@ export default function AdminRecordingsPage() {
       await fetchRecordings();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setDeletingId(null);
     }
   };
 
   const handleToggleStatus = async (recording: Recording) => {
+    setUpdatingId(recording.id);
     try {
       const form = new FormData();
       form.append("recording_id", recording.id);
@@ -297,6 +303,8 @@ export default function AdminRecordingsPage() {
       await fetchRecordings();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -463,10 +471,17 @@ export default function AdminRecordingsPage() {
                           variant={rec.published ? "outline" : "primary"}
                           type="button"
                           onClick={() => handleToggleStatus(rec)}
+                          loading={updatingId === rec.id}
                         >
                           {rec.published ? "Unpublish" : "Publish"}
                         </Button>
-                        <Button size="sm" variant="danger" type="button" onClick={() => handleDelete(rec)}>
+                        <Button 
+                          size="sm" 
+                          variant="danger" 
+                          type="button" 
+                          onClick={() => handleDelete(rec)}
+                          loading={deletingId === rec.id}
+                        >
                           Delete
                         </Button>
                       </div>

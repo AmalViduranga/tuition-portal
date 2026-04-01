@@ -23,6 +23,7 @@ export default function AdminClassesPage() {
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [updatingClassId, setUpdatingClassId] = useState<string | null>(null);
 
   const fetchClasses = useCallback(async () => {
     try {
@@ -117,6 +118,7 @@ export default function AdminClassesPage() {
       return;
     }
 
+    setUpdatingClassId(cls.id);
     try {
       const form = new FormData();
       form.append("class_id", cls.id);
@@ -130,6 +132,8 @@ export default function AdminClassesPage() {
       await fetchClasses();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setUpdatingClassId(null);
     }
   };
 
@@ -183,6 +187,7 @@ export default function AdminClassesPage() {
             size="sm"
             variant={cls.is_active ? "danger" : "primary"}
             onClick={() => handleToggleStatus(cls)}
+            loading={updatingClassId === cls.id}
           >
             {cls.is_active ? "Deactivate" : "Activate"}
           </Button>
