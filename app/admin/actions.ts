@@ -417,7 +417,9 @@ export async function addEnrollment(formData: FormData) {
   const startStr = String(formData.get("start_access_date") ?? "");
   const startDate = new Date(startStr);
   const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 45);
+  endDate.setDate(startDate.getDate() + 40);
+
+  const amountPaid = Number(formData.get("amount_paid") ?? 0);
 
   await supabase.from("student_class_enrollments").insert({
     student_id: String(formData.get("student_id") ?? ""),
@@ -425,9 +427,11 @@ export async function addEnrollment(formData: FormData) {
     start_access_date: startStr,
     access_end_date: endDate.toISOString().split("T")[0],
     access_mode: String(formData.get("access_mode") ?? "paid"),
+    amount_paid: amountPaid,
   });
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin/students");
+  revalidatePath("/admin/earnings");
 }
 
 export async function addPaymentPeriod(formData: FormData) {

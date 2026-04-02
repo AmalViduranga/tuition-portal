@@ -39,11 +39,11 @@ export function isItemAccessible(
     if (e.class_id !== item.class_id) return false;
     
     const start = e.start_access_date;
-    // If access_end_date is missing, fall back to start + 45 days
+    // If access_end_date is missing, fall back to start + 40 days
     let end = e.access_end_date;
     if (!end) {
       const d = new Date(start);
-      d.setDate(d.getDate() + 45);
+      d.setDate(d.getDate() + 40);
       end = d.toISOString().split("T")[0];
     }
     
@@ -77,7 +77,7 @@ export function isClassAccessActive(classId: string, context: AccessContext): bo
     let end = e.access_end_date;
     if (!end) {
       const d = new Date(start);
-      d.setDate(d.getDate() + 45);
+      d.setDate(d.getDate() + 40);
       end = d.toISOString().split("T")[0];
     }
     

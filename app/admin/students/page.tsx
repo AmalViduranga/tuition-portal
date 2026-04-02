@@ -53,16 +53,17 @@ export default function AdminStudentsPage() {
     start_access_date: "",
     access_mode: "paid",
     access_end_date: "",
+    amount_paid: "",
   });
 
   // Track which student is being updated for snappier UI feedback
   const [updatingStudentId, setUpdatingStudentId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Auto-calculate end date (45 days) when start date is changed
+    // Auto-calculate end date (40 days) when start date is changed
     if (enrollmentFormData.start_access_date && !enrollmentFormData.access_end_date) {
       const d = new Date(enrollmentFormData.start_access_date);
-      d.setDate(d.getDate() + 45);
+      d.setDate(d.getDate() + 40);
       setEnrollmentFormData(prev => ({ ...prev, access_end_date: d.toISOString().split('T')[0] }));
     }
   }, [enrollmentFormData.start_access_date]);
@@ -97,6 +98,7 @@ export default function AdminStudentsPage() {
       form.append("class_id", enrollmentFormData.class_id);
       form.append("start_access_date", enrollmentFormData.start_access_date);
       form.append("access_mode", enrollmentFormData.access_mode);
+      form.append("amount_paid", enrollmentFormData.amount_paid || "0");
       if (enrollmentFormData.access_end_date) {
         form.append("access_end_date", enrollmentFormData.access_end_date);
       }
@@ -104,7 +106,7 @@ export default function AdminStudentsPage() {
       const res = await fetch("/api/admin/enrollments", { method: "POST", body: form });
       if (!res.ok) throw new Error("Failed to add enrollment");
       
-      setEnrollmentFormData({ class_id: "", start_access_date: "", access_mode: "paid", access_end_date: "" });
+      setEnrollmentFormData({ class_id: "", start_access_date: "", access_mode: "paid", access_end_date: "", amount_paid: "" });
       await fetchStudentEnrollments(selectedStudentForEnrollments.id);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error saving enrollment");
@@ -619,6 +621,7 @@ export default function AdminStudentsPage() {
                   columns={[
                     { key: "class", header: "Class", render: (e: any) => <span className="font-semibold text-slate-900">{e.class_name || "-"}</span> },
                     { key: "mode", header: "Mode", render: (e: any) => <Badge variant={e.access_mode === "free_card" ? "success" : "default"}>{e.access_mode}</Badge> },
+                    { key: "amount", header: "Amount", render: (e: any) => e.amount_paid > 0 ? `Rs. ${e.amount_paid}` : "-" },
                     { key: "start_date", header: "Start", render: (e: any) => <DateFormat date={e.start_access_date} format="short" /> },
                     { key: "end_date", header: "End", render: (e: any) => e.access_end_date ? <DateFormat date={e.access_end_date} format="short" /> : <span className="text-slate-400">Lifetime</span> },
                     { 
@@ -683,7 +686,15 @@ export default function AdminStudentsPage() {
                   value={enrollmentFormData.access_end_date}
                   onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, access_end_date: e.target.value })}
                   readOnly
-                  helperText="Automatically set to 45 days from start date."
+                  helperText="Automatically set to 40 days from start date."
+                />
+                <Input
+                  label="Amount Paid (Rs.)"
+                  type="number"
+                  value={enrollmentFormData.amount_paid}
+                  onChange={(e) => setEnrollmentFormData({ ...enrollmentFormData, amount_paid: e.target.value })}
+                  placeholder="0.00"
+                  required={enrollmentFormData.access_mode === 'paid'}
                 />
               </div>
               <div className="flex justify-end pt-2">

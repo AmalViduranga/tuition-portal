@@ -48,7 +48,7 @@ export default async function StudentDashboardPage() {
     let end = e.access_end_date;
     if (!end) {
       const d = new Date(start);
-      d.setDate(d.getDate() + 45);
+      d.setDate(d.getDate() + 40);
       end = d.toISOString().split("T")[0];
     }
     if (!latest) return end;
@@ -220,7 +220,7 @@ export default async function StudentDashboardPage() {
                     let end = e.access_end_date;
                     if (!end) {
                       const d = new Date(start);
-                      d.setDate(d.getDate() + 45);
+                      d.setDate(d.getDate() + 40);
                       end = d.toISOString().split("T")[0];
                     }
                     

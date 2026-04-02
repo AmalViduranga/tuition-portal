@@ -13,6 +13,7 @@ const navItems = [
   { href: "/admin/recordings", label: "Recordings", icon: "🎥" },
   { href: "/admin/materials", label: "Materials", icon: "📄" },
   { href: "/admin/enrollments", label: "Enrollments & Payments", icon: "💳" },
+  { href: "/admin/earnings", label: "Earnings", icon: "💰" },
   { href: "/admin/site-content", label: "Site Content", icon: "🌐" },
 ];
 

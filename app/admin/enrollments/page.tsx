@@ -17,8 +17,9 @@ type Enrollment = {
   class_id: string;
   class_name?: string;
   start_access_date: string;
-  access_end_date?: string | null;
+  access_end_date: string;
   access_mode: "paid" | "free_card" | "manual";
+  amount_paid: number;
   created_at: string;
 };
 
@@ -214,6 +215,25 @@ export default function AdminEnrollmentsPage() {
                 <Badge variant={enr.access_mode === "free_card" ? "success" : "default"}>
                   {enr.access_mode}
                 </Badge>
+              ),
+            },
+            {
+              key: "access_period",
+              header: "Access Period",
+              render: (enr: Enrollment) => (
+                <div className="text-sm">
+                  <span className="font-medium">S:</span> <DateFormat date={enr.start_access_date} format="short" /><br/>
+                  <span className="font-medium">E:</span> <DateFormat date={enr.access_end_date} format="short" />
+                </div>
+              ),
+            },
+            {
+              key: "amount",
+              header: "Amount",
+              render: (enr: Enrollment) => (
+                <span className="font-medium text-slate-900">
+                  {enr.amount_paid > 0 ? `Rs. ${enr.amount_paid}` : "-"}
+                </span>
               ),
             },
             {
@@ -496,8 +516,19 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
     class_id: "", 
     start_access_date: new Date().toISOString().split('T')[0],
     access_mode: "paid" as const,
-    access_end_date: ""
+    access_end_date: "",
+    amount_paid: ""
   });
+
+  // Auto-calculate end date (40 days)
+  useEffect(() => {
+    if (formData.start_access_date) {
+      const start = new Date(formData.start_access_date);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 40);
+      setFormData(prev => ({ ...prev, access_end_date: end.toISOString().split('T')[0] }));
+    }
+  }, [formData.start_access_date]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -512,12 +543,20 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
       form.append("class_id", formData.class_id);
       form.append("start_access_date", formData.start_access_date);
       form.append("access_mode", formData.access_mode);
+      form.append("amount_paid", formData.amount_paid || "0");
       if (formData.access_end_date) {
         form.append("access_end_date", formData.access_end_date);
       }
 
       await onSubmit(form);
-      setFormData({ student_id: "", class_id: "", start_access_date: new Date().toISOString().split('T')[0], access_mode: "paid", access_end_date: "" });
+      setFormData({ 
+        student_id: "", 
+        class_id: "", 
+        start_access_date: new Date().toISOString().split('T')[0], 
+        access_mode: "paid", 
+        access_end_date: "",
+        amount_paid: ""
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -528,7 +567,7 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-lg space-y-4 border border-slate-200">
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Select
           label="Student"
           value={formData.student_id}
@@ -555,13 +594,27 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
             { value: "manual", label: "Manual" },
           ]}
         />
+        <Input
+          label="Amount Paid (Rs.)"
+          type="number"
+          value={formData.amount_paid}
+          onChange={(e) => setFormData({ ...formData, amount_paid: e.target.value })}
+          placeholder="0.00"
+          required={formData.access_mode === 'paid'}
+        />
       </div>
       <div className="flex flex-wrap items-end gap-4">
          <Input
-            label="Enrollment Date"
+            label="Access Start Date"
             type="date"
             value={formData.start_access_date}
             onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
+          />
+          <Input
+            label="Access End Date (40 days)"
+            type="date"
+            value={formData.access_end_date}
+            onChange={(e) => setFormData({ ...formData, access_end_date: e.target.value })}
           />
           <Button type="submit" loading={loading} className="px-8">
             Add Enrollment

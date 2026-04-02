@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
         start_access_date,
         access_end_date,
         access_mode,
+        amount_paid,
         created_at,
         profiles (full_name),
         class_groups (name)
@@ -57,6 +58,7 @@ export async function GET(request: NextRequest) {
         start_access_date: item.start_access_date,
         access_end_date: item.access_end_date,
         access_mode: item.access_mode,
+        amount_paid: item.amount_paid || 0,
         created_at: item.created_at,
       };
     });
@@ -81,7 +83,8 @@ export async function POST(request: NextRequest) {
     const classId = String(formData.get("class_id") ?? "");
     const startAccessDate = String(formData.get("start_access_date") ?? "");
     const accessMode = String(formData.get("access_mode") ?? "paid");
-    const accessEndDate = formData.get("access_end_date") ? String(formData.get("access_end_date")) : null;
+    const amountPaid = Number(formData.get("amount_paid") ?? 0);
+    const providedEndDate = formData.get("access_end_date") ? String(formData.get("access_end_date")) : null;
 
     if (!studentId || !classId || !startAccessDate) {
       return NextResponse.json(
@@ -90,11 +93,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Always calculate Access End Date (start + 45 days)
+    // Default 40-day expiry calculation
+    // Start date is inclusive, so end should be start + 40 days
     const startDate = new Date(startAccessDate);
     const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 45);
-    const finalEndDate = endDate.toISOString().split('T')[0];
+    endDate.setDate(startDate.getDate() + 40);
+    const calculatedEndDate = endDate.toISOString().split('T')[0];
+
+    // Final result (provided date or default)
+    const finalEndDate = providedEndDate || calculatedEndDate;
 
     // Use insert instead of upsert to keep enrollment history
     const { error } = await adminSupabase.from("student_class_enrollments").insert({
@@ -103,6 +110,7 @@ export async function POST(request: NextRequest) {
       start_access_date: startAccessDate,
       access_end_date: finalEndDate,
       access_mode: accessMode,
+      amount_paid: amountPaid,
     });
 
     if (error) {
