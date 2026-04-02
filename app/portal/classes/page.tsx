@@ -22,11 +22,11 @@ export default async function StudentClassesPage() {
     throw new Error("Failed to load classes");
   }
 
-  const { data: paymentPeriods } = await supabase
-    .from("student_class_payment_periods")
-    .select("class_id, start_date, end_date, status")
-    .eq("student_id", user.id)
-    .order("end_date", { ascending: false });
+  // Import our dedicated business logic code to ensure consistency
+  const { getStudentAccessContext, isClassAccessActive } = await import("@/lib/recordings/access-logic");
+  
+  // Get full access context (enrollments, payment periods, unlocks) for evaluating the rules
+  const accessContext = await getStudentAccessContext(supabase, user.id);
 
   return (
     <div className="space-y-6">
@@ -46,19 +46,16 @@ export default async function StudentClassesPage() {
         </Card>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {enrollments.map((enr) => {
+          {enrollments.map((enr: any) => {
             const classGroup = Array.isArray(enr.class_groups) ? enr.class_groups[0] : enr.class_groups;
             
             if (!classGroup) return null;
 
-            // Find an active payment period for today
-            const today = new Date().toISOString().split("T")[0];
-            const activePayment = paymentPeriods?.find(p => 
-              p.class_id === classGroup.id && 
-              p.status === "approved" &&
-              p.start_date <= today && 
-              p.end_date >= today
-            );
+            // Use our centralized status truth
+            const isAccessActive = isClassAccessActive(classGroup.id, accessContext);
+            
+            const calculatedEnd = enr.access_end_date || new Date(new Date(enr.start_access_date).getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const isExpired = !isAccessActive && (new Date().toISOString().split('T')[0] > calculatedEnd);
 
             return (
               <Card key={enr.class_id} className="flex flex-col h-full bg-white shadow-sm hover:shadow-md transition-shadow">
@@ -95,18 +92,15 @@ export default async function StudentClassesPage() {
                       </div>
                     )}
 
-                    {enr.access_mode === "paid" && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Active Payment</span>
-                        {activePayment ? (
-                          <span className="font-medium text-emerald-600">
-                            Valid until <DateFormat date={activePayment.end_date} format="short" />
-                          </span>
-                        ) : (
-                          <span className="font-medium text-amber-600">Pending or Expired</span>
-                        )}
-                      </div>
-                    )}
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Access Status</span>
+                      {isAccessActive ? (
+                        <span className="font-medium text-emerald-600">Active</span>
+                      ) : (
+                        <span className="font-medium text-amber-600">{isExpired ? "Expired" : "Pending Enrollment"}</span>
+                      )
+                      }
+                    </div>
                   </div>
 
                   <Link

@@ -62,6 +62,38 @@ export function isItemAccessible(
   return false;
 }
 
+/**
+ * Checks if a student currently has ACTIVE access to a class.
+ * (Meaning they can view current/new content)
+ */
+export function isClassAccessActive(classId: string, context: AccessContext): boolean {
+  const today = new Date().toISOString().split("T")[0];
+
+  // 1. Check enrollment windows
+  const hasActiveEnrollment = context.enrollments.some((e) => {
+    if (e.class_id !== classId) return false;
+    
+    const start = e.start_access_date;
+    let end = e.access_end_date;
+    if (!end) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + 45);
+      end = d.toISOString().split("T")[0];
+    }
+    
+    return today >= start && today <= end;
+  });
+
+  if (hasActiveEnrollment) return true;
+
+  // 2. Check approved payment periods
+  const hasActivePayment = context.paymentPeriods.some(
+    (p) => p.class_id === classId && p.status === "approved" && p.start_date <= today && p.end_date >= today
+  );
+
+  return hasActivePayment;
+}
+
 // Keep backward compatibility for existing code
 export function isRecordingAccessible(
   recording: { id: string; class_id: string; release_at: string; published: boolean },

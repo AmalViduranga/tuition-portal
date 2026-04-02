@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { Card, DateFormat, Badge } from "@/components/ui";
 import { loadStudentRecordings } from "@/lib/recordings/student-recordings";
 import { loadStudentMaterials } from "@/lib/materials/student-materials";
+import { getStudentAccessContext, isClassAccessActive } from "@/lib/recordings/access-logic";
 import { PasswordChangeForm, WhatsAppButton } from "./ClientFeatures";
 
 export const metadata: Metadata = {
@@ -18,20 +19,20 @@ export default async function StudentDashboardPage() {
 
   const [
     profileRes,
-    enrollRes,
     settingsRes,
     recordingsPayload,
-    materialsPayload
+    materialsPayload,
+    accessContext
   ] = await Promise.all([
     supabase.from("profiles").select("full_name, email, phone").eq("id", user.id).single(),
-    supabase.from("student_class_enrollments").select("class_id, start_access_date, access_end_date, access_mode, class_groups(id, name)").eq("student_id", user.id).order("created_at", { ascending: false }),
     supabase.from("site_settings").select("key, value"),
     loadStudentRecordings(supabase, user.id, null),
-    loadStudentMaterials(supabase, user.id, null)
+    loadStudentMaterials(supabase, user.id, null),
+    getStudentAccessContext(supabase, user.id)
   ]);
 
   const profile = profileRes.data;
-  const enrollments = enrollRes.data || [];
+  const enrollments = accessContext.enrollments || [];
   const siteSettings = settingsRes.data;
   
   const whatsappPhone = siteSettings?.find(s => s.key === "contact_phone")?.value || "";
@@ -43,7 +44,13 @@ export default async function StudentDashboardPage() {
 
   // Calculate latest expiry for the banner info if needed
   const latestExpiry = enrollments.reduce((latest: string | null, e: any) => {
-    const end = e.access_end_date || new Date(new Date(e.start_access_date).getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const start = e.start_access_date;
+    let end = e.access_end_date;
+    if (!end) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + 45);
+      end = d.toISOString().split("T")[0];
+    }
     if (!latest) return end;
     return end > latest ? end : latest;
   }, null);
@@ -205,21 +212,30 @@ export default async function StudentDashboardPage() {
                 <div className="space-y-3 text-sm">
                   {enrollments.map((e: any, idx: number) => {
                     const group = Array.isArray(e.class_groups) ? e.class_groups[0] : e.class_groups;
-                    const calculatedEnd = e.access_end_date || new Date(new Date(e.start_access_date).getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-                    const isExpired = today > calculatedEnd;
+                    
+                    // Use shared logic for consistency
+                    const isActive = isClassAccessActive(e.class_id, accessContext);
+                    
+                    const start = e.start_access_date;
+                    let end = e.access_end_date;
+                    if (!end) {
+                      const d = new Date(start);
+                      d.setDate(d.getDate() + 45);
+                      end = d.toISOString().split("T")[0];
+                    }
                     
                     return (
                       <div key={idx} className="flex flex-col justify-between py-2 border-b border-slate-100 last:border-0 last:pb-0">
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`${isExpired ? 'text-slate-500' : 'font-medium text-slate-900'} truncate pr-2`}>
+                          <span className={`${isActive ? 'font-medium text-slate-900' : 'text-slate-500'} truncate pr-2`}>
                             {group?.name || "Class"}
                           </span>
-                          <Badge variant={isExpired ? "danger" : (e.access_mode === "free_card" ? "success" : "default")}>
-                            {isExpired ? "EXPIRED" : (e.access_mode === "free_card" ? "FREE" : "ACTIVE")}
+                          <Badge variant={isActive ? (e.access_mode === "free_card" ? "success" : "default") : "danger"}>
+                            {isActive ? (e.access_mode === "free_card" ? "FREE" : "ACTIVE") : "EXPIRED"}
                           </Badge>
                         </div>
                         <span className="text-slate-500 text-xs">
-                          {e.start_access_date} → {calculatedEnd}
+                          {e.start_access_date} → {end}
                         </span>
                       </div>
                     );
