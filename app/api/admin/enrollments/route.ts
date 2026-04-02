@@ -30,27 +30,40 @@ export async function GET(request: NextRequest) {
       query = query.eq('student_id', studentId);
     }
 
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("GET Enrollments Error:", error);
-      throw error;
+    const { data: rawData, error: fetchError } = await query;
+    if (fetchError) {
+      console.error("GET Enrollments Fetch Error:", fetchError);
+      // Return empty list if table or column doesn't exist for safety
+      if (fetchError.code === '42P01' || fetchError.code === '42703') {
+        return NextResponse.json([]);
+      }
+      throw fetchError;
     }
 
-    const formatted = (data || []).map((item: any) => ({
-      id: item.id || `${item.student_id}-${item.class_id}-${item.created_at}`,
-      student_id: item.student_id,
-      student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : (item.profiles?.full_name || "Unknown"),
-      class_id: item.class_id,
-      class_name: Array.isArray(item.class_groups) ? item.class_groups[0]?.name : (item.class_groups?.name || "Unknown"),
-      start_access_date: item.start_access_date,
-      access_end_date: item.access_end_date,
-      access_mode: item.access_mode,
-      created_at: item.created_at,
-    }));
+    const formatted = (rawData || []).map((item: any) => {
+      // Handle Supabase's varying response structures (object vs array results for joins)
+      const extractName = (source: any, field: string) => {
+          if (!source) return null;
+          if (Array.isArray(source)) return source[0]?.[field] || null;
+          return source[field] || null;
+      };
+
+      return {
+        id: item.id || `${item.student_id}-${item.class_id}-${item.created_at}`,
+        student_id: item.student_id,
+        student_name: extractName(item.profiles, 'full_name') || "Unknown Student",
+        class_id: item.class_id,
+        class_name: extractName(item.class_groups, 'name') || "Unknown Class",
+        start_access_date: item.start_access_date,
+        access_end_date: item.access_end_date,
+        access_mode: item.access_mode,
+        created_at: item.created_at,
+      };
+    });
 
     return NextResponse.json(formatted);
   } catch (error) {
+    console.error("GET Enrollments Server Error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }

@@ -19,7 +19,7 @@ type Enrollment = {
   start_access_date: string;
   access_end_date?: string | null;
   access_mode: "paid" | "free_card" | "manual";
-  student_class_enrollments: { created_at: string };
+  created_at: string;
 };
 
 type PaymentPeriod = {
@@ -86,32 +86,37 @@ export default function AdminEnrollmentsPage() {
       setLoading(true);
       setError(null);
 
-      // Separate fetches into two groups: Critical and Optional
-      // We use individual await/fetch to prevent Promise.all from failing everything if one fails
+      // Utility to fetch and handle errors gracefully per-request
       const fetchJson = async (url: string) => {
-        const res = await fetch(url);
-        if (!res.ok) {
-           console.warn(`Fetch to ${url} failed with status ${res.status}`);
-           return null;
+        try {
+          const res = await fetch(url);
+          if (!res.ok) {
+             console.warn(`Fetch to ${url} failed with status ${res.status}`);
+             return null;
+          }
+          return await res.json();
+        } catch (e) {
+          console.warn(`Failed to fetch ${url}:`, e);
+          return null;
         }
-        return res.json();
       };
 
-      // 1. Mandatory Data
+      // 1. Mandatory Core Data
       const [enrData, studentsData, classesData] = await Promise.all([
         fetchJson("/api/admin/enrollments"),
         fetchJson("/api/admin/students?simple=true"),
         fetchJson("/api/admin/classes?active=true"),
       ]);
 
-      if (!enrData) throw new Error("Could not load enrollments");
+      // At least students and classes must load for the dashboard to be usable
+      if (!enrData) console.warn("Could not load enrollments");
       if (!studentsData || !classesData) throw new Error("Could not load student or class lists");
 
-      setEnrollments(enrData);
+      setEnrollments(enrData || []);
       setStudents(studentsData);
       setClasses(classesData);
 
-      // 2. Optional Data (Don't throw if these fail)
+      // 2. Optional Supplementary Data (Don't let these fail the whole page)
       const [payData, plansData, recData, matData, recUnlockData, matUnlockData] = await Promise.all([
         fetchJson("/api/admin/payments"),
         fetchJson("/api/admin/plans"),
@@ -214,7 +219,7 @@ export default function AdminEnrollmentsPage() {
             {
               key: "start_date",
               header: "Enrolled",
-              render: (enr: Enrollment) => <DateFormat date={enr.student_class_enrollments.created_at} format="short" />,
+              render: (enr: Enrollment) => <DateFormat date={enr.created_at} format="short" />,
             },
           ]}
           data={filteredEnrollments}

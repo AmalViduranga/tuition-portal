@@ -7,6 +7,7 @@ export interface DateFormatProps {
 }
 
 export default function DateFormat({ date, format: formatType = "short", className = "" }: DateFormatProps) {
+  if (!date) return <span className={className}>-</span>;
   const dateObj = typeof date === "string" ? new Date(date) : date;
 
   const formats: Record<string, Intl.DateTimeFormatOptions> = {
