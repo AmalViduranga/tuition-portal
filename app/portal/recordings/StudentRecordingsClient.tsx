@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { Button, Card, SearchBar, Select } from "@/components/ui";
-import { RecordingWatchModal, StudentRecordingCard } from "@/components/recordings";
+import { RecordingWatchModal, StudentRecordingRow } from "@/components/recordings";
 import type { StudentRecordingsPayload } from "@/lib/recordings/student-recordings";
 
 type Recording = StudentRecordingsPayload["recordings"][number];
@@ -177,10 +177,10 @@ export default function StudentRecordingsClient({
                   {items.length}
                 </span>
               </div>
-              <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <ul className="space-y-3">
                 {items.map((rec) => (
                   <li key={rec.id}>
-                    <StudentRecordingCard recording={rec} onOpen={() => void openRecording(rec)} />
+                    <StudentRecordingRow recording={rec} onOpen={() => void openRecording(rec)} />
                   </li>
                 ))}
               </ul>

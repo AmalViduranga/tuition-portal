@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getYouTubeMetadata } from "@/lib/recordings/youtube";
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,7 +9,7 @@ export async function POST(request: NextRequest) {
     const adminSupabase = createAdminClient();
     const body = await request.json();
 
-    const { class_id, recordings, default_published } = body;
+    const { class_id, recordings, default_published, consistent_date } = body;
 
     if (!class_id || !Array.isArray(recordings) || recordings.length === 0) {
       return NextResponse.json(
@@ -17,17 +18,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure we don't insert duplicate video IDs for the same class (or globally if preferred)
-    // We'll just insert, if uniqueness constraint fails, we skip or error.
-    // For now, let's bulk insert.
-    
-    const recordsToInsert = recordings.map((rec: any) => ({
-      class_id,
-      title: rec.title || "Untitled Video",
-      youtube_video_id: rec.youtube_video_id,
-      release_at: rec.release_at || new Date().toISOString(),
-      published: default_published,
-    }));
+    // Map through recording IDs and fetch metadata
+    const recordsToInsert = await Promise.all(
+      recordings.map(async (rec: any) => {
+        let title = rec.title || "Untitled Video";
+        let thumbnail_url = rec.thumbnail_url || null;
+
+        // Try to fetch metadata if title is generic
+        if (rec.youtube_video_id && (!rec.title || rec.title.startsWith("Video "))) {
+          const metadata = await getYouTubeMetadata(rec.youtube_video_id);
+          if (metadata) {
+            title = metadata.title || title;
+            thumbnail_url = metadata.thumbnail_url || thumbnail_url;
+          }
+        }
+
+        return {
+          class_id,
+          title,
+          youtube_video_id: rec.youtube_video_id,
+          thumbnail_url,
+          release_at: consistent_date || rec.release_at || new Date().toISOString(),
+          published: default_published,
+        };
+      })
+    );
 
     const { data: insertedRecords, error } = await adminSupabase
       .from("recordings")

@@ -89,6 +89,14 @@ export async function POST(request: NextRequest) {
       thumbnailUrl = publicUrl;
     }
 
+    if (!thumbnailUrl && youtubeVideoId) {
+      const { getYouTubeMetadata } = await import("@/lib/recordings/youtube");
+      const metadata = await getYouTubeMetadata(youtubeVideoId);
+      if (metadata) {
+        thumbnailUrl = metadata.thumbnail_url;
+      }
+    }
+
     const { data: inserted, error } = await adminSupabase.from("recordings").insert({
       class_id: classId,
       title,

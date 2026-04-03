@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { addRecording, updateRecording, toggleRecordingStatus, deleteRecording } from "@/app/admin/actions";
 import { Card, Button, Input, Textarea, SearchBar, Badge, DateFormat, Modal, Select } from "@/components/ui";
-import { youtubeThumbnailFallbackUrl, youtubeThumbnailUrl } from "@/lib/recordings/youtube";
+import { youtubeThumbnailFallbackUrl, youtubeThumbnailUrl, getYouTubeMetadata } from "@/lib/recordings/youtube";
 
 type Recording = {
   id: string;
@@ -94,6 +94,21 @@ export default function AdminRecordingsPage() {
   useEffect(() => {
     fetchRecordings();
   }, [fetchRecordings]);
+
+  // Auto-fetch title when YouTube ID is entered in Add Modal
+  useEffect(() => {
+    const fetchTitle = async () => {
+      if (formData.youtube_video_id.length === 11 && !formData.title) {
+        // Individual recording fetch
+        const metadata = await getYouTubeMetadata(formData.youtube_video_id);
+        if (metadata) {
+          setFormData(prev => ({ ...prev, title: metadata.title }));
+        }
+      }
+    };
+    const timer = setTimeout(fetchTitle, 500);
+    return () => clearTimeout(timer);
+  }, [formData.youtube_video_id, formData.title]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,13 +239,10 @@ export default function AdminRecordingsPage() {
     setFormLoading(true);
 
     try {
-      const recordings = ids.map((id, index) => {
-        const releaseDate = new Date(bulkFormData.default_release_date);
-        releaseDate.setDate(releaseDate.getDate() + index); // Auto-increment date by 1 day per video
+      const recordings = ids.map((id) => {
         return {
           youtube_video_id: id,
-          title: `Video ${id}`, 
-          release_at: releaseDate.toISOString(),
+          title: `Video ${id}`, // Placeholder, API will update it
         };
       });
 
@@ -241,6 +253,7 @@ export default function AdminRecordingsPage() {
           class_id: bulkFormData.class_id,
           default_published: bulkFormData.default_published,
           recordings,
+          consistent_date: bulkFormData.default_release_date,
         }),
       });
 
@@ -416,78 +429,95 @@ export default function AdminRecordingsPage() {
                   {recs.length}
                 </span>
               </div>
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {recs.map((rec) => (
-                  <article
-                    key={rec.id}
-                    className="flex flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm"
-                  >
-                    <a
-                      href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="relative block aspect-video bg-slate-100"
-                    >
-                      <img
-                        src={rec.thumbnail_url || youtubeThumbnailUrl(rec.youtube_video_id)}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          const el = e.target as HTMLImageElement;
-                          el.src = rec.thumbnail_url
-                            ? youtubeThumbnailFallbackUrl(rec.youtube_video_id)
-                            : youtubeThumbnailFallbackUrl(rec.youtube_video_id);
-                        }}
-                      />
-                    </a>
-                    <div className="flex flex-1 flex-col p-4">
-                      <h3 className="font-semibold text-slate-900 line-clamp-2">{rec.title}</h3>
-                      {rec.description ? (
-                        <p className="mt-2 line-clamp-2 text-sm text-slate-600">{rec.description}</p>
-                      ) : null}
-                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <DateFormat date={rec.release_at} format="short" />
-                        <Badge variant={rec.published ? "success" : "warning"}>
-                          {rec.published ? "Published" : "Draft"}
-                        </Badge>
-                        {typeof rec.views_count === "number" ? (
-                          <span className="text-slate-500">{rec.views_count} views</span>
-                        ) : null}
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-                        <a
-                          href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:flex-none"
-                        >
-                          Watch
-                        </a>
-                        <Button size="sm" variant="ghost" type="button" onClick={() => handleEdit(rec)}>
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={rec.published ? "outline" : "primary"}
-                          type="button"
-                          onClick={() => handleToggleStatus(rec)}
-                          loading={updatingId === rec.id}
-                        >
-                          {rec.published ? "Unpublish" : "Publish"}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="danger" 
-                          type="button" 
-                          onClick={() => handleDelete(rec)}
-                          loading={deletingId === rec.id}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </article>
-                ))}
+              <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                  <thead className="bg-slate-50/80">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700">Video Content</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700">Release Date</th>
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700">Status</th>
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700">Views</th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700 w-px">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 bg-white">
+                    {recs.map((rec) => (
+                      <tr key={rec.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <a
+                              href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="relative h-12 w-20 flex-shrink-0 overflow-hidden rounded bg-slate-100 shadow-sm transition-transform hover:scale-105"
+                            >
+                              <img
+                                src={rec.thumbnail_url || youtubeThumbnailUrl(rec.youtube_video_id)}
+                                alt=""
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  const el = e.target as HTMLImageElement;
+                                  el.src = youtubeThumbnailFallbackUrl(rec.youtube_video_id);
+                                }}
+                              />
+                            </a>
+                            <div className="min-w-0">
+                              <p className="font-medium text-slate-900 line-clamp-1">{rec.title}</p>
+                              <p className="text-xs text-slate-500 font-mono mt-0.5">{rec.youtube_video_id}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-slate-600">
+                          <DateFormat date={rec.release_at} format="short" />
+                        </td>
+                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                          <Badge variant={rec.published ? "success" : "warning"}>
+                            {rec.published ? "Published" : "Draft"}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center text-slate-500 whitespace-nowrap">
+                          {rec.views_count ?? 0}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5 focus-within:ring-0">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              type="button"
+                              onClick={() => handleEdit(rec)}
+                              title="Edit"
+                              className="h-8 w-8 p-0"
+                            >
+                              ✏️
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              type="button"
+                              onClick={() => handleToggleStatus(rec)}
+                              loading={updatingId === rec.id}
+                              title={rec.published ? "Unpublish" : "Publish"}
+                              className="h-8 w-8 p-0"
+                            >
+                              {rec.published ? "🔒" : "👁️"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              type="button"
+                              onClick={() => handleDelete(rec)}
+                              loading={deletingId === rec.id}
+                              title="Delete"
+                              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"
+                            >
+                              🗑️
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </section>
           ))
