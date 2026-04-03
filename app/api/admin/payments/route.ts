@@ -8,35 +8,42 @@ export async function GET() {
     await requireAdmin();
     const adminSupabase = createAdminClient();
 
-    // Try a basic query first or catch relation errors
+    // Join profiles explicitly through student_id to avoid ambiguity with reviewed_by
     const { data, error } = await adminSupabase
       .from("student_class_payment_periods")
       .select(`
         *,
-        profiles (full_name, phone),
-        class_groups (name)
+        student:profiles!student_id (full_name, phone),
+        class_groups (name),
+        payment_plans (id, name)
       `)
-      .order("start_date", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
-       // Relation error usually means a table is missing or column mismatch
-       console.error("GET Payments Fetch Error:", error);
-       return NextResponse.json({ error: error.message }, { status: 500 });
+       console.error("GET Payments Relation Error:", error);
+       // Check if there is a relation error and try a safer fallback
+       if (error.code === 'PGRST108' || error.message.includes("relationship")) {
+          const { data: fallback, error: fallbackErr } = await adminSupabase
+            .from("student_class_payment_periods")
+            .select("*, student:profiles!student_id(full_name, phone)")
+            .limit(100);
+          if (fallbackErr) throw fallbackErr;
+          return NextResponse.json(fallback || []);
+       }
+       throw error;
     }
 
-    // Try optional metadata (payment plans) as a separate field or join if possible
-    // For now we'll map manually and safely access properties
     const formatted = (data || []).map((item: any) => ({
       id: item.id,
       student_id: item.student_id,
-      student_name: item.profiles?.full_name || "Unknown",
-      student_phone: item.profiles?.phone || "",
+      student_name: item.student?.full_name || "Unknown",
+      student_phone: item.student?.phone || "",
       class_id: item.class_id,
-      class_name: item.class_groups?.name || (item.payment_plans as any)?.name || "Multiple Classes",
-      payment_plan_id: (item as any).payment_plan_id || null,
-      plan_name: (item.payment_plans as any)?.name || null,
-      amount_paid: (item as any).amount_paid || 0,
-      access_mode: (item as any).access_mode || "paid",
+      class_name: item.class_groups?.name || item.payment_plans?.name || "Multiple/N-A",
+      payment_plan_id: item.payment_plan_id || null,
+      plan_name: item.payment_plans?.name || null,
+      amount_paid: item.amount_paid || 0,
+      access_mode: item.access_mode || "paid",
       start_date: item.start_date,
       end_date: item.end_date,
       status: item.status,

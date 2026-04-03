@@ -157,7 +157,9 @@ export async function syncFreeCardGrantsForStudent(
     .select("*")
     .eq("student_id", studentId)
     .eq("class_id", classId)
-    .single();
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (!enrollment || enrollment.access_mode !== "free_card") return;
 

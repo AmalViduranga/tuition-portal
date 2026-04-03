@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
         access_mode,
         amount_paid,
         created_at,
-        profiles (full_name),
-        class_groups (name)
+        student:profiles!student_id (full_name),
+        class:class_groups (name)
       `)
       .order("created_at", { ascending: false });
 
@@ -33,28 +33,28 @@ export async function GET(request: NextRequest) {
 
     const { data: rawData, error: fetchError } = await query;
     if (fetchError) {
-      console.error("GET Enrollments Fetch Error:", fetchError);
-      // Return empty list if table or column doesn't exist for safety
-      if (fetchError.code === '42P01' || fetchError.code === '42703') {
-        return NextResponse.json([]);
+      console.error("GET Enrollments Relation Error:", fetchError);
+      // Fallback for missing columns or renamed tables
+      if (fetchError.code === '42P01' || fetchError.code === '42703' || fetchError.code === 'PGRST108') {
+        const { data: basic, error: basicErr } = await adminSupabase.from("student_class_enrollments").select("*").limit(100);
+        return NextResponse.json(basic || []);
       }
       throw fetchError;
     }
 
     const formatted = (rawData || []).map((item: any) => {
-      // Handle Supabase's varying response structures (object vs array results for joins)
-      const extractName = (source: any, field: string) => {
-          if (!source) return null;
-          if (Array.isArray(source)) return source[0]?.[field] || null;
-          return source[field] || null;
+      // Map profile/class results reliably
+      const getVal = (obj: any, field: string) => {
+          if (!obj) return null;
+          return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
       };
 
       return {
         id: item.id || `${item.student_id}-${item.class_id}-${item.created_at}`,
         student_id: item.student_id,
-        student_name: extractName(item.profiles, 'full_name') || "Unknown Student",
+        student_name: getVal(item.student, 'full_name') || "Unknown Student",
         class_id: item.class_id,
-        class_name: extractName(item.class_groups, 'name') || "Unknown Class",
+        class_name: getVal(item.class, 'name') || "Unknown Class",
         start_access_date: item.start_access_date,
         access_end_date: item.access_end_date,
         access_mode: item.access_mode,

@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
         created_at,
         revoked_at,
         revoke_reason,
-        profiles (full_name),
-        recordings (title)
+        student:profiles!student_id (full_name),
+        recording:recordings (title)
       `)
       .is('revoked_at', null)
       .order("created_at", { ascending: false });
@@ -31,16 +31,30 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query;
-    if (error) throw error;
+    if (error) {
+       console.error("GET Recording Unlocks Error:", error);
+       if (error.code === 'PGRST108') {
+          const { data: fallback } = await adminSupabase.from("recording_manual_unlocks").select("*, student:profiles!student_id(full_name)").limit(100);
+          return NextResponse.json(fallback || []);
+       }
+       throw error;
+    }
 
-    const formatted = (data || []).map((item) => ({
-      id: item.id,
-      student_id: item.student_id,
-      student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : (item.profiles as any)?.full_name,
-      recording_id: item.recording_id,
-      recording_title: Array.isArray(item.recordings) ? item.recordings[0]?.title : (item.recordings as any)?.title,
-      created_at: item.created_at,
-    }));
+    const formatted = (data || []).map((item) => {
+      const getVal = (obj: any, field: string) => {
+          if (!obj) return null;
+          return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
+      };
+
+      return {
+        id: item.id,
+        student_id: item.student_id,
+        student_name: getVal(item.student, 'full_name') || "Unknown Student",
+        recording_id: item.recording_id,
+        recording_title: getVal(item.recording, 'title') || "Unknown Recording",
+        created_at: item.created_at,
+      };
+    });
 
     return NextResponse.json(formatted);
   } catch (error) {

@@ -175,21 +175,23 @@ export default function AdminEnrollmentsPage() {
           students={students}
           classes={classes}
           onSubmit={async (formData) => {
-            await fetch("/api/admin/enrollments", {
+            const res = await fetch("/api/admin/enrollments", {
               method: "POST",
               body: formData,
             });
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Failed with status ${res.status}`);
+            }
             await fetchData();
           }}
         />
       </div>
 
-      {loading ? (
+      {loading && enrollments.length === 0 ? (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
         </div>
-      ) : error ? (
-        <div className="text-center py-12 text-red-600">{error}</div>
       ) : (
         <Table
           columns={[
@@ -243,7 +245,7 @@ export default function AdminEnrollmentsPage() {
             },
           ]}
           data={filteredEnrollments}
-          emptyMessage="No enrollments yet"
+          emptyMessage={error ? `Error: ${error}` : "No enrollments yet"}
           className="border border-slate-200 rounded-lg overflow-hidden"
         />
       )}
@@ -269,10 +271,14 @@ export default function AdminEnrollmentsPage() {
           classes={classes}
           plans={plans}
           onSubmit={async (formData) => {
-            await fetch("/api/admin/payments", {
+            const res = await fetch("/api/admin/payments", {
               method: "POST",
               body: formData,
             });
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Failed with status ${res.status}`);
+            }
             await fetchData();
           }}
         />
