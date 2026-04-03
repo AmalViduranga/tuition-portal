@@ -122,9 +122,11 @@ export async function DELETE(request: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Recording Unlock Revocation Error:", error);
+    const message = error?.message || error?.details || (typeof error === 'string' ? error : "Unknown error");
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: message },
       { status: 500 }
     );
   }
