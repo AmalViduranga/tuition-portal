@@ -11,11 +11,12 @@ export async function POST(request: NextRequest) {
 
     const { class_id, recordings, default_published, consistent_date } = body;
 
-    if (!class_id || !Array.isArray(recordings) || recordings.length === 0) {
-      return NextResponse.json(
-        { error: "Class ID and recordings array are required" },
-        { status: 400 }
-      );
+    if (!class_id) {
+      return NextResponse.json({ error: "Target Class ID is required" }, { status: 400 });
+    }
+
+    if (!Array.isArray(recordings) || recordings.length === 0) {
+      return NextResponse.json({ error: "No video IDs were provided or extracted" }, { status: 400 });
     }
 
     // Map through recording IDs and fetch metadata

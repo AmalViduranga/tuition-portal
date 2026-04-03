@@ -218,10 +218,14 @@ export default function AdminRecordingsPage() {
 
   const extractVideoIds = (text: string) => {
     const ids: string[] = [];
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/gi;
+    // Improved regex to handle /live/, /shorts/, /embed/, and standard /v/ patterns
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/gi;
     let match;
     while ((match = regex.exec(text)) !== null) {
-      if (!ids.includes(match[1])) ids.push(match[1]);
+      const id = match[1];
+      if (id && id.length === 11 && !ids.includes(id)) {
+        ids.push(id);
+      }
     }
     return ids;
   };
@@ -231,6 +235,10 @@ export default function AdminRecordingsPage() {
     setFormError(null);
     
     const ids = extractVideoIds(bulkFormData.urls);
+    if (!bulkFormData.class_id) {
+      setFormError("Please select a target class.");
+      return;
+    }
     if (ids.length === 0) {
       setFormError("No valid YouTube URLs found.");
       return;
@@ -753,6 +761,7 @@ export default function AdminRecordingsPage() {
             value={bulkFormData.class_id}
             onChange={(e) => setBulkFormData({ ...bulkFormData, class_id: e.target.value })}
             options={classes.filter((c) => c.is_active).map((cls) => ({ value: cls.id, label: cls.name }))}
+            placeholder="Select a class..."
             required
           />
 
