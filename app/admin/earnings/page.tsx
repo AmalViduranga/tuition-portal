@@ -66,10 +66,18 @@ export default function EarningsPage() {
       return d.getMonth() === prevMonth && d.getFullYear() === prevYear;
     });
 
-    const currentIncome = filtered.reduce((acc, curr) => acc + (curr.amount_paid || 0), 0);
-    const prevIncome = previous.reduce((acc, curr) => acc + (curr.amount_paid || 0), 0);
+    const calculateIncome = (records: EnrollmentRecord[]) => records.reduce((acc, curr) => {
+      // Only count if access_mode is 'paid' and amount_paid > 0
+      if (curr.access_mode === 'paid' && curr.amount_paid > 0) {
+        return acc + curr.amount_paid;
+      }
+      return acc;
+    }, 0);
+
+    const currentIncome = calculateIncome(filtered);
+    const prevIncome = calculateIncome(previous);
     
-    const paidStudents = new Set(filtered.filter(e => e.access_mode === 'paid').map(e => e.id)).size;
+    const paidStudents = new Set(filtered.filter(e => e.access_mode === 'paid' && (e.amount_paid || 0) > 0).map(e => e.id)).size;
     
     // Class-wise breakdown
     const classMap: Record<string, { income: number, students: number }> = {};
@@ -77,7 +85,10 @@ export default function EarningsPage() {
       if (!classMap[enr.class_name]) {
         classMap[enr.class_name] = { income: 0, students: 0 };
       }
-      classMap[enr.class_name].income += (enr.amount_paid || 0);
+      // Calculate income correctly
+      if (enr.access_mode === 'paid' && enr.amount_paid > 0) {
+        classMap[enr.class_name].income += enr.amount_paid;
+      }
       if (enr.access_mode === 'paid') {
         classMap[enr.class_name].students += 1;
       }
