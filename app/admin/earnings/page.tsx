@@ -67,9 +67,10 @@ export default function EarningsPage() {
     });
 
     const calculateIncome = (records: EnrollmentRecord[]) => records.reduce((acc, curr) => {
-      // Only count if access_mode is 'paid' and amount_paid > 0
-      if (curr.access_mode === 'paid' && curr.amount_paid > 0) {
-        return acc + curr.amount_paid;
+      const amount = Number(curr.amount_paid) || 0;
+      // Only count if access_mode is 'paid' and verified amount > 0
+      if (curr.access_mode === 'paid' && amount > 0) {
+        return acc + amount;
       }
       return acc;
     }, 0);
@@ -77,7 +78,9 @@ export default function EarningsPage() {
     const currentIncome = calculateIncome(filtered);
     const prevIncome = calculateIncome(previous);
     
-    const paidStudents = new Set(filtered.filter(e => e.access_mode === 'paid' && (e.amount_paid || 0) > 0).map(e => e.id)).size;
+    const paidStudents = new Set(
+      filtered.filter(e => e.access_mode === 'paid' && (Number(e.amount_paid) || 0) > 0).map(e => e.id)
+    ).size;
     
     // Class-wise breakdown
     const classMap: Record<string, { income: number, students: number }> = {};
@@ -85,9 +88,10 @@ export default function EarningsPage() {
       if (!classMap[enr.class_name]) {
         classMap[enr.class_name] = { income: 0, students: 0 };
       }
+      const amount = Number(enr.amount_paid) || 0;
       // Calculate income correctly
-      if (enr.access_mode === 'paid' && enr.amount_paid > 0) {
-        classMap[enr.class_name].income += enr.amount_paid;
+      if (enr.access_mode === 'paid' && amount > 0) {
+        classMap[enr.class_name].income += amount;
       }
       if (enr.access_mode === 'paid') {
         classMap[enr.class_name].students += 1;
@@ -171,7 +175,7 @@ export default function EarningsPage() {
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-500">
                 <span className="text-6xl">💰</span>
               </div>
-              <p className="text-indigo-100 text-sm font-medium uppercase tracking-wider">Current Month Income</p>
+              <p className="text-indigo-100 text-sm font-medium uppercase tracking-wider">Total Monthly Earnings</p>
               <h2 className="text-4xl font-extrabold mt-2">Rs. {stats.currentIncome.toLocaleString()}</h2>
               <div className="mt-4 flex items-center text-sm">
                 <span className={`px-2 py-0.5 rounded-full font-bold ${stats.currentIncome >= stats.prevIncome ? 'bg-white/20' : 'bg-white/10'}`}>
@@ -252,7 +256,7 @@ export default function EarningsPage() {
                       key: "amount",
                       header: "Amount",
                       render: (r: EnrollmentRecord) => (
-                        <span className="font-bold text-slate-800 whitespace-nowrap">Rs. {r.amount_paid.toLocaleString()}</span>
+                        <span className="font-bold text-slate-800 whitespace-nowrap">Rs. {(Number(r.amount_paid) || 0).toLocaleString()}</span>
                       )
                     },
                     {
