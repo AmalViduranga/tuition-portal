@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   addEnrollment,
   addPaymentPeriod,
@@ -81,6 +81,7 @@ export default function AdminEnrollmentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -155,15 +156,41 @@ export default function AdminEnrollmentsPage() {
     { id: "material-unlocks" as TabType, label: "Material Unlocks" },
   ];
 
-  const filteredEnrollments = enrollments.filter((enr) =>
-    enr.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    enr.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const sortedEnrollments = useMemo(() => {
+    let result = enrollments;
 
-  const filteredPayments = payments.filter((pay: any) =>
-    pay.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    pay.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    if (searchQuery) {
+      result = result.filter((enr) =>
+        enr.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        enr.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (!selectedStudentId) return result;
+
+    const selected = result.filter((e) => e.student_id === selectedStudentId);
+    const others = result.filter((e) => e.student_id !== selectedStudentId);
+
+    return [...selected, ...others];
+  }, [enrollments, selectedStudentId, searchQuery]);
+
+  const sortedPayments = useMemo(() => {
+    let result = payments;
+
+    if (searchQuery) {
+      result = result.filter((pay: any) =>
+        pay.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pay.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (!selectedStudentId) return result;
+
+    const selected = result.filter((e: any) => e.student_id === selectedStudentId);
+    const others = result.filter((e: any) => e.student_id !== selectedStudentId);
+
+    return [...selected, ...others];
+  }, [payments, selectedStudentId, searchQuery]);
 
   const renderEnrollments = () => (
     <Card>
@@ -174,6 +201,7 @@ export default function AdminEnrollmentsPage() {
         <EnrollmentForm
           students={students}
           classes={classes}
+          onStudentSelect={setSelectedStudentId}
           onSubmit={async (formData) => {
             const res = await fetch("/api/admin/enrollments", {
               method: "POST",
@@ -200,7 +228,12 @@ export default function AdminEnrollmentsPage() {
               header: "Student",
               render: (enr: Enrollment) => (
                 <div>
-                  <p className="font-medium">{enr.student_name || "Unknown"}</p>
+                  <p className="font-medium flex items-center gap-2">
+                    {enr.student_name || "Unknown"}
+                    {enr.student_id === selectedStudentId && (
+                      <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
+                    )}
+                  </p>
                   <p className="text-xs text-slate-500">{enr.student_id.slice(0, 8)}...</p>
                 </div>
               ),
@@ -244,7 +277,7 @@ export default function AdminEnrollmentsPage() {
               render: (enr: Enrollment) => <DateFormat date={enr.created_at} format="short" />,
             },
           ]}
-          data={filteredEnrollments}
+          data={sortedEnrollments}
           emptyMessage={error ? `Error: ${error}` : "No enrollments yet"}
           className="border border-slate-200 rounded-lg overflow-hidden"
         />
@@ -270,6 +303,7 @@ export default function AdminEnrollmentsPage() {
           students={students}
           classes={classes}
           plans={plans}
+          onStudentSelect={setSelectedStudentId}
           onSubmit={async (formData) => {
             const res = await fetch("/api/admin/payments", {
               method: "POST",
@@ -298,7 +332,12 @@ export default function AdminEnrollmentsPage() {
               header: "Student",
               render: (pay: any) => (
                 <div>
-                  <p className="font-medium">{pay.student_name || "Unknown"}</p>
+                  <p className="font-medium flex items-center gap-2">
+                    {pay.student_name || "Unknown"}
+                    {pay.student_id === selectedStudentId && (
+                      <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
+                    )}
+                  </p>
                   <p className="text-xs text-slate-500">{pay.student_phone || pay.student_id.slice(0, 8)}</p>
                 </div>
               ),
@@ -377,7 +416,7 @@ export default function AdminEnrollmentsPage() {
               ),
             },
           ]}
-          data={filteredPayments}
+          data={sortedPayments}
           emptyMessage="No payment periods yet"
           className="border border-slate-200 rounded-lg overflow-hidden"
         />
@@ -514,9 +553,10 @@ interface EnrollmentFormProps {
   students: Student[];
   classes: Class[];
   onSubmit: (formData: FormData) => Promise<void>;
+  onStudentSelect?: (id: string) => void;
 }
 
-function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
+function EnrollmentForm({ students, classes, onSubmit, onStudentSelect }: EnrollmentFormProps) {
   const [formData, setFormData] = useState({ 
     student_id: "", 
     class_id: "", 
@@ -577,7 +617,11 @@ function EnrollmentForm({ students, classes, onSubmit }: EnrollmentFormProps) {
         <Select
           label="Student"
           value={formData.student_id}
-          onChange={(e) => setFormData({ ...formData, student_id: e.target.value })}
+          onChange={(e) => {
+            const val = e.target.value;
+            setFormData({ ...formData, student_id: val });
+            if (onStudentSelect) onStudentSelect(val);
+          }}
           options={students.map((s) => ({ value: s.id, label: s.full_name }))}
           placeholder="Select student"
           required
@@ -635,9 +679,10 @@ interface PaymentFormProps {
   classes: Class[];
   plans: any[];
   onSubmit: (formData: FormData) => Promise<void>;
+  onStudentSelect?: (id: string) => void;
 }
 
-function PaymentForm({ students, classes, plans, onSubmit }: PaymentFormProps) {
+function PaymentForm({ students, classes, plans, onSubmit, onStudentSelect }: PaymentFormProps) {
   const [formData, setFormData] = useState({ 
     student_id: "", 
     class_id: "", 
@@ -730,7 +775,11 @@ function PaymentForm({ students, classes, plans, onSubmit }: PaymentFormProps) {
         <Select
           label="Student"
           value={formData.student_id}
-          onChange={(e) => setFormData({ ...formData, student_id: e.target.value })}
+          onChange={(e) => {
+            const val = e.target.value;
+            setFormData({ ...formData, student_id: val });
+            if (onStudentSelect) onStudentSelect(val);
+          }}
           options={students.map((s) => ({ value: s.id, label: s.full_name }))}
           placeholder="Select student"
           required
