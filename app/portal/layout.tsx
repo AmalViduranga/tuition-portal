@@ -37,11 +37,12 @@ export default async function PortalLayout({
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="flex items-center gap-2 text-xl font-bold tracking-tight text-indigo-700 hover:opacity-90 transition-opacity">
               <Image
-                src="/AV_Logo_01.jpg"
+                src="/AV_Logo_01-removebg-preview.png"
                 alt="AV Classes Logo"
-                width={40}
-                height={40}
-                className="h-8 w-8 md:h-10 md:w-10 object-contain rounded-md shrink-0"
+                width={42}
+                height={42}
+                priority
+                className="h-8 w-8 md:h-10 md:w-10 object-contain shrink-0"
               />
               <span className="hidden sm:inline-block">Student Dashboard</span>
               <span className="sm:hidden">Dashboard</span>

@@ -62,11 +62,12 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tight text-indigo-700 md:text-lg hover:opacity-90 transition-opacity">
             <Image
-              src="/AV_Logo_01.jpg"
+              src="/AV_Logo_01-removebg-preview.png"
               alt="AV Classes Logo"
-              width={40}
-              height={40}
-              className="h-8 w-8 md:h-10 md:w-10 object-contain rounded-md"
+              width={42}
+              height={42}
+              priority
+              className="h-8 w-8 md:h-10 md:w-10 object-contain"
             />
             <span className="hidden sm:inline-block">{siteName}</span>
           </Link>

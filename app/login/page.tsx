@@ -16,11 +16,11 @@ export default async function LoginPage({ searchParams }: Props) {
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <Image
-              src="/AV_Logo_01.jpg"
+              src="/AV_Logo_01-removebg-preview.png"
               alt="AV Classes Logo"
               width={64}
               height={64}
-              className="h-16 w-16 object-contain rounded-xl shadow-sm"
+              className="h-16 w-16 object-contain"
             />
           </div>
           <h1 className="text-2xl font-semibold text-slate-900">Student Portal Login</h1>

@@ -47,11 +47,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className={`flex items-center gap-2 ${isCollapsed ? "lg:hidden" : ""}`}>
               <Link href="/admin" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
                 <Image
-                  src="/AV_Logo_01.jpg"
+                  src="/AV_Logo_01-removebg-preview.png"
                   alt="AV Classes Logo"
-                  width={36}
-                  height={36}
-                  className="h-8 w-8 object-contain rounded-md shrink-0"
+                  width={42}
+                  height={42}
+                  priority
+                  className="h-8 w-8 object-contain shrink-0"
                 />
                 <span className="text-lg font-bold text-indigo-700 whitespace-nowrap overflow-hidden block">
                   Admin Panel
@@ -64,11 +65,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {isCollapsed && (
               <div className="hidden lg:flex items-center justify-center">
                 <Image
-                  src="/AV_Logo_01.jpg"
+                  src="/AV_Logo_01-removebg-preview.png"
                   alt="AV Classes Logo"
-                  width={36}
-                  height={36}
-                  className="h-8 w-8 object-contain rounded-md"
+                  width={42}
+                  height={42}
+                  priority
+                  className="h-8 w-8 object-contain"
                 />
               </div>
             )}
