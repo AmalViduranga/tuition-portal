@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { LoginForm } from "./login-form";
 
 type Props = {
@@ -13,6 +14,15 @@ export default async function LoginPage({ searchParams }: Props) {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       <div className="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm border border-slate-100">
         <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/AV_Logo_01.jpg"
+              alt="AV Classes Logo"
+              width={64}
+              height={64}
+              className="h-16 w-16 object-contain rounded-xl shadow-sm"
+            />
+          </div>
           <h1 className="text-2xl font-semibold text-slate-900">Student Portal Login</h1>
           <p className="mt-2 text-sm text-slate-600">
             Sign in to access your classes, study materials, and recordings. Accounts are securely created by your instructor.

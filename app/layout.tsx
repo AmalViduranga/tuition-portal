@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mathslk.online"),
+  icons: {
+    icon: "/AV_Logo_01.jpg",
+  },
   title: "A/L Maths Sri Lanka | Best Mathematics Tuition | MathsLK",
   description: "Join MathsLK for top tier A/L Maths Sri Lanka classes. Access structured theory, revision, past papers, and online recordings with Amal Viduranga.",
   keywords: [

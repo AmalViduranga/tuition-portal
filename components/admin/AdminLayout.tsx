@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logout } from "@/app/login/actions";
@@ -44,15 +45,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Logo / Header */}
           <div className={`flex h-16 items-center border-b border-slate-200 px-4 ${isCollapsed ? "justify-center" : "justify-between"}`}>
             <div className={`flex items-center gap-2 ${isCollapsed ? "lg:hidden" : ""}`}>
-              <Link href="/admin" className="text-lg font-bold text-indigo-700 whitespace-nowrap overflow-hidden block">
-                Admin Panel
+              <Link href="/admin" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+                <Image
+                  src="/AV_Logo_01.jpg"
+                  alt="AV Classes Logo"
+                  width={36}
+                  height={36}
+                  className="h-8 w-8 object-contain rounded-md shrink-0"
+                />
+                <span className="text-lg font-bold text-indigo-700 whitespace-nowrap overflow-hidden block">
+                  Admin Panel
+                </span>
               </Link>
               <span className="rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
                 Beta
               </span>
             </div>
             {isCollapsed && (
-              <span className="hidden lg:block text-xl font-bold text-indigo-700">A</span>
+              <div className="hidden lg:flex items-center justify-center">
+                <Image
+                  src="/AV_Logo_01.jpg"
+                  alt="AV Classes Logo"
+                  width={36}
+                  height={36}
+                  className="h-8 w-8 object-contain rounded-md"
+                />
+              </div>
             )}
             <button
               type="button"

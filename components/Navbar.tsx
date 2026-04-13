@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
 
@@ -59,10 +60,17 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
     <header className="sticky top-0 z-40 border-b border-indigo-100 bg-white/85 backdrop-blur-xl">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link href="/" className="text-base font-bold tracking-tight text-indigo-700 md:text-lg">
-            {siteName}
+          <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tight text-indigo-700 md:text-lg hover:opacity-90 transition-opacity">
+            <Image
+              src="/AV_Logo_01.jpg"
+              alt="AV Classes Logo"
+              width={40}
+              height={40}
+              className="h-8 w-8 md:h-10 md:w-10 object-contain rounded-md"
+            />
+            <span className="hidden sm:inline-block">{siteName}</span>
           </Link>
-          <span className="rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
+          <span className="hidden sm:inline-block rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
             Beta
           </span>
         </div>
