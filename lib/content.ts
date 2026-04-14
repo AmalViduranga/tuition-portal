@@ -43,7 +43,8 @@ export const pastResults = {
   },
   batch2025: {
     title: "Second batch: 2025 A/L Batch",
-    status: "Students have completed the A/L examination; results are yet to be released",
+    totalStudents: 20,
+    results: "5 A passes, 8 B passes, and 7 C passes",
   },
 };
 

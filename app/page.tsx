@@ -157,28 +157,47 @@ export default async function Home(props: { searchParams: SearchParams }) {
           <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-white to-indigo-50/50 p-8 shadow-sm">
             <div className="mb-6 flex items-center justify-between border-b border-indigo-100 pb-4">
               <h3 className="text-xl font-bold text-slate-900">{pastResults.batch2024.title}</h3>
-              <span className="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">11 Students</span>
+              <span className="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">{pastResults.batch2024.totalStudents} Students</span>
             </div>
             <div className="mb-6">
               <p className="text-2xl font-extrabold text-indigo-600">{pastResults.batch2024.results}</p>
             </div>
-            <ul className="space-y-3">
-              {pastResults.batch2024.highlights.slice(0, 3).map((hl, i) => (
-                <li key={i} className="flex gap-3 text-slate-700">
-                  <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500"></div>
-                  <span className="text-sm">{hl}</span>
-                </li>
-              ))}
-            </ul>
+            {pastResults.batch2024.highlights && (
+              <ul className="space-y-3">
+                {pastResults.batch2024.highlights.slice(0, 3).map((hl, i) => (
+                  <li key={i} className="flex gap-3 text-slate-700">
+                    <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500"></div>
+                    <span className="text-sm">{hl}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           
           {/* 2025 Batch */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm flex flex-col justify-center items-center text-center">
-             <div className="rounded-full bg-slate-100 p-4 mb-4">
-               <Clock className="h-8 w-8 text-slate-400" />
-             </div>
-             <h3 className="text-xl font-bold text-slate-900 mb-2">{pastResults.batch2025.title}</h3>
-             <p className="text-slate-500 max-w-xs">{pastResults.batch2025.status}</p>
+          <div className="rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/30 to-indigo-100/50 p-8 shadow-md relative">
+            <div className="absolute -top-3 -right-3">
+              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-sm">
+                <Star className="h-3 w-3" /> Latest Results
+              </span>
+            </div>
+            <div className="mb-6 flex items-center justify-between border-b border-indigo-200 pb-4">
+              <h3 className="text-xl font-bold text-slate-900">{pastResults.batch2025.title}</h3>
+              <span className="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700">{pastResults.batch2025.totalStudents} Students</span>
+            </div>
+            <div className="mb-6">
+              <p className="text-2xl font-extrabold text-indigo-600">{pastResults.batch2025.results}</p>
+            </div>
+            {('highlights' in pastResults.batch2025) && (
+              <ul className="space-y-3">
+                {(pastResults.batch2025 as any).highlights.slice(0, 3).map((hl: string, i: number) => (
+                  <li key={i} className="flex gap-3 text-slate-700">
+                    <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500"></div>
+                    <span className="text-sm">{hl}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </section>

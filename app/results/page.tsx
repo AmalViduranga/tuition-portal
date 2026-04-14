@@ -43,12 +43,38 @@ export default function ResultsPage() {
            </ul>
         </div>
         
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm flex flex-col justify-center items-center text-center">
-           <div className="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-400">
-             <Trophy className="h-10 w-10" />
+        <div className="rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/20 to-indigo-100/40 p-8 shadow-md relative">
+           <div className="absolute -top-4 -right-4">
+             <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm">
+               <Star className="h-3.5 w-3.5" /> Latest Results
+             </span>
            </div>
-           <h2 className="text-2xl font-bold text-slate-900 mb-3">{pastResults.batch2025.title}</h2>
-           <p className="text-slate-500 text-lg max-w-sm">{pastResults.batch2025.status}</p>
+           <div className="flex items-center gap-4 mb-6">
+              <div className="bg-indigo-600 p-3 rounded-xl text-white shadow-sm">
+                <Trophy className="h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">{pastResults.batch2025.title}</h2>
+           </div>
+           <div className="mb-8 p-6 bg-white rounded-2xl border border-indigo-100 shadow-sm">
+             <p className="text-sm uppercase tracking-wider font-semibold text-slate-500 mb-2">Overall Results</p>
+             <p className="text-3xl font-extrabold text-indigo-600">{pastResults.batch2025.results}</p>
+             <p className="text-slate-600 font-medium mt-1">From a total of {pastResults.batch2025.totalStudents} students</p>
+           </div>
+           {('highlights' in pastResults.batch2025) && (
+             <>
+               <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                 <Star className="h-5 w-5 text-amber-500" /> Key Highlights
+               </h3>
+               <ul className="space-y-4">
+                   {(pastResults.batch2025 as any).highlights.map((item: string, idx: number) => (
+                     <li key={idx} className="flex gap-3 text-slate-700 bg-white border border-slate-100 p-4 rounded-xl shadow-sm">
+                       <TrendingUp className="h-5 w-5 text-emerald-500 shrink-0" />
+                       <span>{item}</span>
+                     </li>
+                   ))}
+               </ul>
+             </>
+           )}
         </div>
       </div>
     </div>
