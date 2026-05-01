@@ -6,6 +6,7 @@ import { SITE_NAME } from "@/lib/content";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import SiteWrapper from "@/components/SiteWrapper";
+import PromotionPopup from "@/components/PromotionPopup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,6 +78,7 @@ export default async function RootLayout({
         <SiteWrapper user={user} profile={profile}>
           {children}
         </SiteWrapper>
+        <PromotionPopup />
       </body>
     </html>
   );

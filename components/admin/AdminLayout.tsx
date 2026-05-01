@@ -15,6 +15,7 @@ const navItems = [
   { href: "/admin/materials", label: "Materials", icon: "📄" },
   { href: "/admin/enrollments", label: "Enrollments & Payments", icon: "💳" },
   { href: "/admin/earnings", label: "Earnings", icon: "💰" },
+  { href: "/admin/promotions", label: "Promotions", icon: "📢" },
   { href: "/admin/site-content", label: "Site Content", icon: "🌐" },
 ];
 
