@@ -507,3 +507,46 @@ export async function updateSiteContent(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/about");
 }
+
+export async function resetStudentPassword(formData: FormData) {
+  await requireAdmin();
+  const studentId = String(formData.get("student_id") ?? "");
+
+  const adminClient = createAdminClient();
+
+  // Generate a secure random password (min 10 chars, upper, lower, numbers)
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const nums = "0123456789";
+  const specials = "!@#$%^&*()";
+  const all = upper + lower + nums + specials;
+  
+  let tempPassword = "";
+  tempPassword += upper[Math.floor(Math.random() * upper.length)];
+  tempPassword += lower[Math.floor(Math.random() * lower.length)];
+  tempPassword += nums[Math.floor(Math.random() * nums.length)];
+  for (let i = 0; i < 7; i++) {
+    tempPassword += all[Math.floor(Math.random() * all.length)];
+  }
+
+  // Shuffle string to avoid predictable patterns
+  tempPassword = tempPassword.split('').sort(() => 0.5 - Math.random()).join('');
+
+  const { error: authError } = await adminClient.auth.admin.updateUserById(studentId, {
+    password: tempPassword,
+  });
+
+  if (authError) {
+    throw new Error(`Failed to reset password: ${authError.message}`);
+  }
+
+  const { error: dbError } = await adminClient.from("profiles").update({
+    must_change_password: true,
+  }).eq("id", studentId);
+
+  if (dbError) {
+    throw new Error(`Failed to update password flag: ${dbError.message}`);
+  }
+
+  return { ok: true, tempPassword };
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createStudent } from "@/app/admin/actions";
+import { createStudent, resetStudentPassword } from "@/app/admin/actions";
 import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table, Select } from "@/components/ui";
 
 type Student = {
@@ -32,6 +32,10 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
   const [createSuccess, setCreateSuccess] = useState<{
     temporaryPassword?: string;
     mustChangePassword?: boolean;
+  } | null>(null);
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState<{
+    studentName: string;
+    tempPassword: string;
   } | null>(null);
   const [formData, setFormData] = useState({
     full_name: "",
@@ -298,6 +302,30 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
     }
   };
 
+  const handleResetPassword = async (student: Student) => {
+    if (!confirm(`Are you sure you want to reset the password for ${student.full_name}?`)) {
+      return;
+    }
+
+    setUpdatingStudentId(student.id);
+    try {
+      const form = new FormData();
+      form.append("student_id", student.id);
+
+      const result = await resetStudentPassword(form);
+
+      if (result.ok) {
+        setResetPasswordSuccess({ studentName: student.full_name, tempPassword: result.tempPassword });
+      } else {
+        throw new Error("Failed to reset password");
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error resetting password");
+    } finally {
+      setUpdatingStudentId(null);
+    }
+  };
+
   const filteredStudents = students.filter(
     (student) =>
       student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -346,6 +374,15 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
       className: "text-right",
       render: (student: Student) => (
         <div className="flex items-center justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleResetPassword(student)}
+            disabled={updatingStudentId === student.id}
+            title="Reset Password"
+          >
+            Reset Pwd
+          </Button>
           <Button
             size="sm"
             variant="outline"
@@ -424,6 +461,33 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
             type="button"
             onClick={() => setCreateSuccess(null)}
             className="mt-3 text-xs font-medium text-emerald-800 underline underline-offset-2 hover:text-emerald-950"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {resetPasswordSuccess && (
+        <div
+          className="rounded-xl border border-blue-200 bg-blue-50/90 px-4 py-3 text-sm text-blue-950 shadow-sm"
+          role="status"
+        >
+          <p className="font-medium">Password reset successfully for {resetPasswordSuccess.studentName}.</p>
+          <div className="mt-2 space-y-1">
+            <p>
+              A temporary password was generated. Share it securely (this message is not shown again):
+            </p>
+            <code className="block rounded-md bg-white/80 px-3 py-2 font-mono text-xs text-slate-800 ring-1 ring-blue-100">
+              {resetPasswordSuccess.tempPassword}
+            </code>
+          </div>
+          <p className="mt-1 text-blue-900/90 text-xs">
+            They will be forced to change it upon their next login.
+          </p>
+          <button
+            type="button"
+            onClick={() => setResetPasswordSuccess(null)}
+            className="mt-3 text-xs font-medium text-blue-800 underline underline-offset-2 hover:text-blue-950"
           >
             Dismiss
           </button>
