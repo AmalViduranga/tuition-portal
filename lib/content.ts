@@ -76,9 +76,9 @@ export const classGroups = [
   },
   {
     name: "2028 A/L",
-    day: "TBA",
-    time: "Starting soon",
-    mode: "Online",
+    day: "Saturday",
+    time: "3:00 PM - 5:00 PM",
+    mode: "Online via Zoom",
   },
   {
     name: "Paper Class",
