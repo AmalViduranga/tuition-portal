@@ -31,9 +31,15 @@ export default async function Home(props: { searchParams: SearchParams }) {
         <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
         
         <div className="relative mx-auto max-w-4xl text-white">
-          <div className="mb-6 inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 backdrop-blur-sm text-center">
-            <span className="flex h-2 w-2 rounded-full bg-indigo-400"></span>
-            #1 A/L Maths Sri Lanka • 2026/2027 Enrollments Open
+          <div className="mb-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 backdrop-blur-sm text-center">
+              <span className="flex h-2 w-2 rounded-full bg-indigo-400"></span>
+              #1 A/L Maths Sri Lanka • 2026/2027 Enrollments Open
+            </div>
+            <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-300 backdrop-blur-sm text-center">
+              <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              2028 A/L Intake Now Open
+            </div>
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-7xl lg:leading-[1.1]">
             Master A/L Mathematics (07) with <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Confidence</span>

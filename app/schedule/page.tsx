@@ -6,9 +6,15 @@ export default function SchedulePage() {
     <div className="flex flex-col gap-8 md:gap-12 pb-10">
       <section className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-white p-8 text-center shadow-sm md:p-12">
          <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-indigo-500 via-cyan-500 to-indigo-500" />
-        <p className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 text-sm font-semibold text-violet-700">
-          <CalendarDays className="h-4 w-4" /> Weekly Plan
-        </p>
+        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <p className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 text-sm font-semibold text-violet-700">
+            <CalendarDays className="h-4 w-4" /> Weekly Plan
+          </p>
+          <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
+            <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+            2028 A/L Intake Now Open
+          </p>
+        </div>
         <h1 className="mt-4 text-4xl font-extrabold text-slate-900 md:text-5xl">Class Schedule</h1>
         <p className="mt-4 text-lg text-slate-600 max-w-xl mx-auto">
           Find the timeline that fits you best and join our sessions. We offer various classes to cater to different batches.
