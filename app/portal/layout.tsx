@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { logout } from "@/app/login/actions";
 import PortalNav from "./PortalNav";
 import StudentNotifications from "@/components/portal/StudentNotifications";
+import { ActionSubmitButton } from "@/components/ui";
 
 export default async function PortalLayout({
   children,
@@ -63,12 +64,11 @@ export default async function PortalLayout({
             )}
             <StudentNotifications />
             <form action={logout}>
-              <button
-                type="submit"
+              <ActionSubmitButton
                 className="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 transition-colors"
               >
                 Sign out
-              </button>
+              </ActionSubmitButton>
             </form>
           </div>
         </div>

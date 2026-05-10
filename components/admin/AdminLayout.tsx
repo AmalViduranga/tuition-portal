@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logout } from "@/app/login/actions";
+import { ActionSubmitButton } from "@/components/ui";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "🏠" },
@@ -177,13 +178,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <span className="sm:hidden">Dashboard</span>
             </Link>
             <form action={logout}>
-              <button
-                type="submit"
+              <ActionSubmitButton
                 className="rounded-lg bg-slate-100 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
                 title="Log out"
               >
                 Log out
-              </button>
+              </ActionSubmitButton>
             </form>
           </div>
         </header>

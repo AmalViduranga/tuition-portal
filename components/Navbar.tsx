@@ -6,6 +6,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
 
+import { ActionSubmitButton, LoadingLink } from "@/components/ui";
+
 interface NavbarProps {
   siteName: string;
   user: any;
@@ -132,20 +134,20 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                     </Link>
                   )}
                   <form action={logout} className="border-t border-slate-100">
-                    <button type="submit" className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+                    <ActionSubmitButton className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
                       Sign out
-                    </button>
+                    </ActionSubmitButton>
                   </form>
                 </div>
               )}
             </div>
           ) : (
-            <Link
+            <LoadingLink
               href="/login"
-              className="ml-1 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-indigo-700"
+              className="ml-1 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-indigo-700 inline-flex"
             >
               Student Login
-            </Link>
+            </LoadingLink>
           )}
         </div>
 
@@ -215,16 +217,15 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                       </Link>
                     )}
                     <form action={logout}>
-
-                      <button type="submit" className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 mt-1">
+                      <ActionSubmitButton className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 mt-1">
                         Sign out
-                      </button>
+                      </ActionSubmitButton>
                     </form>
                   </>
                 ) : (
-                  <Link href="/login" className="mt-1 block rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white">
+                  <LoadingLink href="/login" className="mt-1 block rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white">
                     Student Login
-                  </Link>
+                  </LoadingLink>
                 )}
               </div>
             </div>

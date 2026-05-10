@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { SITE_NAME } from "@/lib/content";
 import Link from "next/link";
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
+import { LoadingLink } from "@/components/ui";
 
 interface SiteWrapperProps {
   children: React.ReactNode;
@@ -101,7 +102,7 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Student Access</h3>
             <div className="mt-3 flex flex-col gap-2 text-sm">
-              <Link href="/login" className="text-slate-700 hover:text-indigo-700">Student Login</Link>
+              <LoadingLink href="/login" className="text-slate-700 hover:text-indigo-700 inline-flex items-center">Student Login</LoadingLink>
               <Link href="/dashboard" className="text-slate-700 hover:text-indigo-700">Dashboard</Link>
             </div>
           </div>
