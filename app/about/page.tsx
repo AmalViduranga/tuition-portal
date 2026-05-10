@@ -26,7 +26,7 @@ export default async function AboutPage() {
     
   // Ensure description is always an array
   const description = Array.isArray(descriptionRaw) ? descriptionRaw : [descriptionRaw];
-  const imageUrl = siteSettings.teacher_image_url || null;
+  const imageUrl = siteSettings.teacher_image_url || "/AV maths photo 01.png";
 
   return (
     <div className="flex flex-col gap-8 md:gap-12 pb-10">
