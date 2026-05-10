@@ -7,10 +7,12 @@ import ClassRecordingsList from "@/components/recordings/ClassRecordingsList";
 
 type Props = {
   params: Promise<{ classId: string }>;
+  searchParams: Promise<{ highlight?: string }>;
 };
 
-export default async function ClassDetailPage({ params }: Props) {
+export default async function ClassDetailPage({ params, searchParams }: Props) {
   const { classId } = await params;
+  const { highlight } = await searchParams;
   const { supabase, user } = await requireUser();
 
   // Load recordings and materials for this specific class using the centralized source of truth
@@ -53,14 +55,18 @@ export default async function ClassDetailPage({ params }: Props) {
 
       <section className="rounded-xl bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-900">Recordings</h2>
-        <ClassRecordingsList recordings={visibleRecordings} />
+        <ClassRecordingsList recordings={visibleRecordings} highlight={highlight} />
       </section>
 
       <section className="rounded-xl bg-white p-6 shadow-sm text-slate-900">
         <h2 className="text-lg font-semibold">Materials</h2>
         <div className="mt-4 grid gap-3">
           {visibleMaterials.map((material) => (
-            <article key={material.id} className="rounded-md border border-slate-200 p-3">
+            <article 
+              key={material.id} 
+              id={material.id}
+              className={`rounded-md border p-3 transition-colors duration-500 ${highlight === material.id ? 'border-indigo-500 bg-indigo-50 shadow-md' : 'border-slate-200'}`}
+            >
               <p className="font-medium">{material.title}</p>
               <p className="text-sm text-slate-600">Released: {material.release_at}</p>
               <div className="mt-3 flex items-center gap-4">

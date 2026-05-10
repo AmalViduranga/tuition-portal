@@ -16,15 +16,21 @@ export type StudentRecordingRowData = {
 
 interface StudentRecordingRowProps {
   recording: StudentRecordingRowData;
+  isHighlighted?: boolean;
   onOpen: () => void;
 }
 
-export default function StudentRecordingRow({ recording, onOpen }: StudentRecordingRowProps) {
+export default function StudentRecordingRow({ recording, isHighlighted, onOpen }: StudentRecordingRowProps) {
   return (
     <button
       type="button"
+      id={recording.id}
       onClick={onOpen}
-      className="group flex w-full items-center gap-4 rounded-xl border border-slate-200/80 bg-white p-3 text-left shadow-sm transition-all hover:border-indigo-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      className={`group flex w-full items-center gap-4 rounded-xl border p-3 text-left shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 duration-500 ${
+        isHighlighted 
+          ? "border-indigo-500 bg-indigo-50 shadow-md" 
+          : "border-slate-200/80 bg-white hover:border-indigo-200 hover:shadow-md"
+      }`}
     >
       <div className="relative aspect-video w-32 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:w-40">
         <img

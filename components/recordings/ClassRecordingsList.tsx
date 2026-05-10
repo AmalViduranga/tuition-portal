@@ -5,9 +5,10 @@ import { StudentRecordingRow, RecordingWatchModal } from "@/components/recording
 
 interface ClassRecordingsListProps {
   recordings: any[];
+  highlight?: string;
 }
 
-export default function ClassRecordingsList({ recordings }: ClassRecordingsListProps) {
+export default function ClassRecordingsList({ recordings, highlight }: ClassRecordingsListProps) {
   const [selectedRecording, setSelectedRecording] = useState<any | null>(null);
 
   if (recordings.length === 0) {
@@ -24,6 +25,7 @@ export default function ClassRecordingsList({ recordings }: ClassRecordingsListP
         <StudentRecordingRow
           key={recording.id}
           recording={recording}
+          isHighlighted={highlight === recording.id}
           onOpen={() => setSelectedRecording(recording)}
         />
       ))}

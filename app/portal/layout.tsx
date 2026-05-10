@@ -3,6 +3,7 @@ import Image from "next/image";
 import { requireUser } from "@/lib/auth";
 import { logout } from "@/app/login/actions";
 import PortalNav from "./PortalNav";
+import StudentNotifications from "@/components/portal/StudentNotifications";
 
 export default async function PortalLayout({
   children,
@@ -60,6 +61,7 @@ export default async function PortalLayout({
                 Admin Panel
               </Link>
             )}
+            <StudentNotifications />
             <form action={logout}>
               <button
                 type="submit"
