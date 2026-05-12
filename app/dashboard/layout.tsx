@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { requireUser } from "@/lib/auth";
 import { logout } from "@/app/login/actions";
+import StudentNotifications from "@/components/portal/StudentNotifications";
 
 export default async function DashboardLayout({
   children,
@@ -59,6 +60,7 @@ export default async function DashboardLayout({
                 Admin Panel
               </Link>
             )}
+            <StudentNotifications />
             <Link
               href="/dashboard/profile"
               className="inline-flex items-center rounded-lg bg-white border border-slate-200 shadow-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
