@@ -21,6 +21,10 @@ type Enrollment = {
   access_mode: "paid" | "free_card" | "manual";
   amount_paid: number;
   created_at: string;
+  revoked_at?: string;
+  revoked_by?: string;
+  revoke_reason?: string;
+  updated_at?: string;
 };
 
 type PaymentPeriod = {
@@ -82,6 +86,8 @@ export default function AdminEnrollmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [editEnrollment, setEditEnrollment] = useState<Enrollment | null>(null);
+  const [revokeEnrollment, setRevokeEnrollment] = useState<Enrollment | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -276,10 +282,56 @@ export default function AdminEnrollmentsPage() {
               header: "Enrolled",
               render: (enr: Enrollment) => <DateFormat date={enr.created_at} format="short" />,
             },
+            {
+              key: "status",
+              header: "Status",
+              render: (enr: Enrollment) => {
+                if (enr.revoked_at) {
+                  return <Badge variant="danger">Revoked</Badge>;
+                }
+                const isExpired = enr.access_end_date && new Date().toISOString().split('T')[0] > enr.access_end_date.split('T')[0];
+                return isExpired ? <Badge variant="warning">Expired</Badge> : <Badge variant="success">Active</Badge>;
+              }
+            },
+            {
+              key: "actions",
+              header: "Actions",
+              className: "text-right",
+              render: (enr: Enrollment) => (
+                <div className="flex items-center justify-end gap-2">
+                  {!enr.revoked_at ? (
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => setEditEnrollment(enr)}>Edit</Button>
+                      <Button size="sm" variant="danger" onClick={() => setRevokeEnrollment(enr)}>Revoke</Button>
+                    </>
+                  ) : (
+                    <Button size="sm" variant="success" onClick={() => setEditEnrollment(enr)}>
+                      Reactivate
+                    </Button>
+                  )}
+                </div>
+              ),
+            },
           ]}
           data={sortedEnrollments}
           emptyMessage={error ? `Error: ${error}` : "No enrollments yet"}
           className="border border-slate-200 rounded-lg overflow-hidden"
+        />
+      )}
+
+      {editEnrollment && (
+        <EditEnrollmentFlow 
+           enrollment={editEnrollment} 
+           onClose={() => setEditEnrollment(null)}
+           onSuccess={() => { setEditEnrollment(null); fetchData(); }}
+        />
+      )}
+
+      {revokeEnrollment && (
+        <RevokeEnrollmentModal 
+           enrollment={revokeEnrollment} 
+           onClose={() => setRevokeEnrollment(null)}
+           onSuccess={() => { setRevokeEnrollment(null); fetchData(); }}
         />
       )}
     </Card>
@@ -908,5 +960,185 @@ function UnlockForm({ students, items, itemLabel, onSubmit }: UnlockFormProps) {
         Unlock {itemLabel}
       </Button>
     </form>
+  );
+}
+
+// === NEW MODAL COMPONENTS ===
+
+function EditEnrollmentFlow({ enrollment, onClose, onSuccess }: { enrollment: Enrollment, onClose: () => void, onSuccess: () => void }) {
+  const [step, setStep] = useState<"edit" | "confirm">("edit");
+  const [formData, setFormData] = useState({
+    start_access_date: enrollment.start_access_date?.split('T')[0] || "",
+    access_end_date: enrollment.access_end_date?.split('T')[0] || "",
+    access_mode: enrollment.access_mode,
+    amount_paid: enrollment.amount_paid.toString(),
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/enrollments/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enrollment_id: enrollment.id,
+          ...formData,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Failed with status ${res.status}`);
+      }
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      setLoading(false);
+    }
+  };
+
+  if (step === "confirm") {
+    return (
+      <Modal isOpen={true} onClose={onClose} title="Confirm Enrollment Update" size="md">
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">Please review the changes before applying.</p>
+          
+          <div className="grid grid-cols-2 gap-4 text-sm border border-slate-200 rounded-lg overflow-hidden">
+            <div className="bg-slate-50 p-3 border-r border-slate-200">
+              <h4 className="font-bold text-slate-900 mb-2">Old Details</h4>
+              <p>Mode: <span className="font-mono">{enrollment.access_mode}</span></p>
+              <p>Start: <span className="font-mono">{enrollment.start_access_date?.split('T')[0]}</span></p>
+              <p>End: <span className="font-mono">{enrollment.access_end_date?.split('T')[0] || "None"}</span></p>
+              <p>Amount: <span className="font-mono">{enrollment.amount_paid}</span></p>
+            </div>
+            <div className="bg-indigo-50 p-3">
+              <h4 className="font-bold text-indigo-900 mb-2">New Details</h4>
+              <p>Mode: <span className="font-mono">{formData.access_mode}</span></p>
+              <p>Start: <span className="font-mono">{formData.start_access_date}</span></p>
+              <p>End: <span className="font-mono">{formData.access_end_date || "None"}</span></p>
+              <p>Amount: <span className="font-mono">{formData.amount_paid}</span></p>
+            </div>
+          </div>
+          
+          {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>}
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setStep("edit")} disabled={loading}>Back to Edit</Button>
+            <Button variant="success" onClick={handleConfirm} loading={loading}>Confirm Enrollment</Button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title={enrollment.revoked_at ? "Reactivate Enrollment" : "Edit Enrollment"} size="md">
+      <div className="space-y-4">
+        <div className="grid gap-4">
+          <Select
+            label="Access Mode"
+            value={formData.access_mode}
+            onChange={(e) => setFormData({ ...formData, access_mode: e.target.value as any })}
+            options={[
+              { value: "paid", label: "Paid" },
+              { value: "free_card", label: "Free Card" },
+              { value: "manual", label: "Manual" },
+            ]}
+          />
+          <Input
+            label="Amount Paid (Rs.)"
+            type="number"
+            value={formData.amount_paid}
+            onChange={(e) => setFormData({ ...formData, amount_paid: e.target.value })}
+          />
+          <Input
+            label="Start Date"
+            type="date"
+            value={formData.start_access_date}
+            onChange={(e) => setFormData({ ...formData, start_access_date: e.target.value })}
+          />
+          <Input
+            label="End Date"
+            type="date"
+            value={formData.access_end_date}
+            onChange={(e) => setFormData({ ...formData, access_end_date: e.target.value })}
+          />
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="primary" onClick={() => setStep("confirm")}>Review Changes</Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function RevokeEnrollmentModal({ enrollment, onClose, onSuccess }: { enrollment: Enrollment, onClose: () => void, onSuccess: () => void }) {
+  const [reason, setReason] = useState("");
+  const [revokePayments, setRevokePayments] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRevoke = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/enrollments/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enrollment_id: enrollment.id,
+          reason,
+          revoke_payments: revokePayments,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Failed with status ${res.status}`);
+      }
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title="Revoke Enrollment" size="md">
+      <div className="space-y-4">
+        <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded text-sm">
+          <strong>Warning:</strong> Revoking this enrollment will immediately remove the student's access to this class's resources granted by this enrollment. This action is tracked.
+        </div>
+        
+        <Input
+          label="Reason for Revocation (Optional)"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="e.g., Accidental enrollment, Refund issued"
+        />
+
+        <div className="flex items-center gap-2 mt-4">
+          <input 
+            type="checkbox" 
+            id="revoke_payments" 
+            checked={revokePayments}
+            onChange={(e) => setRevokePayments(e.target.checked)}
+            className="rounded text-red-600 focus:ring-red-500"
+          />
+          <label htmlFor="revoke_payments" className="text-sm text-slate-700 font-medium">
+            Also reject any approved payment periods for this class
+          </label>
+        </div>
+
+        {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>}
+
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <Button variant="outline" onClick={onClose} disabled={loading}>Cancel</Button>
+          <Button variant="danger" onClick={handleRevoke} loading={loading}>Revoke Enrollment</Button>
+        </div>
+      </div>
+    </Modal>
   );
 }

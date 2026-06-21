@@ -15,6 +15,7 @@ export default async function StudentClassesPage() {
       class_groups (id, name, description, is_active)
     `)
     .eq("student_id", user.id)
+    .is("revoked_at", null)
     .order("created_at", { ascending: false });
 
   if (error) {

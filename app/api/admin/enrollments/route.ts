@@ -22,6 +22,10 @@ export async function GET(request: NextRequest) {
         access_mode,
         amount_paid,
         created_at,
+        revoked_at,
+        revoked_by,
+        revoke_reason,
+        updated_at,
         student:profiles!student_id (full_name),
         class:class_groups (name)
       `)
@@ -60,6 +64,10 @@ export async function GET(request: NextRequest) {
         access_mode: item.access_mode,
         amount_paid: item.amount_paid || 0,
         created_at: item.created_at,
+        revoked_at: item.revoked_at || null,
+        revoked_by: item.revoked_by || null,
+        revoke_reason: item.revoke_reason || null,
+        updated_at: item.updated_at || null,
       };
     });
 

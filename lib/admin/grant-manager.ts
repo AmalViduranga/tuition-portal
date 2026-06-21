@@ -89,6 +89,7 @@ export async function grantNewReleaseAccess(
     .select("student_id")
     .eq("class_id", classId)
     .eq("access_mode", "free_card")
+    .is("revoked_at", null)
     .lte("start_access_date", releaseAt)
     .or(`access_end_date.is.null,access_end_date.gte.${releaseAt}`);
 
@@ -157,6 +158,7 @@ export async function syncFreeCardGrantsForStudent(
     .select("*")
     .eq("student_id", studentId)
     .eq("class_id", classId)
+    .is("revoked_at", null)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();

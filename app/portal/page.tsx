@@ -13,6 +13,7 @@ export default async function PortalHomePage() {
       .from("student_class_enrollments")
       .select("class_id, start_access_date, class_groups(id, name)")
       .eq("student_id", user.id)
+      .is("revoked_at", null)
       .order("created_at", { ascending: false }),
     adminDb
       .from("recordings")

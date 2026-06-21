@@ -46,7 +46,8 @@ export async function loadStudentMaterials(
       )
     `,
     )
-    .eq("student_id", userId);
+    .eq("student_id", userId)
+    .is("revoked_at", null);
 
   if (enrollError) throw enrollError;
 

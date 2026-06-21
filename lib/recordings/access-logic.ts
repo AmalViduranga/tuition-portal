@@ -109,7 +109,7 @@ export async function getStudentAccessContext(
   const [recGrantsRes, matGrantsRes, enrollRes, payRes] = await Promise.all([
     supabase.from("recording_manual_unlocks").select("recording_id").eq("student_id", studentId).is("revoked_at", null),
     supabase.from("material_manual_unlocks").select("material_id").eq("student_id", studentId).is("revoked_at", null),
-    supabase.from("student_class_enrollments").select("class_id, access_mode, start_access_date, access_end_date").eq("student_id", studentId),
+    supabase.from("student_class_enrollments").select("class_id, access_mode, start_access_date, access_end_date").eq("student_id", studentId).is("revoked_at", null),
     supabase.from("student_class_payment_periods").select("class_id, start_date, end_date, status").eq("student_id", studentId)
   ]);
 
