@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Button, Card, SearchBar, Select, Badge } from "@/components/ui";
+import { Card, SearchBar, Select, Badge } from "@/components/ui";
 import type { StudentMaterialsPayload } from "@/lib/materials/student-materials";
 
 type Material = StudentMaterialsPayload["materials"][number];
@@ -217,7 +217,7 @@ export default function StudentMaterialsClient({
                         </div>
                         <div className="mt-4 flex gap-2 w-full">
                           <a
-                            href={mat.file_url}
+                            href={`/api/student/materials/${mat.id}/download?action=view`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex flex-1 items-center justify-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
@@ -225,7 +225,7 @@ export default function StudentMaterialsClient({
                             Open
                           </a>
                           <a
-                            href={`${mat.file_url}?download=`}
+                            href={`/api/student/materials/${mat.id}/download?action=download`}
                             download
                             className="inline-flex flex-1 items-center justify-center rounded-lg bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-100"
                           >

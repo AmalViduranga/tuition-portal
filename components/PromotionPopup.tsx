@@ -86,6 +86,7 @@ export default function PromotionPopup() {
           onClick={handleImageClick}
         >
           {/* We use an img tag with object-contain to ensure the whole poster is visible without being cropped */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={promotion.image_url}
             alt={promotion.title || "Promotion"}

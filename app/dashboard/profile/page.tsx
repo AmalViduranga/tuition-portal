@@ -3,7 +3,7 @@ import { Badge, Card, DateFormat } from "@/components/ui";
 import { ProfileEditForm } from "./ClientProfileFeatures";
 import { PasswordChangeForm } from "../ClientFeatures";
 import Link from "next/link";
-import { User, Mail, Phone, Calendar, Shield, Activity, GraduationCap } from "lucide-react";
+import { User, Mail, Calendar, Shield, Activity, GraduationCap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -130,13 +130,13 @@ export default async function StudentProfilePage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {enrollments.map((enr: any) => {
+                {enrollments.map((enr: { id: string; class_id: string; access_mode: string; class_groups?: { name: string } | { name: string }[] }) => {
                   const className = Array.isArray(enr.class_groups) 
                     ? enr.class_groups[0]?.name 
                     : enr.class_groups?.name;
                     
                   // Find active payment for this class
-                  const activePayment = paymentPeriods?.find((p: any) => 
+                  const activePayment = paymentPeriods?.find((p: { class_id: string; status: string; end_date?: string }) => 
                     p.class_id === enr.class_id && 
                     (p.status === "approved" || p.status === "pending")
                   );

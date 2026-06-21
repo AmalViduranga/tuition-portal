@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { forgotPassword } from "./actions";
 
@@ -39,7 +39,7 @@ function ForgotPasswordForm() {
           <div className="text-5xl mb-4">📧</div>
           <h1 className="text-2xl font-semibold text-slate-900">Check Your Email</h1>
           <p className="mt-4 text-sm text-slate-600">
-            We've sent a password reset link to <strong>{decodeURIComponent(emailFromQuery)}</strong>.
+            We&apos;ve sent a password reset link to <strong>{decodeURIComponent(emailFromQuery)}</strong>.
           </p>
           <p className="mt-2 text-sm text-slate-500">
             Click the link in the email to reset your password. The link will expire in 1 hour.
@@ -61,7 +61,7 @@ function ForgotPasswordForm() {
     <div className="mx-auto w-full max-w-md rounded-xl bg-white p-6 shadow-sm">
       <h1 className="text-2xl font-semibold">Reset Password</h1>
       <p className="mt-2 text-sm text-slate-600">
-        Enter your email address and we'll send you a link to reset your password.
+        Enter your email address and we&apos;ll send you a link to reset your password.
       </p>
 
       {error && (

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     if (!material?.published) {
       // It was draft, now published
-      await grantNewReleaseAccess(materialId, material.class_id, material.release_at, "material", (await requireAdmin()).user.id);
+      await grantNewReleaseAccess(materialId, material.class_id, material.release_at, "material", adminAuth.user!.id);
     }
 
     return NextResponse.json({ success: true });

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getYouTubeMetadata } from "@/lib/recordings/youtube";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const body = await request.json();
 
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     // Map through recording IDs and fetch metadata
     const recordsToInsert = await Promise.all(
-      recordings.map(async (rec: any) => {
+      recordings.map(async (rec: { title?: string; thumbnail_url?: string; youtube_video_id?: string; release_at?: string }) => {
         let title = rec.title || "Untitled Video";
         let thumbnail_url = rec.thumbnail_url || null;
 

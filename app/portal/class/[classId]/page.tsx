@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { Card, Badge, DateFormat } from "@/components/ui";
+import { Badge } from "@/components/ui";
 import { loadStudentRecordings } from "@/lib/recordings/student-recordings";
 import { loadStudentMaterials } from "@/lib/materials/student-materials";
 import ClassRecordingsList from "@/components/recordings/ClassRecordingsList";

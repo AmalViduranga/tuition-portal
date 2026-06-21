@@ -10,8 +10,8 @@ import { ActionSubmitButton, LoadingLink } from "@/components/ui";
 
 interface NavbarProps {
   siteName: string;
-  user: any;
-  profile: any;
+  user: { email?: string } | null;
+  profile: { full_name?: string; role?: string } | null;
 }
 
 export default function Navbar({ siteName, user, profile }: NavbarProps) {
@@ -20,15 +20,6 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
-
-  // Hide main navbar on internal dashboard/portal/admin routes to prevent duplication
-  const isInternalRoute = 
-    pathname.startsWith("/admin") || 
-    pathname.startsWith("/portal") || 
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/change-password");
-
-  if (isInternalRoute) return null;
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -46,10 +37,21 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
   }, []);
 
   // Close menus on route change
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setMobileMenuOpen(false);
     setProfileMenuOpen(false);
-  }, [pathname]);
+  }
+
+  // Hide main navbar on internal dashboard/portal/admin routes to prevent duplication
+  const isInternalRoute = 
+    pathname.startsWith("/admin") || 
+    pathname.startsWith("/portal") || 
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/change-password");
+
+  if (isInternalRoute) return null;
 
   const navLinks = [
     { href: "/about", label: "About" },
@@ -59,7 +61,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-indigo-100 bg-white/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-slate-200/60 bg-white/80 backdrop-blur-2xl shadow-sm transition-all duration-300">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tight text-indigo-700 md:text-lg hover:opacity-90 transition-opacity">

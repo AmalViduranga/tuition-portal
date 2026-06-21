@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Card, Button, DateFormat, Table, Badge, Select } from "@/components/ui";
+import { Card, Button, Table, Badge, Select } from "@/components/ui";
 
 type EnrollmentRecord = {
   id: string;

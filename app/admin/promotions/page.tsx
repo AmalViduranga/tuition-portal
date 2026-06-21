@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getErrorMessage } from "@/lib/utils/error";
 import { Card, Button, Input, Textarea } from "@/components/ui";
 import { Trash2, CheckCircle, XCircle } from "lucide-react";
 
@@ -23,6 +24,7 @@ export default function AdminPromotionsPage() {
 
   // Form State
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [targetUrl, setTargetUrl] = useState("/contact");
@@ -30,11 +32,7 @@ export default function AdminPromotionsPage() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchPromotions();
-  }, []);
-
-  const fetchPromotions = async () => {
+  const fetchPromotions = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -44,12 +42,37 @@ export default function AdminPromotionsPage() {
 
       if (error) throw error;
       setPromotions(data || []);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch promotions");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to fetch promotions");
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchPromotions();
+  }, [fetchPromotions]);
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [file]);
+
+  // fetchPromotions is now declared earlier.
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,8 +128,8 @@ export default function AdminPromotionsPage() {
       
       // Refresh list
       fetchPromotions();
-    } catch (err: any) {
-      setError(err.message || "Failed to create promotion");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to create promotion");
     } finally {
       setSaving(false);
     }
@@ -121,8 +144,8 @@ export default function AdminPromotionsPage() {
 
       if (error) throw error;
       fetchPromotions();
-    } catch (err: any) {
-      setError(err.message || "Failed to update status");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to update status");
     }
   };
 
@@ -146,8 +169,8 @@ export default function AdminPromotionsPage() {
       }
 
       fetchPromotions();
-    } catch (err: any) {
-      setError(err.message || "Failed to delete promotion");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to delete promotion");
     }
   };
 
@@ -233,18 +256,23 @@ export default function AdminPromotionsPage() {
                 placeholder="Brief description to show under the image"
               />
               
-              {file && (
+              {previewUrl ? (
                 <div className="mt-4">
                   <p className="text-sm font-medium text-slate-700 mb-2">Preview:</p>
                   <div className="relative h-40 w-full rounded-md overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={URL.createObjectURL(file)}
-                      alt="Preview"
+                      src={previewUrl}
+                      alt="Promotion image preview"
                       className="max-h-full max-w-full object-contain"
                     />
                   </div>
                 </div>
-              )}
+              ) : file ? (
+                <div className="mt-4">
+                  <p className="text-sm text-red-500">Selected file is not a valid image preview.</p>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -265,6 +293,7 @@ export default function AdminPromotionsPage() {
             {promotions.map((promo) => (
               <div key={promo.id} className="border border-slate-200 rounded-lg overflow-hidden flex flex-col bg-white">
                 <div className="relative h-48 w-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={promo.image_url}
                     alt={promo.title || "Promotion"}

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updatePassword } from "./actions";
-import { Button, Input, Card } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 
 export function PasswordChangeForm() {
   const [isPending, startTransition] = useTransition();

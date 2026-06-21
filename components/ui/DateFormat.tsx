@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 
 export interface DateFormatProps {
   date: string | Date;
@@ -17,9 +16,12 @@ export default function DateFormat({ date, format: formatType = "short", classNa
     time: { hour: "numeric", minute: "2-digit", hour12: true },
   };
 
+  let displayValue: string;
   try {
-    return <span className={className}>{dateObj.toLocaleDateString("en-US", formats[formatType])}</span>;
+    displayValue = dateObj.toLocaleDateString("en-US", formats[formatType]);
   } catch {
-    return <span className={className}>{String(date)}</span>;
+    displayValue = String(date);
   }
+
+  return <span className={className}>{displayValue}</span>;
 }

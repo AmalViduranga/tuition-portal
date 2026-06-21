@@ -18,7 +18,7 @@ export async function getYouTubeMetadata(videoId: string) {
       thumbnail_url: data.thumbnail_url,
       author_name: data.author_name,
     };
-  } catch (e) {
+  } catch {
     return null;
   }
 }

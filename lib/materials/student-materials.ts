@@ -112,7 +112,7 @@ export async function loadStudentMaterials(
   const accessContext = await getStudentAccessContext(supabase, userId);
 
   const accessibleMaterials = (rawMaterials || []).filter((mat) => 
-    isItemAccessible(mat as any, accessContext, "material")
+    isItemAccessible(mat as { id: string; class_id: string; release_at: string; published: boolean }, accessContext, "material")
   );
 
   const list = accessibleMaterials.map((mat) => ({
@@ -122,7 +122,7 @@ export async function loadStudentMaterials(
   }));
 
   return {
-    materials: list as any,
+    materials: list as unknown as StudentMaterialsPayload["materials"],
     accessible_classes,
   };
 }

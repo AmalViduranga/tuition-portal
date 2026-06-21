@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
-import { SITE_NAME } from "@/lib/content";
-import Navbar from "@/components/Navbar";
+
 import { createClient } from "@/lib/supabase/server";
 import SiteWrapper from "@/components/SiteWrapper";
 import PromotionPopup from "@/components/PromotionPopup";

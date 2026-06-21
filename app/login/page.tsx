@@ -48,7 +48,7 @@ export default async function LoginPage({ searchParams }: Props) {
 
         <div className="mt-6 border-t border-slate-200 pt-4 text-center">
           <p className="text-xs text-slate-500">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/contact" className="text-indigo-600 hover:text-indigo-700 font-medium">
               Contact us
             </Link>{" "}

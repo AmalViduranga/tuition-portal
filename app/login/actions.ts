@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import crypto from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -23,7 +24,7 @@ export async function login(formData: FormData) {
   }
 
   // Server-side role lookup prevents relying only on client-side route checks.
-  let { data: profile } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("role, must_change_password")
     .eq("id", user.id)
@@ -44,25 +45,13 @@ export async function login(formData: FormData) {
   }
 
   // Normalize role for comparison (handle case sensitivity, whitespace)
-  let userRole = profile?.role?.trim().toLowerCase();
+  const userRole = profile?.role?.trim().toLowerCase();
 
-  // Auto-bootstrap an admin if none exists or if using primary contact email 
+  // Auto-bootstrap logic removed for security.
+  // Admins must be manually assigned via database query.
   if (userRole !== "admin") {
-    const adminClient = createAdminClient();
-    const { count: adminCount } = await adminClient
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("role", "admin");
-
-    if (adminCount === 0 || user.email === "amalvidu20@gmail.com") {
-      await adminClient
-        .from("profiles")
-        .update({ role: "admin", is_active: true, must_change_password: false })
-        .eq("id", user.id);
-      
-      userRole = "admin";
-      profile.must_change_password = false;
-    }
+    // We retain the fallback check to ensure the user at least gets a profile
+    // if the trigger failed, which we already handled above.
   }
 
   // Admins go to admin dashboard
@@ -83,10 +72,19 @@ export async function login(formData: FormData) {
   // --- SINGLE DEVICE RESTRICTION FOR STUDENTS ---
   if (userRole === "student") {
     const lockId = crypto.randomUUID();
+    
+    // Hash User-Agent
+    const headersList = await headers();
+    const userAgent = headersList.get("user-agent") || "unknown";
+    const uaHash = crypto.createHash("sha256").update(userAgent).digest("hex");
+
     const adminSupabase = createAdminClient();
     await adminSupabase
       .from("profiles")
-      .update({ current_session_lock: lockId })
+      .update({ 
+        current_session_lock: lockId,
+        current_session_user_agent_hash: uaHash 
+      })
       .eq("id", user.id);
 
     const cookieStore = await cookies();

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
+import { getErrorMessage } from "@/lib/utils/error";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const limit = url.searchParams.get("limit") === "true";
@@ -35,9 +37,9 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json(recordings || []);
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -45,7 +47,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -110,14 +113,14 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
 
     if (published && inserted) {
-      await grantNewReleaseAccess(inserted.id, classId, releaseAt, "recording", (await requireAdmin()).user.id);
+      await grantNewReleaseAccess(inserted.id, classId, releaseAt, "recording", adminAuth.user!.id);
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Recordings POST Error:", error);
     return NextResponse.json(
-      { error: error?.message || (typeof error === 'string' ? error : JSON.stringify(error)) },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -125,7 +128,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -193,13 +197,13 @@ export async function PUT(request: NextRequest) {
     if (error) throw error;
 
     if (published) {
-      await grantNewReleaseAccess(recordingId, classId, releaseAt, "recording", (await requireAdmin()).user.id);
+      await grantNewReleaseAccess(recordingId, classId, releaseAt, "recording", adminAuth.user!.id);
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

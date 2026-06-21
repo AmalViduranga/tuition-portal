@@ -1,5 +1,4 @@
 import { updatePassword } from "@/app/login/actions";
-import Link from "next/link";
 import { SubmitButton } from "@/components/SubmitButton";
 
 type Props = {

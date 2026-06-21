@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantPaymentAccess } from "@/lib/admin/grant-manager";
+import { getErrorMessage } from "@/lib/utils/error";
 
 export async function GET() {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
 
     // Join profiles explicitly through student_id to avoid ambiguity with reviewed_by
@@ -33,27 +35,49 @@ export async function GET() {
        throw error;
     }
 
-    const formatted = (data || []).map((item: any) => ({
-      id: item.id,
-      student_id: item.student_id,
-      student_name: item.student?.full_name || "Unknown",
-      student_phone: item.student?.phone || "",
-      class_id: item.class_id,
-      class_name: item.class_groups?.name || item.payment_plans?.name || "Multiple/N-A",
-      payment_plan_id: item.payment_plan_id || null,
-      plan_name: item.payment_plans?.name || null,
-      amount_paid: item.amount_paid || 0,
-      access_mode: item.access_mode || "paid",
-      start_date: item.start_date,
-      end_date: item.end_date,
-      status: item.status,
-      created_at: item.created_at,
-    }));
+    const formatted = (data || []).map((item: {
+      id: string;
+      student_id: string;
+      student?: { full_name?: string; phone?: string } | { full_name?: string; phone?: string }[];
+      class_id: string;
+      class_groups?: { name?: string } | { name?: string }[];
+      payment_plan_id?: string;
+      payment_plans?: { name?: string } | { name?: string }[];
+      amount_paid?: number;
+      access_mode?: string;
+      start_date: string;
+      end_date: string;
+      status: string;
+      created_at: string;
+    }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getVal = (obj: any, field: string) => {
+        if (!obj) return null;
+        return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
+      };
+      
+      return {
+        id: item.id,
+        student_id: item.student_id,
+        student_name: getVal(item.student, "full_name") || "Unknown",
+        student_phone: getVal(item.student, "phone") || "",
+        class_id: item.class_id,
+        class_name: getVal(item.class_groups, "name") || getVal(item.payment_plans, "name") || "Multiple/N-A",
+        payment_plan_id: item.payment_plan_id || null,
+        plan_name: getVal(item.payment_plans, "name") || null,
+        amount_paid: item.amount_paid || 0,
+        access_mode: item.access_mode || "paid",
+        start_date: item.start_date,
+        end_date: item.end_date,
+        status: item.status,
+        created_at: item.created_at,
+      };
+    });
 
     return NextResponse.json(formatted);
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -61,7 +85,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const admin = await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
+    const admin = adminAuth;
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -98,14 +124,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert payment record building object dynamically to be schema-safe
-    const record: Record<string, any> = {
+    const record: {
+      student_id: string;
+      class_id: string | null;
+      start_date: string;
+      end_date: string;
+      status: string;
+      admin_note: string;
+      reviewed_by: string | null;
+      reviewed_at: string | null;
+      payment_plan_id?: string;
+      amount_paid?: number;
+      access_mode?: string;
+    } = {
       student_id: studentId,
       class_id: classId,
       start_date: finalStartDate,
       end_date: finalEndDate,
       status: finalStatus,
       admin_note: adminNote,
-      reviewed_by: finalStatus === "approved" ? admin.user.id : null,
+      reviewed_by: finalStatus === "approved" ? admin.user!.id : null,
       reviewed_at: finalStatus === "approved" ? new Date().toISOString() : null,
     };
 
@@ -142,15 +180,14 @@ export async function POST(request: NextRequest) {
     
     // Trigger access granting if automatically approved
     if (finalStatus === "approved" && inserted) {
-      await grantPaymentAccess(inserted.id, admin.user.id);
+      await grantPaymentAccess(inserted.id, admin.user!.id);
     }
 
     return NextResponse.json({ success: true, id: inserted.id });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Payment Submission Server Error:", error);
-    const message = error?.message || error?.details || (typeof error === 'string' ? error : "Unknown error");
     return NextResponse.json(
-      { error: message, details: error },
+      { error: getErrorMessage(error), details: error },
       { status: 500 }
     );
   }

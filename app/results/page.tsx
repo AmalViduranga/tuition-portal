@@ -66,7 +66,7 @@ export default function ResultsPage() {
                  <Star className="h-5 w-5 text-amber-500" /> Key Highlights
                </h3>
                <ul className="space-y-4">
-                   {(pastResults.batch2025 as any).highlights.map((item: string, idx: number) => (
+                   {(pastResults.batch2025 as { highlights: string[] }).highlights.map((item: string, idx: number) => (
                      <li key={idx} className="flex gap-3 text-slate-700 bg-white border border-slate-100 p-4 rounded-xl shadow-sm">
                        <TrendingUp className="h-5 w-5 text-emerald-500 shrink-0" />
                        <span>{item}</span>

@@ -9,8 +9,8 @@ import { LoadingLink } from "@/components/ui";
 
 interface SiteWrapperProps {
   children: React.ReactNode;
-  user: any;
-  profile: any;
+  user: { email?: string; id?: string } | null;
+  profile: { full_name?: string; role?: string } | null;
 }
 
 export default function SiteWrapper({ children, user, profile }: SiteWrapperProps) {

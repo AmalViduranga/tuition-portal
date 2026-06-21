@@ -1,0 +1,379 @@
+﻿
+> tuition-portal@0.1.0 lint
+> eslint
+
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\about\page.tsx
+  49:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\actions.ts
+  175:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  329:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\earnings\page.tsx
+  4:24  warning  'DateFormat' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\enrollments\page.tsx
+     5:3    warning  'addEnrollment' is defined but never used                        @typescript-eslint/no-unused-vars
+     6:3    warning  'addPaymentPeriod' is defined but never used                     @typescript-eslint/no-unused-vars
+     7:3    warning  'addManualRecordingUnlock' is defined but never used             @typescript-eslint/no-unused-vars
+     8:3    warning  'addManualMaterialUnlock' is defined but never used              @typescript-eslint/no-unused-vars
+     9:3    warning  'updatePaymentPeriodStatus' is defined but never used            @typescript-eslint/no-unused-vars
+   152:38   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   187:36   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   195:40   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   196:38   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   385:29   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   400:29   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   405:29   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   410:29   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   419:29   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   433:29   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   692:86   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   732:10   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+   755:20   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  1043:88   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  1112:97   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  1112:120  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\materials\AdminMaterialsClient.tsx
+    4:10  warning  'addMaterial' is defined but never used           @typescript-eslint/no-unused-vars
+    4:23  warning  'updateMaterial' is defined but never used        @typescript-eslint/no-unused-vars
+    4:39  warning  'toggleMaterialStatus' is defined but never used  @typescript-eslint/no-unused-vars
+  122:41  error    Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\page.tsx
+    2:10   warning  'createClient' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   16:14   warning  'recentMaterials' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   24:92   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\page.tsx:24:92
+  22 |     supabase.from("class_groups").select("*", { count: "exact" }).eq("is_active", true),
+  23 |     supabase.from("student_class_enrollments").select("*", { count: "exact" }),
+> 24 |     supabase.from("recordings").select("*", { count: "exact" }).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+     |                                                                                            ^^^^^^^^^^ Cannot call impure function
+  25 |     supabase.from("materials").select("*", { count: "exact" }).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+  26 |     supabase.from("profiles").select("id, full_name, created_at").eq("role", "student").order("created_at", { ascending: false }).limit(5),
+  27 |     supabase.from("recordings").select("id, title, release_at, class_groups(name)").order("created_at", { ascending: false }).limit(5),                                               react-hooks/purity
+   25:91   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\page.tsx:25:91
+  23 |     supabase.from("student_class_enrollments").select("*", { count: "exact" }),
+  24 |     supabase.from("recordings").select("*", { count: "exact" }).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+> 25 |     supabase.from("materials").select("*", { count: "exact" }).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+     |                                                                                           ^^^^^^^^^^ Cannot call impure function
+  26 |     supabase.from("profiles").select("id, full_name, created_at").eq("role", "student").order("created_at", { ascending: false }).limit(5),
+  27 |     supabase.from("recordings").select("id, title, release_at, class_groups(name)").order("created_at", { ascending: false }).limit(5),
+  28 |     supabase.from("materials").select("id, title, release_at, class_groups(name)").order("created_at", { ascending: false }).limit(5),  react-hooks/purity
+   84:83   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+   84:153  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  113:83   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  113:153  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\promotions\page.tsx
+   36:6   warning  React Hook useEffect has a missing dependency: 'fetchPromotions'. Either include it or remove the dependency array                                                                                                                                                                       react-hooks/exhaustive-deps
+   67:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  128:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  144:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  169:19  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  260:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  292:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\recordings\AdminRecordingsClient.tsx
+    4:10  warning  'addRecording' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+    4:24  warning  'updateRecording' is defined but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+    4:41  warning  'toggleRecordingStatus' is defined but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    4:64  warning  'deleteRecording' is defined but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  462:31  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\reports\monthly-payments\page.tsx
+    7:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   40:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   41:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  157:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  158:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  191:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  200:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  205:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  211:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\site-content\page.tsx
+  5:41  warning  'Badge' is defined but never used                  @typescript-eslint/no-unused-vars
+  7:7   warning  'CONTENT_KEYS' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\admin\students\AdminStudentsClient.tsx
+   53:64  error    Unexpected any. Specify a different type                                                                                               @typescript-eslint/no-explicit-any
+   73:6   warning  React Hook useEffect has a missing dependency: 'enrollmentFormData.access_end_date'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  257:9   warning  'handleDelete' is assigned a value but never used                                                                                      @typescript-eslint/no-unused-vars
+  564:62  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                        react/no-unescaped-entities
+  564:74  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                        react/no-unescaped-entities
+  686:66  error    Unexpected any. Specify a different type                                                                                               @typescript-eslint/no-explicit-any
+  687:64  error    Unexpected any. Specify a different type                                                                                               @typescript-eslint/no-explicit-any
+  688:68  error    Unexpected any. Specify a different type                                                                                               @typescript-eslint/no-explicit-any
+  689:71  error    Unexpected any. Specify a different type                                                                                               @typescript-eslint/no-explicit-any
+  690:67  error    Unexpected any. Specify a different type                                                                                               @typescript-eslint/no-explicit-any
+  695:35  error    Unexpected any. Specify a different type                                                                                               @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\classes\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\classes\toggle\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\enrollments\delete\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\enrollments\revoke\route.ts
+   2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+  62:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\enrollments\route.ts
+    2:10  warning  'requireAdmin' is defined but never used       @typescript-eslint/no-unused-vars
+   44:37  warning  'basicErr' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   50:50  error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+   52:28  error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+  165:19  error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\enrollments\update\route.ts
+   2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+  71:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\materials\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\materials\toggle\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\payments\route.ts
+    2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+   37:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:34  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\payments\status\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\plans\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\recordings\bulk\route.ts
+   2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+  25:34  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\recordings\delete\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\recordings\route.ts
+    2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+  119:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\recordings\toggle\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\reports\monthly\route.ts
+   2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+  51:13  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  61:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\site-content\route.ts
+  1:10  warning  'NextRequest' is defined but never used   @typescript-eslint/no-unused-vars
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\students\delete-permanent\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\students\delete\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\students\route.ts
+  3:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\students\toggle\route.ts
+  2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\unlocks\material\route.ts
+   2:10   warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+  40:100  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:101  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\admin\unlocks\recording\route.ts
+    2:10  warning  'requireAdmin' is defined but never used  @typescript-eslint/no-unused-vars
+   45:28  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\api\student\materials\[id]\download\route.ts
+  38:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\change-password\page.tsx
+  2:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\dashboard\ClientFeatures.tsx
+  5:25  warning  'Card' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\dashboard\page.tsx
+   43:9   warning  'today' is assigned a value but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   46:70  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  124:49  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  127:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  158:48  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  213:40  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\dashboard\profile\page.tsx
+    6:22  warning  'Phone' is defined but never used         @typescript-eslint/no-unused-vars
+  133:40  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:66  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\forgot-password\page.tsx
+   3:30  warning  'useEffect' is defined but never used                            @typescript-eslint/no-unused-vars
+  42:15  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  64:40  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\layout.tsx
+  4:8   warning  'Link' is defined but never used       @typescript-eslint/no-unused-vars
+  5:10  warning  'SITE_NAME' is defined but never used  @typescript-eslint/no-unused-vars
+  6:8   warning  'Navbar' is defined but never used     @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\login\actions.ts
+  27:15  error  'profile' is never reassigned. Use 'const' instead   prefer-const
+  48:7   error  'userRole' is never reassigned. Use 'const' instead  prefer-const
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\login\login-form.tsx
+  3:10  warning  'useActionState' is defined but never used  @typescript-eslint/no-unused-vars
+  4:8   warning  'Link' is defined but never used            @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\login\page.tsx
+  51:16  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\page.tsx
+    5:141  warning  'Activity' is defined but never used      @typescript-eslint/no-unused-vars
+  306:44   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\portal\class\[classId]\page.tsx
+  3:10  warning  'Card' is defined but never used        @typescript-eslint/no-unused-vars
+  3:23  warning  'DateFormat' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\portal\classes\page.tsx
+  45:55  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  50:34  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\portal\materials\StudentMaterialsClient.tsx
+  4:10  warning  'Button' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\portal\notifications\actions.ts
+   43:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\portal\page.tsx
+    4:16  warning  'DateFormat' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   35:33  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   58:58  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   59:9   warning  'latestExpiry' is assigned a value but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   59:74  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  140:63  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  198:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\portal\recordings\StudentRecordingsClient.tsx
+   4:10  warning  'Button' is defined but never used          @typescript-eslint/no-unused-vars
+  28:10  warning  'error' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\reset-password\actions.ts
+  3:10  warning  'redirect' is defined but never used        @typescript-eslint/no-unused-vars
+  8:9   warning  'token' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\reset-password\page.tsx
+  3:30  warning  'useEffect' is defined but never used        @typescript-eslint/no-unused-vars
+  4:10  warning  'useSearchParams' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\app\results\page.tsx
+  69:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\Navbar.tsx
+  13:9   error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+  14:12  error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+  34:3   error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  49:3   error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\PromotionPopup.tsx
+  89:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\SiteWrapper.tsx
+  12:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  13:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\admin\StatsCard.tsx
+  1:15  warning  'ReactNode' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\recordings\ClassRecordingsList.tsx
+   7:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  12:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\recordings\StudentRecordingCard.tsx
+  29:9  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\recordings\StudentRecordingRow.tsx
+  36:9  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\ui\DateFormat.tsx
+   1:15  warning  'ReactNode' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  21:12  error    Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\ui\DateFormat.tsx:21:12
+  19 |
+  20 |   try {
+> 21 |     return <span className={className}>{dateObj.toLocaleDateString("en-US", formats[formatType])}</span>;
+     |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  22 |   } catch {
+  23 |     return <span className={className}>{String(date)}</span>;
+  24 |   }  react-hooks/error-boundaries
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\ui\LoadingLink.tsx
+  17:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\components\ui\LoadingLink.tsx:17:5
+  15 |   useEffect(() => {
+  16 |     // Reset navigating state when pathname changes
+> 17 |     setIsNavigating(false);
+     |     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  18 |   }, [pathname]);
+  19 |
+  20 |   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {  react-hooks/set-state-in-effect
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\lib\admin\grant-manager.ts
+   42:7   error    'targetClassIds' is never reassigned. Use 'const' instead  prefer-const
+   45:56  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+   46:23  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+   46:63  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+   57:46  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+   62:41  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+   68:40  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+  106:7   error    'planStudentIds' is never reassigned. Use 'const' instead  prefer-const
+  123:34  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+  124:78  error    Unexpected any. Specify a different type                   @typescript-eslint/no-explicit-any
+  128:12  warning  'e' is defined but never used                              @typescript-eslint/no-unused-vars
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\lib\materials\student-materials.ts
+  115:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  125:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\UOM\UOM 4th Sem\Cursor Project\tuition-portal\lib\recordings\youtube.ts
+  21:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 191 problems (111 errors, 80 warnings)
+  4 errors and 0 warnings potentially fixable with the `--fix` option.
+

@@ -33,6 +33,7 @@ export default function StudentRecordingRow({ recording, isHighlighted, onOpen }
       }`}
     >
       <div className="relative aspect-video w-32 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:w-40">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={recording.thumbnail_url || youtubeThumbnailUrl(recording.youtube_video_id)}
           alt=""

@@ -1,5 +1,4 @@
 import { requireAdmin } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
 import StatsCard from "@/components/admin/StatsCard";
 import Card from "@/components/ui/Card";
 import Link from "next/link";
@@ -8,12 +7,15 @@ import DateFormat from "@/components/ui/DateFormat";
 export default async function AdminHomePage() {
   const { supabase } = await requireAdmin();
 
+  // eslint-disable-next-line
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
   const [
     { count: totalStudents },
     { count: totalClasses },
     { count: totalEnrollments },
     { count: recentRecordings },
-    { count: recentMaterials },
+    /* recentMaterials */,
     { data: studentsList },
     { data: recordingsList },
     { data: materialsList },
@@ -21,8 +23,8 @@ export default async function AdminHomePage() {
     supabase.from("profiles").select("*", { count: "exact" }).eq("role", "student"),
     supabase.from("class_groups").select("*", { count: "exact" }).eq("is_active", true),
     supabase.from("student_class_enrollments").select("*", { count: "exact" }),
-    supabase.from("recordings").select("*", { count: "exact" }).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-    supabase.from("materials").select("*", { count: "exact" }).gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+    supabase.from("recordings").select("*", { count: "exact" }).gte("created_at", sevenDaysAgo),
+    supabase.from("materials").select("*", { count: "exact" }).gte("created_at", sevenDaysAgo),
     supabase.from("profiles").select("id, full_name, created_at").eq("role", "student").order("created_at", { ascending: false }).limit(5),
     supabase.from("recordings").select("id, title, release_at, class_groups(name)").order("created_at", { ascending: false }).limit(5),
     supabase.from("materials").select("id, title, release_at, class_groups(name)").order("created_at", { ascending: false }).limit(5),
@@ -81,7 +83,11 @@ export default async function AdminHomePage() {
                   <div className="flex items-start justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-900 truncate">{rec.title}</p>
-                      <p className="text-xs text-slate-500">{(rec.class_groups as any)?.name || Array.isArray(rec.class_groups) && (rec.class_groups as any)[0]?.name}</p>
+                      <p className="text-xs text-slate-500">
+                        {Array.isArray(rec.class_groups) 
+                          ? (rec.class_groups[0] as { name?: string })?.name 
+                          : (rec.class_groups as { name?: string })?.name}
+                      </p>
                     </div>
                     <span className="text-sm text-slate-500">
                       <DateFormat date={rec.release_at} format="short" />
@@ -110,7 +116,11 @@ export default async function AdminHomePage() {
                   <div className="flex items-start justify-between">
                     <div className="min-w-0">
                       <p className="font-medium text-slate-900 truncate">{mat.title}</p>
-                      <p className="text-xs text-slate-500">{(mat.class_groups as any)?.name || Array.isArray(mat.class_groups) && (mat.class_groups as any)[0]?.name}</p>
+                      <p className="text-xs text-slate-500">
+                        {Array.isArray(mat.class_groups) 
+                          ? (mat.class_groups[0] as { name?: string })?.name 
+                          : (mat.class_groups as { name?: string })?.name}
+                      </p>
                     </div>
                     <span className="text-sm text-slate-500">
                       <DateFormat date={mat.release_at} format="short" />

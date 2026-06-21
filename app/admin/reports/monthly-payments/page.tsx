@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, Button, Badge, DateFormat, Select, Table, SearchBar } from "@/components/ui";
 
 export default function MonthlyReportPage() {
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<{ summary: { totalMonthlyIncome: number; totalPaidStudents: number; totalFreeCardStudents: number; }; classGroups: { name: string; paidCount: number; freeCardCount: number; totalIncome: number; rows: { id: string; student_name: string; phone?: string; mode: string; payment_date: string; expiry_date: string; amount: number; }[]; }[]; } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -37,8 +37,8 @@ export default function MonthlyReportPage() {
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "Class,Student Name,Phone,Access Mode,Payment Date,Expiry Date,Amount\n";
 
-    reportData.classGroups.forEach((group: any) => {
-      group.rows.forEach((row: any) => {
+    reportData.classGroups.forEach((group: { name: string; rows: { id: string; student_name: string; phone?: string; mode: string; payment_date: string; expiry_date: string; amount: number; }[] }) => {
+      group.rows.forEach((row: { id: string; student_name: string; phone?: string; mode: string; payment_date: string; expiry_date: string; amount: number; }) => {
         csvContent += `"${group.name}","${row.student_name}","${row.phone || ""}","${row.mode}","${row.payment_date}","${row.expiry_date}","${row.amount}"\n`;
       });
     });
@@ -154,8 +154,8 @@ export default function MonthlyReportPage() {
             </Card>
           ) : (
             <div className="space-y-10">
-              {reportData.classGroups.map((group: any) => {
-                const filteredRows = group.rows.filter((r: any) => 
+              {reportData.classGroups.map((group: { name: string; paidCount: number; freeCardCount: number; totalIncome: number; rows: { id: string; student_name: string; phone?: string; mode: string; payment_date: string; expiry_date: string; amount: number; }[] }) => {
+                const filteredRows = group.rows.filter((r: { id: string; student_name: string }) => 
                   r.student_name.toLowerCase().includes(searchQuery.toLowerCase())
                 );
                 
@@ -178,7 +178,7 @@ export default function MonthlyReportPage() {
                           {
                             key: "student",
                             header: "Student",
-                            render: (row: any) => (
+                            render: (row: { id: string; student_name: string; phone?: string; }) => (
                               <div>
                                 <p className="font-semibold text-slate-900">{row.student_name}</p>
                                 <p className="text-xs text-slate-500">{row.phone || "No phone"}</p>
@@ -188,7 +188,7 @@ export default function MonthlyReportPage() {
                           {
                             key: "mode",
                             header: "Type",
-                            render: (row: any) => (
+                            render: (row: { id: string; mode: string }) => (
                               <Badge variant={row.mode === "free_card" ? "success" : row.mode === "manual" ? "warning" : "default"}>
                                 {row.mode}
                               </Badge>
@@ -197,18 +197,18 @@ export default function MonthlyReportPage() {
                           {
                             key: "payment_date",
                             header: "Date",
-                            render: (row: any) => <DateFormat date={row.payment_date} format="short" />,
+                            render: (row: { id: string; payment_date: string }) => <DateFormat date={row.payment_date} format="short" />,
                           },
                           {
                             key: "expiry",
                             header: "Expiry",
-                            render: (row: any) => <DateFormat date={row.expiry_date} format="short" />,
+                            render: (row: { id: string; expiry_date: string }) => <DateFormat date={row.expiry_date} format="short" />,
                           },
                           {
                             key: "amount",
                             header: "Amount",
                             className: "text-right font-medium",
-                            render: (row: any) => row.mode === "paid" ? `Rs. ${row.amount.toLocaleString()}` : <span className="text-slate-400">-</span>,
+                            render: (row: { id: string; mode: string; amount: number }) => row.mode === "paid" ? `Rs. ${row.amount.toLocaleString()}` : <span className="text-slate-400">-</span>,
                           },
                         ]}
 

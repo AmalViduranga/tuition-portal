@@ -48,9 +48,17 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
   const [formLoading, setFormLoading] = useState(false);
 
   // Enrollments Modal State
+  type StudentEnrollmentRow = {
+    id: string;
+    class_name: string;
+    access_mode: string;
+    amount_paid: number;
+    start_access_date: string;
+    access_end_date: string | null;
+  };
   const [isEnrollmentModalOpen, setIsEnrollmentModalOpen] = useState(false);
   const [selectedStudentForEnrollments, setSelectedStudentForEnrollments] = useState<Student | null>(null);
-  const [studentEnrollments, setStudentEnrollments] = useState<any[]>([]);
+  const [studentEnrollments, setStudentEnrollments] = useState<StudentEnrollmentRow[]>([]);
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
   const [enrollmentFormData, setEnrollmentFormData] = useState({
     class_id: "",
@@ -70,7 +78,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
       d.setDate(d.getDate() + 40);
       setEnrollmentFormData(prev => ({ ...prev, access_end_date: d.toISOString().split('T')[0] }));
     }
-  }, [enrollmentFormData.start_access_date]);
+  }, [enrollmentFormData.start_access_date, enrollmentFormData.access_end_date]);
 
   const fetchStudentEnrollments = async (studentId: string) => {
     try {
@@ -254,26 +262,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
     }
   };
 
-  const handleDelete = async (student: Student) => {
-    if (!confirm(`Are you sure you want to deactivate ${student.full_name}? This can be reversed later.`)) {
-      return;
-    }
 
-    try {
-      const form = new FormData();
-      form.append("student_id", student.id);
-
-      const response = await fetch("/api/admin/students/delete", {
-        method: "POST",
-        body: form,
-      });
-
-      if (!response.ok) throw new Error("Failed to deactivate student");
-      await fetchStudents();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Unknown error");
-    }
-  };
 
   const handlePermanentDelete = async (student: Student) => {
     const doubleConfirm = confirm(`DANGER: Are you sure you want to PERMANENTLY delete ${student.full_name}? This will remove all their records, access, and login account. This CANNOT be undone.`);
@@ -561,7 +550,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
             <p className="font-semibold text-blue-800">Account Creation Only</p>
             <p className="mt-1">
               Adding a student here creates their login credentials. Content access (recordings/materials) will only be granted 
-              after you **enroll them** in classes using the "Enrollments" button in the table below.
+              After you enroll them in classes using the &quot;Enrollments&quot; button in the table below.
             </p>
           </div>
           
@@ -683,16 +672,16 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
               <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                 <Table
                   columns={[
-                    { key: "class", header: "Class", render: (e: any) => <span className="font-semibold text-slate-900">{e.class_name || "-"}</span> },
-                    { key: "mode", header: "Mode", render: (e: any) => <Badge variant={e.access_mode === "free_card" ? "success" : "default"}>{e.access_mode}</Badge> },
-                    { key: "amount", header: "Amount", render: (e: any) => e.amount_paid > 0 ? `Rs. ${e.amount_paid}` : "-" },
-                    { key: "start_date", header: "Start", render: (e: any) => <DateFormat date={e.start_access_date} format="short" /> },
-                    { key: "end_date", header: "End", render: (e: any) => e.access_end_date ? <DateFormat date={e.access_end_date} format="short" /> : <span className="text-slate-400">Lifetime</span> },
+                    { key: "class", header: "Class", render: (e: StudentEnrollmentRow) => <span className="font-semibold text-slate-900">{e.class_name || "-"}</span> },
+                    { key: "mode", header: "Mode", render: (e: StudentEnrollmentRow) => <Badge variant={e.access_mode === "free_card" ? "success" : "default"}>{e.access_mode}</Badge> },
+                    { key: "amount", header: "Amount", render: (e: StudentEnrollmentRow) => e.amount_paid > 0 ? `Rs. ${e.amount_paid}` : "-" },
+                    { key: "start_date", header: "Start", render: (e: StudentEnrollmentRow) => <DateFormat date={e.start_access_date} format="short" /> },
+                    { key: "end_date", header: "End", render: (e: StudentEnrollmentRow) => e.access_end_date ? <DateFormat date={e.access_end_date} format="short" /> : <span className="text-slate-400">Lifetime</span> },
                     { 
                       key: "actions", 
                       header: "", 
                       className: "text-right",
-                      render: (e: any) => (
+                      render: (e: StudentEnrollmentRow) => (
                         <Button 
                           size="sm" 
                           variant="danger" 

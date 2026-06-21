@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { addRecording, updateRecording, toggleRecordingStatus, deleteRecording } from "@/app/admin/actions";
 import { Card, Button, Input, Textarea, SearchBar, Badge, DateFormat, Modal, Select } from "@/components/ui";
 import { youtubeThumbnailFallbackUrl, youtubeThumbnailUrl, getYouTubeMetadata } from "@/lib/recordings/youtube";
 
@@ -459,6 +458,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
                               rel="noopener noreferrer"
                               className="relative h-12 w-20 flex-shrink-0 overflow-hidden rounded bg-slate-100 shadow-sm transition-transform hover:scale-105"
                             >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={rec.thumbnail_url || youtubeThumbnailUrl(rec.youtube_video_id)}
                                 alt=""

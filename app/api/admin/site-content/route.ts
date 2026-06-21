@@ -1,10 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import { requireAdminApi } from "@/lib/auth";
 
 // GET all site settings
 export async function GET() {
   try {
-    const { supabase } = await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
+    const supabase = adminAuth.supabase!;
 
     const { data: settings, error } = await supabase
       .from("site_settings")

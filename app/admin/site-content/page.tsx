@@ -2,17 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { updateSiteContent } from "@/app/admin/actions";
-import { Card, Button, Input, Textarea, Badge } from "@/components/ui";
-
-const CONTENT_KEYS = {
-  site_name: "Site Name",
-  teacher_name: "Teacher Name",
-  teacher_qualification: "Teacher Qualification",
-  teacher_description: "Teacher Description",
-  subject_name: "Subject Name",
-  subject_code: "Subject Code",
-  subject_description: "Subject Description",
-} as const;
+import { Card, Button, Input, Textarea } from "@/components/ui";
 
 export default function AdminSiteContentPage() {
   const [content, setContent] = useState<Record<string, string>>({});

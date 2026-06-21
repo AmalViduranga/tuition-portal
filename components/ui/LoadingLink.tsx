@@ -1,7 +1,7 @@
 "use client";
 import Link, { LinkProps } from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 
 interface LoadingLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps>, LinkProps {
   children: ReactNode;
@@ -11,11 +11,12 @@ interface LoadingLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorEle
 export default function LoadingLink({ children, loadingText, onClick, className = "", ...props }: LoadingLinkProps) {
   const [isNavigating, setIsNavigating] = useState(false);
   const pathname = usePathname();
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
-  useEffect(() => {
-    // Reset navigating state when pathname changes
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setIsNavigating(false);
-  }, [pathname]);
+  }
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (onClick) onClick(e);

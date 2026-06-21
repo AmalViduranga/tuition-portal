@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getErrorMessage } from "@/lib/utils/error";
 
 export async function POST(request: NextRequest) {
   try {
-    const { user } = await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
+    const user = adminAuth.user!;
     const adminSupabase = createAdminClient();
     const body = await request.json();
 
@@ -57,11 +60,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Revoke Enrollment Server Error:", error);
-    const message = error?.message || "Unknown error";
     return NextResponse.json(
-      { error: message },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

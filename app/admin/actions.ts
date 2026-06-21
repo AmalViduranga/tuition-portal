@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createStudentAccount } from "@/lib/admin/create-student-account";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { randomInt } from "node:crypto";
 
 export async function createStudent(formData: FormData) {
   await requireAdmin();
@@ -171,7 +172,7 @@ export async function updateRecording(formData: FormData) {
   const { supabase } = await requireAdmin();
   const recordingId = String(formData.get("recording_id") ?? "");
 
-  const updateData: Record<string, any> = {
+  const updateData: { class_id: string; title: string; description: string; youtube_video_id: string; release_at: string; published: boolean; thumbnail_url?: string; } = {
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
@@ -325,7 +326,7 @@ export async function updateMaterial(formData: FormData) {
   const { supabase } = await requireAdmin();
   const materialId = String(formData.get("material_id") ?? "");
 
-  const updateData: Record<string, any> = {
+  const updateData: { class_id: string; title: string; material_type: string; release_at: string; published: boolean; file_url?: string; file_size?: number; file_type?: string; } = {
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
     material_type: String(formData.get("material_type") ?? "other"),
@@ -522,15 +523,20 @@ export async function resetStudentPassword(formData: FormData) {
   const all = upper + lower + nums + specials;
   
   let tempPassword = "";
-  tempPassword += upper[Math.floor(Math.random() * upper.length)];
-  tempPassword += lower[Math.floor(Math.random() * lower.length)];
-  tempPassword += nums[Math.floor(Math.random() * nums.length)];
+  tempPassword += upper[randomInt(0, upper.length)];
+  tempPassword += lower[randomInt(0, lower.length)];
+  tempPassword += nums[randomInt(0, nums.length)];
   for (let i = 0; i < 7; i++) {
-    tempPassword += all[Math.floor(Math.random() * all.length)];
+    tempPassword += all[randomInt(0, all.length)];
   }
 
-  // Shuffle string to avoid predictable patterns
-  tempPassword = tempPassword.split('').sort(() => 0.5 - Math.random()).join('');
+  // Shuffle string securely to avoid predictable patterns
+  const chars = tempPassword.split("");
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = randomInt(0, i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  tempPassword = chars.join("");
 
   const { error: authError } = await adminClient.auth.admin.updateUserById(studentId, {
     password: tempPassword,

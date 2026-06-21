@@ -40,7 +40,7 @@ export async function getStudentPendingNotifications(): Promise<NotificationItem
     .eq("student_id", user.id)
 
   const seenSet = new Set(
-    (seenReads || []).map((r: any) => `${r.resource_type}:${r.resource_id}`)
+    (seenReads || []).map((r: { resource_type: string; resource_id: string }) => `${r.resource_type}:${r.resource_id}`)
   )
 
   const notifications: NotificationItem[] = []
@@ -89,10 +89,10 @@ export async function markStudentNotificationSeen(resourceType: "material" | "re
   let hasAccess = false
   if (resourceType === "recording") {
     const payload = await loadStudentRecordings(supabase, user.id, null)
-    hasAccess = payload.recordings.some((r: any) => r.id === resourceId)
+    hasAccess = payload.recordings.some((r: { id: string }) => r.id === resourceId)
   } else {
     const payload = await loadStudentMaterials(supabase, user.id, null)
-    hasAccess = payload.materials.some((m: any) => m.id === resourceId)
+    hasAccess = payload.materials.some((m: { id: string }) => m.id === resourceId)
   }
 
   if (!hasAccess) {
@@ -126,8 +126,8 @@ export async function markAllStudentNotificationsSeen(items: {resource_type: "ma
   ])
 
   const accessibleSet = new Set([
-    ...recordingsPayload.recordings.map((r: any) => `recording:${r.id}`),
-    ...materialsPayload.materials.map((m: any) => `material:${m.id}`)
+    ...recordingsPayload.recordings.map((r: { id: string }) => `recording:${r.id}`),
+    ...materialsPayload.materials.map((m: { id: string }) => `material:${m.id}`)
   ])
 
   const toInsert = validItems

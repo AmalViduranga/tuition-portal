@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createStudentAccount } from "@/lib/admin/create-student-account";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const simple = url.searchParams.get("simple") === "true";
@@ -35,7 +36,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const formData = await request.formData();
 
     const email = String(formData.get("email") ?? "");

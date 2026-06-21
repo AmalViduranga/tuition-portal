@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Button, Card, SearchBar, Select } from "@/components/ui";
+import { Card, SearchBar, Select } from "@/components/ui";
 import { RecordingWatchModal, StudentRecordingRow } from "@/components/recordings";
 import type { StudentRecordingsPayload } from "@/lib/recordings/student-recordings";
 
@@ -25,7 +25,7 @@ export default function StudentRecordingsClient({
   const [selectedClassId, setSelectedClassId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
 
   const fetchRecordings = useCallback(async (classId: string) => {

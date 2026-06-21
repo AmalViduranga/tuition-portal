@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/utils/error";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get("student_id");
@@ -41,9 +43,9 @@ export async function GET(request: NextRequest) {
     }
 
     const formatted = (data || []).map((item) => {
-      const getVal = (obj: any, field: string) => {
+      const getVal = (obj: unknown, field: string) => {
           if (!obj) return null;
-          return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
+          return Array.isArray(obj) ? obj[0]?.[field] : (obj as Record<string, unknown>)[field];
       };
 
       return {
@@ -67,7 +69,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user } = await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
+    const user = adminAuth.user!;
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -101,7 +105,8 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -122,11 +127,10 @@ export async function DELETE(request: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Recording Unlock Revocation Error:", error);
-    const message = error?.message || error?.details || (typeof error === 'string' ? error : "Unknown error");
     return NextResponse.json(
-      { error: message },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }

@@ -4,11 +4,13 @@ import { useState } from "react";
 import { StudentRecordingRow, RecordingWatchModal } from "@/components/recordings";
 
 interface ClassRecordingsListProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recordings: any[];
   highlight?: string;
 }
 
 export default function ClassRecordingsList({ recordings, highlight }: ClassRecordingsListProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedRecording, setSelectedRecording] = useState<any | null>(null);
 
   if (recordings.length === 0) {

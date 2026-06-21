@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const limit = url.searchParams.get("limit") === "true";
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -103,7 +105,7 @@ export async function POST(request: NextRequest) {
     if (insertError) throw insertError;
 
     if (published && inserted) {
-      await grantNewReleaseAccess(inserted.id, classId, releaseAt, "material", (await requireAdmin()).user.id);
+      await grantNewReleaseAccess(inserted.id, classId, releaseAt, "material", adminAuth.user!.id);
     }
 
     return NextResponse.json({ success: true });
@@ -117,7 +119,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -193,7 +196,7 @@ export async function PUT(request: NextRequest) {
     if (error) throw error;
 
     if (published) {
-      await grantNewReleaseAccess(materialId, classId, releaseAt, "material", (await requireAdmin()).user.id);
+      await grantNewReleaseAccess(materialId, classId, releaseAt, "material", adminAuth.user!.id);
     }
 
     return NextResponse.json({ success: true });
@@ -206,7 +209,8 @@ export async function PUT(request: NextRequest) {
 }
 export async function DELETE(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const url = new URL(request.url);
     const materialId = url.searchParams.get("id");

@@ -39,11 +39,11 @@ export async function grantPaymentAccess(paymentPeriodId: string, adminId?: stri
   const { student_id, class_id, start_date, end_date, payment_plans } = payment;
 
   // 2. Determine all class IDs covered by this payment
-  let targetClassIds: string[] = [];
+  const targetClassIds: string[] = [];
   if (class_id) targetClassIds.push(class_id);
   
-  if (payment_plans && Array.isArray((payment_plans as any).payment_plan_classes)) {
-    (payment_plans as any).payment_plan_classes.forEach((ppc: any) => {
+  if (payment_plans && Array.isArray((payment_plans as { payment_plan_classes: { class_id: string }[] }).payment_plan_classes)) {
+    (payment_plans as { payment_plan_classes: { class_id: string }[] }).payment_plan_classes.forEach((ppc) => {
       if (!targetClassIds.includes(ppc.class_id)) targetClassIds.push(ppc.class_id);
     });
   }
@@ -54,18 +54,18 @@ export async function grantPaymentAccess(paymentPeriodId: string, adminId?: stri
 }
 
 /** Internal helper for access granting logic */
-async function processAccessGrants(supabase: any, student_id: string, classIds: string[], start: string, end: string, adminId?: string) {
+async function processAccessGrants(supabase: ReturnType<typeof createAdminClient>, student_id: string, classIds: string[], start: string, end: string, adminId?: string) {
   for (const tid of classIds) {
     // A. Recordings
     const { data: recordings } = await supabase.from("recordings").select("id").eq("class_id", tid).gte("release_at", start).lte("release_at", end);
     if (recordings && recordings.length > 0) {
-      const grants = recordings.map((r: any) => ({ student_id, recording_id: r.id, granted_by: adminId || null, grant_type: "payment" }));
+      const grants = recordings.map((r: { id: string }) => ({ student_id, recording_id: r.id, granted_by: adminId || null, grant_type: "payment" }));
       await supabase.from("recording_manual_unlocks").upsert(grants, { onConflict: "student_id, recording_id", ignoreDuplicates: true });
     }
     // B. Materials
     const { data: materials } = await supabase.from("materials").select("id").eq("class_id", tid).gte("release_at", start).lte("release_at", end);
     if (materials && materials.length > 0) {
-      const grants = materials.map((m: any) => ({ student_id, material_id: m.id, granted_by: adminId || null, grant_type: "payment" }));
+      const grants = materials.map((m: { id: string }) => ({ student_id, material_id: m.id, granted_by: adminId || null, grant_type: "payment" }));
       await supabase.from("material_manual_unlocks").upsert(grants, { onConflict: "student_id, material_id", ignoreDuplicates: true });
     }
   }
@@ -103,7 +103,7 @@ export async function grantNewReleaseAccess(
     .gte("end_date", releaseAt);
 
   // 3. Optional: Find Students with Plan-based access (handle missing tables safely)
-  let planStudentIds: string[] = [];
+  const planStudentIds: string[] = [];
   try {
      const { data: planPayments } = await supabase
       .from("student_class_payment_periods")
@@ -120,12 +120,13 @@ export async function grantNewReleaseAccess(
       .gte("end_date", releaseAt);
       
      if (planPayments) {
-        planPayments.forEach((p: any) => {
-            const hasClass = p.payment_plans?.payment_plan_classes?.some((c: any) => c.class_id === classId);
+        planPayments.forEach((p: { payment_plans?: { payment_plan_classes?: { class_id: string }[] } | { payment_plan_classes?: { class_id: string }[] }[]; student_id: string }) => {
+            const plans = Array.isArray(p.payment_plans) ? p.payment_plans[0] : p.payment_plans;
+            const hasClass = plans?.payment_plan_classes?.some((c) => c.class_id === classId);
             if (hasClass) planStudentIds.push(p.student_id);
         });
      }
-  } catch (e) {
+  } catch {
      console.warn("Skipping plan-based access check (tables might be missing)");
   }
 

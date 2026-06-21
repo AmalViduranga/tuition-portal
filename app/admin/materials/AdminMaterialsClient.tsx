@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { addMaterial, updateMaterial, toggleMaterialStatus } from "@/app/admin/actions";
 import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table, Select } from "@/components/ui";
 
 type Material = {
@@ -119,7 +118,7 @@ export default function AdminMaterialsClient({ initialMaterials, initialClasses 
 
   const handleEdit = (material: Material) => {
     setSelectedMaterial(material);
-    const cg = material.class_groups as any;
+    const cg = material.class_groups as { id: string } | { id: string }[] | null;
     setFormData({
       class_id: (Array.isArray(cg) ? cg[0]?.id : cg?.id) || "",
       title: material.title,

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get("student_id");
@@ -36,9 +37,9 @@ export async function GET(request: NextRequest) {
     const formatted = (data || []).map((item) => ({
       id: item.id,
       student_id: item.student_id,
-      student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : (item.profiles as any)?.full_name,
+      student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : (item.profiles as { full_name?: string })?.full_name,
       material_id: item.material_id,
-      material_title: Array.isArray(item.materials) ? item.materials[0]?.title : (item.materials as any)?.title,
+      material_title: Array.isArray(item.materials) ? item.materials[0]?.title : (item.materials as { title?: string })?.title,
       created_at: item.created_at,
     }));
 
@@ -53,7 +54,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user } = await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
+    const user = adminAuth.user!;
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -87,7 +90,8 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 

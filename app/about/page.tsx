@@ -46,6 +46,7 @@ export default async function AboutPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-1 border border-slate-100 bg-slate-50 rounded-3xl p-8 flex flex-col items-center text-center justify-center">
             {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img 
                 src={imageUrl} 
                 alt={name} 

@@ -1,11 +1,10 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function resetPassword(formData: FormData) {
   const password = String(formData.get("password") ?? "");
-  const token = String(formData.get("token") ?? "");
+
 
   if (!password) {
     return { error: "Password is required" };

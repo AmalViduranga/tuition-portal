@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { supabase } = await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
+    const supabase = adminAuth.supabase!;
     const formData = await request.formData();
 
     const classId = String(formData.get("class_id") ?? "");

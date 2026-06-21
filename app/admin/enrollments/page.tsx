@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  addEnrollment,
-  addPaymentPeriod,
-  addManualRecordingUnlock,
-  addManualMaterialUnlock,
-  updatePaymentPeriodStatus,
-} from "@/app/admin/actions";
+
 import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Select, Table } from "@/components/ui";
 
 type Enrollment = {
@@ -31,11 +25,14 @@ type PaymentPeriod = {
   id: string;
   student_id: string;
   student_name?: string;
+  student_phone?: string;
   class_id: string;
   class_name?: string;
   start_date: string;
   end_date: string;
   status: string;
+  amount_paid?: number;
+  access_mode?: string;
   created_at: string;
 };
 
@@ -149,7 +146,7 @@ export default function AdminEnrollmentsPage() {
     }
   }, []);
 
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<{ id: string; name: string; fee: string | number }[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -184,7 +181,7 @@ export default function AdminEnrollmentsPage() {
     let result = payments;
 
     if (searchQuery) {
-      result = result.filter((pay: any) =>
+      result = result.filter((pay: PaymentPeriod) =>
         pay.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pay.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -192,8 +189,8 @@ export default function AdminEnrollmentsPage() {
 
     if (!selectedStudentId) return result;
 
-    const selected = result.filter((e: any) => e.student_id === selectedStudentId);
-    const others = result.filter((e: any) => e.student_id !== selectedStudentId);
+    const selected = result.filter((e: PaymentPeriod) => e.student_id === selectedStudentId);
+    const others = result.filter((e: PaymentPeriod) => e.student_id !== selectedStudentId);
 
     return [...selected, ...others];
   }, [payments, selectedStudentId, searchQuery]);
@@ -382,7 +379,7 @@ export default function AdminEnrollmentsPage() {
             {
               key: "student",
               header: "Student",
-              render: (pay: any) => (
+              render: (pay: PaymentPeriod) => (
                 <div>
                   <p className="font-medium flex items-center gap-2">
                     {pay.student_name || "Unknown"}
@@ -397,17 +394,17 @@ export default function AdminEnrollmentsPage() {
             {
               key: "class",
               header: "Class/Plan",
-              render: (pay: any) => pay.class_name || "-",
+              render: (pay: PaymentPeriod) => pay.class_name || "-",
             },
             {
               key: "amount",
               header: "Amount",
-              render: (pay: any) => pay.access_mode === 'paid' ? `Rs. ${pay.amount_paid}` : <span className="text-slate-400">{pay.access_mode}</span>,
+              render: (pay: PaymentPeriod) => pay.access_mode === 'paid' ? `Rs. ${pay.amount_paid}` : <span className="text-slate-400">{pay.access_mode}</span>,
             },
             {
               key: "period",
               header: "Period",
-              render: (pay: any) => (
+              render: (pay: PaymentPeriod) => (
                 <div className="text-sm">
                   <DateFormat date={pay.start_date} format="short" /> - <DateFormat date={pay.end_date} format="short" />
                 </div>
@@ -416,7 +413,7 @@ export default function AdminEnrollmentsPage() {
             {
               key: "status",
               header: "Status",
-              render: (pay: any) => (
+              render: (pay: PaymentPeriod) => (
                 <Badge variant={
                   pay.status === "approved" ? "success" :
                   pay.status === "rejected" ? "danger" :
@@ -430,7 +427,7 @@ export default function AdminEnrollmentsPage() {
               key: "actions",
               header: "Actions",
               className: "text-right",
-              render: (pay: any) => (
+              render: (pay: PaymentPeriod) => (
                 <div className="flex items-center justify-end gap-2">
                   {pay.status === "pending" && (
                     <>
@@ -613,7 +610,7 @@ function EnrollmentForm({ students, classes, onSubmit, onStudentSelect }: Enroll
     student_id: "", 
     class_id: "", 
     start_access_date: new Date().toISOString().split('T')[0],
-    access_mode: "paid" as const,
+    access_mode: "paid" as "paid" | "free_card" | "manual",
     access_end_date: "",
     amount_paid: ""
   });
@@ -689,7 +686,7 @@ function EnrollmentForm({ students, classes, onSubmit, onStudentSelect }: Enroll
         <Select
           label="Access Mode"
           value={formData.access_mode}
-          onChange={(e) => setFormData({ ...formData, access_mode: e.target.value as any })}
+          onChange={(e) => setFormData({ ...formData, access_mode: e.target.value as "paid" | "free_card" | "manual" })}
           options={[
             { value: "paid", label: "Paid" },
             { value: "free_card", label: "Free Card" },
@@ -729,7 +726,7 @@ function EnrollmentForm({ students, classes, onSubmit, onStudentSelect }: Enroll
 interface PaymentFormProps {
   students: Student[];
   classes: Class[];
-  plans: any[];
+  plans: { id: string; name: string; fee: string | number }[];
   onSubmit: (formData: FormData) => Promise<void>;
   onStudentSelect?: (id: string) => void;
 }
@@ -752,10 +749,10 @@ function PaymentForm({ students, classes, plans, onSubmit, onStudentSelect }: Pa
   // Auto-calculate end date (1.5 months) and amount when plan selected
   const handlePlanChange = (val: string) => {
     const plan = plans.find(p => p.id === val);
-    const updates: any = { payment_plan_id: val, class_id: "" };
+    const updates: { payment_plan_id: string; class_id: string; amount_paid?: string; end_date?: string } = { payment_plan_id: val, class_id: "" };
     
     if (plan) {
-      updates.amount_paid = plan.fee;
+      updates.amount_paid = String(plan.fee);
       
       // Auto set 1.5 months if not set
       if (!formData.end_date) {
@@ -1040,7 +1037,7 @@ function EditEnrollmentFlow({ enrollment, onClose, onSuccess }: { enrollment: En
           <Select
             label="Access Mode"
             value={formData.access_mode}
-            onChange={(e) => setFormData({ ...formData, access_mode: e.target.value as any })}
+            onChange={(e) => setFormData({ ...formData, access_mode: e.target.value as "paid" | "free_card" | "manual" })}
             options={[
               { value: "paid", label: "Paid" },
               { value: "free_card", label: "Free Card" },
@@ -1109,7 +1106,7 @@ function RevokeEnrollmentModal({ enrollment, onClose, onSuccess }: { enrollment:
     <Modal isOpen={true} onClose={onClose} title="Revoke Enrollment" size="md">
       <div className="space-y-4">
         <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded text-sm">
-          <strong>Warning:</strong> Revoking this enrollment will immediately remove the student's access to this class's resources granted by this enrollment. This action is tracked.
+          <strong>Warning:</strong> Revoking this enrollment will immediately remove the student&apos;s access to this class&apos;s resources granted by this enrollment. This action is tracked.
         </div>
         
         <Input

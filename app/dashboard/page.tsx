@@ -40,10 +40,10 @@ export default async function StudentDashboardPage() {
   const accessibleRecordings = (recordingsPayload?.recordings || []).slice(0, 3);
   const accessibleMaterials = (materialsPayload?.materials || []).slice(0, 3);
   
-  const today = new Date().toISOString().split('T')[0];
+
 
   // Calculate latest expiry for the banner info if needed
-  const latestExpiry = enrollments.reduce((latest: string | null, e: any) => {
+  const latestExpiry = enrollments.reduce((latest: string | null, e: { start_access_date: string; access_end_date?: string | null }) => {
     const start = e.start_access_date;
     let end = e.access_end_date;
     if (!end) {
@@ -121,9 +121,10 @@ export default async function StudentDashboardPage() {
               </Card>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {accessibleRecordings.map((rec: any) => (
+                {accessibleRecordings.map((rec: { id: string; youtube_video_id: string; title: string; class_groups?: { name?: string } | { name?: string }[] | null }) => (
                   <Link key={rec.id} href="/portal/recordings" className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:shadow-md">
                     <div className="aspect-video w-full bg-slate-100 relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`https://img.youtube.com/vi/${rec.youtube_video_id}/mqdefault.jpg`}
                         alt={rec.title}
@@ -133,7 +134,7 @@ export default async function StudentDashboardPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-slate-900 line-clamp-2 text-sm">{rec.title}</h3>
-                      <p className="mt-1 text-xs text-slate-500 truncate">{rec.class_groups?.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{(Array.isArray(rec.class_groups) ? rec.class_groups[0] : rec.class_groups)?.name}</p>
                     </div>
                   </Link>
                 ))}
@@ -155,7 +156,7 @@ export default async function StudentDashboardPage() {
               </Card>
             ) : (
               <div className="grid gap-3 sm:grid-cols-1">
-                {accessibleMaterials.map((mat: any) => (
+                {accessibleMaterials.map((mat: { id: string; file_url: string; file_type?: string | null; title: string; release_at: string; class_groups?: { name?: string } | { name?: string }[] | null }) => (
                   <a key={mat.id} href={mat.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-indigo-200 hover:shadow-sm">
                     <div className="flex items-center gap-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-xl text-indigo-600">
@@ -164,7 +165,7 @@ export default async function StudentDashboardPage() {
                       <div>
                         <h3 className="font-medium text-slate-900 text-sm">{mat.title}</h3>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {mat.class_groups?.name || "Class"} &middot; <DateFormat date={mat.release_at} format="short" />
+                          {(Array.isArray(mat.class_groups) ? mat.class_groups[0] : mat.class_groups)?.name || "Class"} &middot; <DateFormat date={mat.release_at} format="short" />
                         </p>
                       </div>
                     </div>
@@ -210,7 +211,7 @@ export default async function StudentDashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3 text-sm">
-                  {enrollments.map((e: any, idx: number) => {
+                  {enrollments.map((e: { class_id: string; start_access_date: string; access_end_date?: string | null; access_mode?: string; class_groups?: { name?: string } | { name?: string }[] }, idx: number) => {
                     const group = Array.isArray(e.class_groups) ? e.class_groups[0] : e.class_groups;
                     
                     // Use shared logic for consistency

@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { login } from "./actions";
 import { LoginSubmitButton } from "./login-submit-button";
 import { Eye, EyeOff } from "lucide-react";

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Card, DateFormat } from "@/components/ui";
+import { Card } from "@/components/ui";
 
 export default async function PortalHomePage() {
   const { supabase, user } = await requireUser();
@@ -32,7 +32,7 @@ export default async function PortalHomePage() {
 
   // Filter recordings to only those the student has access to
   const accessibleClassIds = new Set(
-    (enrollments || []).map((e: any) => {
+    (enrollments || []).map((e: { class_groups: { id: string } | { id: string }[] }) => {
       const group = Array.isArray(e.class_groups) ? e.class_groups[0] : e.class_groups;
       return group?.id;
     })
@@ -54,13 +54,7 @@ export default async function PortalHomePage() {
   if (hour >= 12 && hour < 17) greetingMsg = "Good afternoon";
   else if (hour >= 17) greetingMsg = "Good evening";
 
-  // Calculate latest expiry for paid periods
-  const paidEnrollments = (enrollments || []).filter((e: any) => e.access_mode !== "free_card");
-  const latestExpiry = paidEnrollments.reduce((latest: string | null, e: any) => {
-    if (!e.access_end_date) return latest;
-    if (!latest) return e.access_end_date;
-    return e.access_end_date > latest ? e.access_end_date : latest;
-  }, null);
+
 
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
   const studentName = profile?.full_name || "Student";
@@ -137,7 +131,7 @@ export default async function PortalHomePage() {
           </div>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
-            {(enrollments || []).slice(0, 4).map((enrollment: any) => {
+            {(enrollments || []).slice(0, 4).map((enrollment: { class_id: string; start_access_date: string; class_groups: { name: string } | { name: string }[] }) => {
               const group = Array.isArray(enrollment.class_groups)
                 ? enrollment.class_groups[0]
                 : enrollment.class_groups;
@@ -195,6 +189,7 @@ export default async function PortalHomePage() {
                 >
                   <Link href={`/portal/recordings`} className="block">
                     <div className="aspect-video relative bg-slate-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`https://img.youtube.com/vi/${recording.youtube_video_id}/mqdefault.jpg`}
                         alt={recording.title}

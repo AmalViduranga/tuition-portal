@@ -42,12 +42,12 @@ export default async function StudentClassesPage() {
         <Card className="text-center py-12 bg-slate-50 border-dashed">
           <div className="text-4xl mb-3">📚</div>
           <h2 className="text-lg font-semibold text-slate-900">No Classes Yet</h2>
-          <p className="text-slate-600 mt-1">You haven't been enrolled in any classes.</p>
+          <p className="text-slate-600 mt-1">You haven&apos;t been enrolled in any classes.</p>
           <p className="text-sm text-slate-500 mt-2">Please contact your administrator to get enrolled.</p>
         </Card>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {enrollments.map((enr: any) => {
+          {enrollments.map((enr: { class_id: string; start_access_date: string; access_mode: string; access_end_date?: string; class_groups: { id: string; name: string; description?: string; is_active: boolean } | { id: string; name: string; description?: string; is_active: boolean }[] }) => {
             const classGroup = Array.isArray(enr.class_groups) ? enr.class_groups[0] : enr.class_groups;
             
             if (!classGroup) return null;

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncFreeCardGrantsForStudent } from "@/lib/admin/grant-manager";
+import { getErrorMessage } from "@/lib/utils/error";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     
     const { searchParams } = new URL(request.url);
@@ -40,15 +42,30 @@ export async function GET(request: NextRequest) {
       console.error("GET Enrollments Relation Error:", fetchError);
       // Fallback for missing columns or renamed tables
       if (fetchError.code === '42P01' || fetchError.code === '42703' || fetchError.code === 'PGRST108') {
-        const { data: basic, error: basicErr } = await adminSupabase.from("student_class_enrollments").select("*").limit(100);
+        const { data: basic } = await adminSupabase.from("student_class_enrollments").select("*").limit(100);
         return NextResponse.json(basic || []);
       }
       throw fetchError;
     }
 
-    const formatted = (rawData || []).map((item: any) => {
+    const formatted = (rawData || []).map((item: {
+      id: string;
+      student_id: string;
+      student?: { full_name?: string } | { full_name?: string }[];
+      class_id: string;
+      class?: { name?: string } | { name?: string }[];
+      start_access_date: string;
+      access_end_date: string;
+      access_mode: string;
+      amount_paid?: number;
+      created_at: string;
+      revoked_at?: string;
+      revoked_by?: string;
+      revoke_reason?: string;
+      updated_at?: string;
+    }) => {
       // Map profile/class results reliably
-      const getVal = (obj: any, field: string) => {
+      const getVal = (obj: { full_name?: string; name?: string } | { full_name?: string; name?: string }[] | undefined, field: "full_name" | "name") => {
           if (!obj) return null;
           return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
       };
@@ -72,10 +89,10 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(formatted);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("GET Enrollments Server Error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -83,7 +100,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -101,6 +119,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!["paid", "free_card", "manual"].includes(accessMode)) {
+      return NextResponse.json(
+        { error: "Invalid access mode. Must be paid, free_card, or manual" },
+        { status: 400 }
+      );
+    }
+
+    if (isNaN(new Date(startAccessDate).getTime())) {
+      return NextResponse.json(
+        { error: "Invalid start_access_date" },
+        { status: 400 }
+      );
+    }
+
+    if (providedEndDate && isNaN(new Date(providedEndDate).getTime())) {
+      return NextResponse.json(
+        { error: "Invalid access_end_date" },
+        { status: 400 }
+      );
+    }
+
     // Default 40-day expiry calculation
     // Start date is inclusive, so end should be start + 40 days
     const startDate = new Date(startAccessDate);
@@ -110,6 +149,13 @@ export async function POST(request: NextRequest) {
 
     // Final result (provided date or default)
     const finalEndDate = providedEndDate || calculatedEndDate;
+
+    if (new Date(finalEndDate) < new Date(startAccessDate)) {
+      return NextResponse.json(
+        { error: "Access end date must be after start date" },
+        { status: 400 }
+      );
+    }
 
     // Use insert instead of upsert to keep enrollment history
     const { error } = await adminSupabase.from("student_class_enrollments").insert({
@@ -128,16 +174,14 @@ export async function POST(request: NextRequest) {
     
     // syncFreeCardGrantsForStudent logic is still relevant if we want manual unlock fallbacks
     if (accessMode === "free_card") {
-      const { user } = await requireAdmin();
-      await syncFreeCardGrantsForStudent(studentId, classId, user.id);
+      await syncFreeCardGrantsForStudent(studentId, classId, adminAuth.user!.id);
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Enrollment Submission Server Error:", error);
-    const message = error?.message || error?.details || (typeof error === 'string' ? error : "Unknown error");
     return NextResponse.json(
-      { error: message, details: error },
+      { error: getErrorMessage(error), details: error },
       { status: 500 }
     );
   }

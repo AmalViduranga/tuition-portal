@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     
     const { searchParams } = new URL(request.url);
@@ -47,7 +48,18 @@ export async function GET(request: NextRequest) {
     // Process records into class-wise groups
     const classGroups: Record<string, {
       name: string;
-      rows: any[];
+      rows: {
+        id: string;
+        student_name?: string;
+        phone?: string;
+        class_name: string;
+        payment_date?: string;
+        expiry_date?: string;
+        amount: number;
+        mode?: string;
+        status?: string;
+        notes?: string;
+      }[];
       paidCount: number;
       freeCardCount: number;
       totalIncome: number;
@@ -57,8 +69,14 @@ export async function GET(request: NextRequest) {
     let totalFreeCardStudents = 0;
     let totalMonthlyIncome = 0;
 
-    (records || []).forEach((rec: any) => {
-      const className = rec.class_groups?.name || rec.payment_plans?.name || "Other / Bundles";
+    (records || []).forEach((rec: { id: string; class_groups?: { name?: string } | { name?: string }[]; payment_plans?: { name?: string } | { name?: string }[]; class_id?: string; payment_plan_id?: string; profiles?: { full_name?: string; phone?: string } | { full_name?: string; phone?: string }[]; start_date?: string; end_date?: string; amount_paid?: number; access_mode?: string; status?: string; admin_note?: string }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const getVal = (obj: any, field: string) => {
+        if (!obj) return null;
+        return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
+      };
+
+      const className = getVal(rec.class_groups, "name") || getVal(rec.payment_plans, "name") || "Other / Bundles";
       const key = rec.class_id || rec.payment_plan_id || "other";
 
       if (!classGroups[key]) {
@@ -72,8 +90,9 @@ export async function GET(request: NextRequest) {
       }
 
       const row = {
-        student_name: rec.profiles?.full_name,
-        phone: rec.profiles?.phone,
+        id: rec.id,
+        student_name: getVal(rec.profiles, "full_name"),
+        phone: getVal(rec.profiles, "phone"),
         class_name: className,
         payment_date: rec.start_date,
         expiry_date: rec.end_date,

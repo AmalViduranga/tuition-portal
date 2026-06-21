@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantPaymentAccess } from "@/lib/admin/grant-manager";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const adminAuth = await requireAdminApi();
+    if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const formData = await request.formData();
 
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       .from("student_class_payment_periods")
       .update({ 
         status,
-        reviewed_by: (await requireAdmin()).user.id,
+        reviewed_by: adminAuth.user!.id,
         reviewed_at: new Date().toISOString()
       })
       .eq("id", periodId);
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Trigger access granting if approved
     if (status === "approved") {
-      await grantPaymentAccess(periodId, (await requireAdmin()).user.id);
+      await grantPaymentAccess(periodId, adminAuth.user!.id);
     }
 
     return NextResponse.json({ success: true });

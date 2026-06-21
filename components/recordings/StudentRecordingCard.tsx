@@ -26,6 +26,7 @@ export default function StudentRecordingCard({ recording, onOpen }: StudentRecor
       className="group w-full text-left rounded-xl overflow-hidden border border-slate-200/80 bg-white shadow-sm transition-all hover:shadow-md hover:border-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
     >
       <div className="relative aspect-video bg-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={youtubeThumbnailUrl(recording.youtube_video_id)}
           alt=""
