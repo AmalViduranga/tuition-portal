@@ -5,6 +5,7 @@ import { createStudentAccount } from "@/lib/admin/create-student-account";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { randomInt } from "node:crypto";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function createStudent(formData: FormData) {
   await requireAdmin();
@@ -76,17 +77,30 @@ export async function updateStudent(formData: FormData) {
 }
 
 export async function createClass(formData: FormData) {
-  const { supabase } = await requireAdmin();
-  await supabase.from("class_groups").insert({
+  const { supabase, user } = await requireAdmin();
+  const { data: inserted } = await supabase.from("class_groups").insert({
     name: String(formData.get("name") ?? ""),
     description: String(formData.get("description") ?? ""),
     is_active: true,
-  });
+  }).select("id").single();
+
+  if (inserted) {
+    await createAuditLog({
+      actorId: user.id,
+      actorEmail: user.email,
+      actorRole: "admin",
+      action: "CLASS_CREATED",
+      targetType: "class",
+      targetId: inserted.id,
+      targetLabel: String(formData.get("name") ?? ""),
+    });
+  }
+
   revalidatePath("/admin/classes");
 }
 
 export async function updateClass(formData: FormData) {
-  const { supabase } = await requireAdmin();
+  const { supabase, user } = await requireAdmin();
   const classId = String(formData.get("class_id") ?? "");
   const name = String(formData.get("name") ?? "");
   const description = String(formData.get("description") ?? "");
@@ -95,11 +109,21 @@ export async function updateClass(formData: FormData) {
     .update({ name, description })
     .eq("id", classId);
 
+  await createAuditLog({
+    actorId: user.id,
+    actorEmail: user.email,
+    actorRole: "admin",
+    action: "CLASS_UPDATED",
+    targetType: "class",
+    targetId: classId,
+    targetLabel: name,
+  });
+
   revalidatePath("/admin/classes");
 }
 
 export async function toggleClassStatus(formData: FormData) {
-  const { supabase } = await requireAdmin();
+  const { supabase, user } = await requireAdmin();
   const classId = String(formData.get("class_id") ?? "");
 
   // Get current status
@@ -113,6 +137,16 @@ export async function toggleClassStatus(formData: FormData) {
     .from("class_groups")
     .update({ is_active: !classData?.is_active })
     .eq("id", classId);
+
+  await createAuditLog({
+    actorId: user.id,
+    actorEmail: user.email,
+    actorRole: "admin",
+    action: "CLASS_STATUS_TOGGLED",
+    targetType: "class",
+    targetId: classId,
+    metadata: { is_active: !classData?.is_active },
+  });
 
   revalidatePath("/admin/classes");
 }
@@ -479,7 +513,7 @@ export async function addManualMaterialUnlock(formData: FormData) {
 
 // Site content management
 export async function updateSiteContent(formData: FormData) {
-  const { supabase } = await requireAdmin();
+  const { supabase, user } = await requireAdmin();
 
   const teacherImageUrl = String(formData.get("teacher_image_url") ?? "");
 
@@ -504,6 +538,17 @@ export async function updateSiteContent(formData: FormData) {
   );
 
   await Promise.all(promises);
+
+  await createAuditLog({
+    actorId: user.id,
+    actorEmail: user.email,
+    actorRole: "admin",
+    action: "SITE_CONTENT_UPDATED",
+    targetType: "site_content",
+    targetId: "site_content",
+    metadata: Object.fromEntries(updates.map((u) => [u.key, u.value])),
+  });
+
   revalidatePath("/admin/site-content");
   revalidatePath("/");
   revalidatePath("/about");
@@ -555,4 +600,18 @@ export async function resetStudentPassword(formData: FormData) {
   }
 
   return { ok: true, tempPassword };
+}
+
+export async function logPromotionAction(action: string, promotionId: string, title?: string, is_active?: boolean) {
+  const { user } = await requireAdmin();
+  await createAuditLog({
+    actorId: user.id,
+    actorEmail: user.email,
+    actorRole: "admin",
+    action,
+    targetType: "promotion",
+    targetId: promotionId,
+    targetLabel: title,
+    metadata: is_active !== undefined ? { is_active } : undefined,
+  });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function GET(request: NextRequest) {
   try {
@@ -108,6 +109,18 @@ export async function POST(request: NextRequest) {
       await grantNewReleaseAccess(inserted.id, classId, releaseAt, "material", adminAuth.user!.id);
     }
 
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "MATERIAL_UPLOADED",
+      targetType: "material",
+      targetId: inserted?.id,
+      targetLabel: title,
+      metadata: { class_id: classId, release_at: releaseAt, material_type: materialType, published, file_size: file.size },
+      request,
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
@@ -199,6 +212,18 @@ export async function PUT(request: NextRequest) {
       await grantNewReleaseAccess(materialId, classId, releaseAt, "material", adminAuth.user!.id);
     }
 
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "MATERIAL_UPDATED",
+      targetType: "material",
+      targetId: materialId,
+      targetLabel: title,
+      metadata: { class_id: classId, release_at: releaseAt, material_type: materialType, published },
+      request,
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
@@ -259,6 +284,16 @@ export async function DELETE(request: NextRequest) {
       .eq("id", materialId);
 
     if (deleteError) throw deleteError;
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "MATERIAL_DELETED",
+      targetType: "material",
+      targetId: materialId,
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

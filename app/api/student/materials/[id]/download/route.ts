@@ -67,6 +67,17 @@ export async function GET(
       throw signError || new Error("Failed to generate signed URL");
     }
 
+    const { createAuditLog } = await import("@/lib/audit/audit-log");
+    await createAuditLog({
+      actorId: user.id,
+      actorEmail: user.email,
+      actorRole: "student",
+      action: action === "download" ? "MATERIAL_DOWNLOADED" : "MATERIAL_VIEWED",
+      targetType: "material",
+      targetId: id,
+      request,
+    });
+
     // 5. Redirect the user securely
     return NextResponse.redirect(signedData.signedUrl);
 

@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import crypto from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function login(formData: FormData) {
   const email = String(formData.get("email") ?? "");
@@ -69,6 +70,15 @@ export async function login(formData: FormData) {
     return redirect("/dashboard");
   }
 
+  await createAuditLog({
+    actorId: user.id,
+    actorEmail: user.email,
+    actorRole: userRole || "student",
+    action: "USER_LOGIN",
+    targetType: "user",
+    targetId: user.id,
+  });
+
   // --- SINGLE DEVICE RESTRICTION FOR STUDENTS ---
   if (userRole === "student") {
     const lockId = crypto.randomUUID();
@@ -113,6 +123,15 @@ export async function logout() {
       .eq("id", user.id)
       .single();
     
+    await createAuditLog({
+      actorId: user.id,
+      actorEmail: user.email,
+      actorRole: profile?.role || "student",
+      action: "USER_LOGOUT",
+      targetType: "user",
+      targetId: user.id,
+    });
+
     if (profile?.role === "student") {
       const adminSupabase = createAdminClient();
       await adminSupabase
@@ -156,5 +175,18 @@ export async function updatePassword(formData: FormData) {
   }
 
   await supabase.from("profiles").update({ must_change_password: false }).eq("id", user.id);
+
+  // We need to fetch role
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+  await createAuditLog({
+    actorId: user.id,
+    actorEmail: user.email,
+    actorRole: profile?.role || "student",
+    action: "PASSWORD_CHANGED",
+    targetType: "user",
+    targetId: user.id,
+  });
+
   return redirect("/dashboard");
 }

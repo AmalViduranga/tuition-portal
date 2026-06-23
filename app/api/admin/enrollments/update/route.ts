@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getErrorMessage } from "@/lib/utils/error";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -67,6 +68,17 @@ export async function PATCH(request: NextRequest) {
     if (updateError) {
       throw updateError;
     }
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "ENROLLMENT_UPDATED",
+      targetType: "enrollment",
+      targetId: enrollment_id,
+      metadata: { new_start_access_date: start_access_date, new_access_end_date: access_end_date, new_access_mode: access_mode },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

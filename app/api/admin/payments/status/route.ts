@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantPaymentAccess } from "@/lib/admin/grant-manager";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,6 +37,17 @@ export async function POST(request: NextRequest) {
     if (status === "approved") {
       await grantPaymentAccess(periodId, adminAuth.user!.id);
     }
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: status === "approved" ? "PAYMENT_APPROVED" : status === "rejected" ? "PAYMENT_REJECTED" : "PAYMENT_UPDATED",
+      targetType: "payment_period",
+      targetId: periodId,
+      metadata: { new_status: status },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

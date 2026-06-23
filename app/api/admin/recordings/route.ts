@@ -3,6 +3,7 @@ import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
 import { getErrorMessage } from "@/lib/utils/error";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function GET(request: NextRequest) {
   try {
@@ -116,6 +117,18 @@ export async function POST(request: NextRequest) {
       await grantNewReleaseAccess(inserted.id, classId, releaseAt, "recording", adminAuth.user!.id);
     }
 
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "RECORDING_CREATED",
+      targetType: "recording",
+      targetId: inserted?.id,
+      targetLabel: title,
+      metadata: { class_id: classId, release_at: releaseAt, published },
+      request,
+    });
+
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error("Recordings POST Error:", error);
@@ -199,6 +212,18 @@ export async function PUT(request: NextRequest) {
     if (published) {
       await grantNewReleaseAccess(recordingId, classId, releaseAt, "recording", adminAuth.user!.id);
     }
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "RECORDING_UPDATED",
+      targetType: "recording",
+      targetId: recordingId,
+      targetLabel: title,
+      metadata: { class_id: classId, release_at: releaseAt, published },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

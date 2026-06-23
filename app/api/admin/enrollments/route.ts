@@ -3,6 +3,7 @@ import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncFreeCardGrantsForStudent } from "@/lib/admin/grant-manager";
 import { getErrorMessage } from "@/lib/utils/error";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function GET(request: NextRequest) {
   try {
@@ -176,6 +177,17 @@ export async function POST(request: NextRequest) {
     if (accessMode === "free_card") {
       await syncFreeCardGrantsForStudent(studentId, classId, adminAuth.user!.id);
     }
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "ENROLLMENT_CREATED",
+      targetType: "enrollment",
+      targetId: `${studentId}-${classId}`,
+      metadata: { student_id: studentId, class_id: classId, start_access_date: startAccessDate, access_end_date: finalEndDate, access_mode: accessMode },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

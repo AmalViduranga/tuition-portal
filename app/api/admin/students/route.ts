@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createStudentAccount } from "@/lib/admin/create-student-account";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,6 +58,18 @@ export async function POST(request: NextRequest) {
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "STUDENT_CREATED",
+      targetType: "profile",
+      targetId: result.studentId,
+      targetLabel: fullName,
+      metadata: { student_email: email, student_name: fullName },
+      request,
+    });
 
     return NextResponse.json({
       success: true,

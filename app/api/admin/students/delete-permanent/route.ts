@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,6 +38,16 @@ export async function POST(request: NextRequest) {
     const { error } = await adminSupabase.auth.admin.deleteUser(studentId);
 
     if (error) throw error;
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "STUDENT_PERMANENT_DELETE_ATTEMPT",
+      targetType: "profile",
+      targetId: studentId,
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

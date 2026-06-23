@@ -71,6 +71,17 @@ export async function POST(
     // Increment view count using RPC or direct update
     await supabase.rpc("increment_recording_views", { recording_id: id });
 
+    const { createAuditLog } = await import("@/lib/audit/audit-log");
+    await createAuditLog({
+      actorId: user.id,
+      actorEmail: user.email,
+      actorRole: "student",
+      action: "RECORDING_VIEWED",
+      targetType: "recording",
+      targetId: id,
+      request,
+    });
+
     return NextResponse.json({ success: true, views_incremented: true });
   } catch (error) {
     console.error("Error logging view:", error);

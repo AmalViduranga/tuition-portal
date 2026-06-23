@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getErrorMessage } from "@/lib/utils/error";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,6 +59,17 @@ export async function POST(request: NextRequest) {
         .eq("class_id", enrollment.class_id)
         .in("status", ["approved", "pending"]);
     }
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "ENROLLMENT_REVOKED",
+      targetType: "enrollment",
+      targetId: enrollment_id,
+      metadata: { student_id: enrollment.student_id, class_id: enrollment.class_id, revoke_reason: reason, revoke_payments: revoke_payments },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

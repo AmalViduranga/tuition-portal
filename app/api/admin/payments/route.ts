@@ -3,6 +3,7 @@ import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantPaymentAccess } from "@/lib/admin/grant-manager";
 import { getErrorMessage } from "@/lib/utils/error";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function GET() {
   try {
@@ -173,6 +174,22 @@ export async function POST(request: NextRequest) {
            };
            const retry = await adminSupabase.from("student_class_payment_periods").insert(basicRecord).select("id").single();
            if (retry.error) throw retry.error;
+           
+           if (finalStatus === "approved") {
+             await grantPaymentAccess(retry.data.id, admin.user!.id);
+           }
+
+           await createAuditLog({
+             actorId: admin.user?.id,
+             actorEmail: admin.user?.email,
+             actorRole: "admin",
+             action: finalStatus === "approved" ? "PAYMENT_APPROVED" : "PAYMENT_UPDATED",
+             targetType: "payment_period",
+             targetId: retry.data.id,
+             metadata: { student_id: studentId, class_id: classId, amount_paid: amountPaid, status: finalStatus },
+             request,
+           });
+
            return NextResponse.json({ success: true, id: retry.data.id });
       }
       throw error;
@@ -182,6 +199,17 @@ export async function POST(request: NextRequest) {
     if (finalStatus === "approved" && inserted) {
       await grantPaymentAccess(inserted.id, admin.user!.id);
     }
+
+    await createAuditLog({
+      actorId: admin.user?.id,
+      actorEmail: admin.user?.email,
+      actorRole: "admin",
+      action: finalStatus === "approved" ? "PAYMENT_APPROVED" : "PAYMENT_UPDATED",
+      targetType: "payment_period",
+      targetId: inserted.id,
+      metadata: { student_id: studentId, class_id: classId, amount_paid: amountPaid, status: finalStatus },
+      request,
+    });
 
     return NextResponse.json({ success: true, id: inserted.id });
   } catch (error: unknown) {

@@ -106,7 +106,7 @@ export default function AdminPromotionsPage() {
       if (!user) throw new Error("Not authenticated");
 
       // 4. Insert into database
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from("promotions")
         .insert({
           title: title || null,
@@ -115,9 +115,12 @@ export default function AdminPromotionsPage() {
           target_url: targetUrl || "/contact",
           is_active: isActive,
           created_by: user.id
-        });
+        }).select("id").single();
 
       if (insertError) throw insertError;
+
+      const { logPromotionAction } = await import("@/app/admin/actions");
+      await logPromotionAction("PROMOTION_CREATED", inserted.id, title, isActive);
 
       // Reset form
       setFile(null);
@@ -135,7 +138,7 @@ export default function AdminPromotionsPage() {
     }
   };
 
-  const toggleStatus = async (id: string, currentStatus: boolean) => {
+  const toggleStatus = async (id: string, currentStatus: boolean, title: string | null) => {
     try {
       const { error } = await supabase
         .from("promotions")
@@ -143,13 +146,17 @@ export default function AdminPromotionsPage() {
         .eq("id", id);
 
       if (error) throw error;
+      
+      const { logPromotionAction } = await import("@/app/admin/actions");
+      await logPromotionAction(!currentStatus ? "PROMOTION_ACTIVATED" : "PROMOTION_DEACTIVATED", id, title || undefined);
+
       fetchPromotions();
     } catch (err: unknown) {
       setError(getErrorMessage(err) || "Failed to update status");
     }
   };
 
-  const deletePromotion = async (id: string, imageUrl: string) => {
+  const deletePromotion = async (id: string, imageUrl: string, title: string | null) => {
     if (!confirm("Are you sure you want to delete this promotion?")) return;
     
     try {
@@ -160,6 +167,9 @@ export default function AdminPromotionsPage() {
         .eq("id", id);
       
       if (dbError) throw dbError;
+
+      const { logPromotionAction } = await import("@/app/admin/actions");
+      await logPromotionAction("PROMOTION_DELETED", id, title || undefined);
 
       // Try to extract path from URL and delete from storage
       const urlParts = imageUrl.split("/promotions/");
@@ -301,14 +311,14 @@ export default function AdminPromotionsPage() {
                   />
                   <div className="absolute top-2 right-2 flex gap-1">
                     <button
-                      onClick={() => toggleStatus(promo.id, promo.is_active)}
+                      onClick={() => toggleStatus(promo.id, promo.is_active, promo.title)}
                       className={`p-1.5 rounded-full ${promo.is_active ? 'bg-green-500 text-white' : 'bg-slate-500 text-white'} hover:opacity-80 transition-opacity`}
                       title={promo.is_active ? "Deactivate" : "Activate"}
                     >
                       {promo.is_active ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                     </button>
                     <button
-                      onClick={() => deletePromotion(promo.id, promo.image_url)}
+                      onClick={() => deletePromotion(promo.id, promo.image_url, promo.title)}
                       className="p-1.5 rounded-full bg-red-500 text-white hover:opacity-80 transition-opacity"
                       title="Delete"
                     >

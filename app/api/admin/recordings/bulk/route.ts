@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getYouTubeMetadata } from "@/lib/recordings/youtube";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,6 +67,18 @@ export async function POST(request: NextRequest) {
             "recording"
           );
         }
+
+        await createAuditLog({
+          actorId: adminAuth.user?.id,
+          actorEmail: adminAuth.user?.email,
+          actorRole: "admin",
+          action: "RECORDING_CREATED",
+          targetType: "recording",
+          targetId: rec.id,
+          targetLabel: rec.title,
+          metadata: { class_id: rec.class_id, release_at: rec.release_at, published: rec.published, bulk: true },
+          request,
+        });
       }
     }
 

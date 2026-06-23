@@ -18,6 +18,7 @@ const navItems = [
   { href: "/admin/earnings", label: "Earnings", icon: "💰" },
   { href: "/admin/promotions", label: "Promotions", icon: "📢" },
   { href: "/admin/site-content", label: "Site Content", icon: "🌐" },
+  { href: "/admin/audit-logs", label: "Audit Logs", icon: "🛡️" },
 ];
 
 interface AdminLayoutProps {

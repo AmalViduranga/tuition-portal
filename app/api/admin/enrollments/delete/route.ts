@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,17 @@ export async function POST(request: NextRequest) {
       .eq("id", enrollmentId);
 
     if (error) throw error;
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "ENROLLMENT_REVOKED",
+      targetType: "enrollment",
+      targetId: enrollmentId,
+      metadata: { action: "hard_delete" },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +40,16 @@ export async function POST(request: NextRequest) {
       // It was draft, now published
       await grantNewReleaseAccess(recordingId, recording.class_id, recording.release_at, "recording", adminAuth.user!.id);
     }
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: !recording?.published ? "RECORDING_PUBLISHED" : "RECORDING_UNPUBLISHED",
+      targetType: "recording",
+      targetId: recordingId,
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

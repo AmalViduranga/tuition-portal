@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuditLog } from "@/lib/audit/audit-log";
 
 export async function GET(request: NextRequest) {
   try {
@@ -79,6 +80,17 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "MANUAL_MATERIAL_UNLOCK_GRANTED",
+      targetType: "material_unlock",
+      targetId: `${studentId}-${materialId}`,
+      metadata: { student_id: studentId, material_id: materialId, grant_type: 'manual' },
+      request,
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
@@ -110,6 +122,17 @@ export async function DELETE(request: NextRequest) {
       .eq("id", unlockId);
 
     if (error) throw error;
+
+    await createAuditLog({
+      actorId: adminAuth.user?.id,
+      actorEmail: adminAuth.user?.email,
+      actorRole: "admin",
+      action: "MANUAL_MATERIAL_UNLOCK_REVOKED",
+      targetType: "material_unlock",
+      targetId: unlockId,
+      metadata: { revoke_reason: 'Manual revoke' },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
