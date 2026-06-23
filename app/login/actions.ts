@@ -14,8 +14,16 @@ export async function login(formData: FormData) {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  if (error || !data.user) {
+    await createAuditLog({
+      action: "USER_LOGIN_FAILED",
+      actorEmail: email,
+      actorRole: null,
+      targetType: "auth",
+      targetLabel: email,
+      metadata: { reason: error?.message || "invalid_credentials" },
+    });
+    redirect(`/login?error=${encodeURIComponent(error?.message || "Invalid login credentials")}`);
   }
 
   const user = data.user;
@@ -42,11 +50,30 @@ export async function login(formData: FormData) {
       is_active: true,
       must_change_password: false
     });
+
+    await createAuditLog({
+      actorId: user.id,
+      actorEmail: user.email,
+      actorRole: "admin",
+      action: "USER_LOGIN",
+      targetType: "user",
+      targetId: user.id,
+    });
+
     return redirect("/admin");
   }
 
   // Normalize role for comparison (handle case sensitivity, whitespace)
   const userRole = profile?.role?.trim().toLowerCase();
+
+  await createAuditLog({
+    actorId: user.id,
+    actorEmail: user.email,
+    actorRole: userRole || "student",
+    action: "USER_LOGIN",
+    targetType: "user",
+    targetId: user.id,
+  });
 
   // Auto-bootstrap logic removed for security.
   // Admins must be manually assigned via database query.
@@ -69,15 +96,6 @@ export async function login(formData: FormData) {
   if (next.startsWith("/admin")) {
     return redirect("/dashboard");
   }
-
-  await createAuditLog({
-    actorId: user.id,
-    actorEmail: user.email,
-    actorRole: userRole || "student",
-    action: "USER_LOGIN",
-    targetType: "user",
-    targetId: user.id,
-  });
 
   // --- SINGLE DEVICE RESTRICTION FOR STUDENTS ---
   if (userRole === "student") {
