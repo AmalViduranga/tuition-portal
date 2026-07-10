@@ -111,7 +111,7 @@ export default function MonthlyReportPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
         </div>
       ) : error ? (
         <Card className="bg-red-50 border-red-200 p-8 text-center">
@@ -122,11 +122,11 @@ export default function MonthlyReportPage() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-2xl text-white shadow-lg shadow-indigo-200">
-              <p className="text-indigo-100 text-sm font-medium">Monthly Income</p>
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl text-white shadow-lg shadow-blue-200">
+              <p className="text-blue-100 text-sm font-medium">Monthly Income</p>
               <h2 className="text-4xl font-black mt-1">Rs. {reportData.summary.totalMonthlyIncome.toLocaleString()}</h2>
-              <div className="mt-4 flex items-center gap-2 text-indigo-100 text-xs">
-                <span className="bg-indigo-500/30 px-2 py-0.5 rounded-full">Primary Revenue</span>
+              <div className="mt-4 flex items-center gap-2 text-blue-100 text-xs">
+                <span className="bg-blue-500/30 px-2 py-0.5 rounded-full">Primary Revenue</span>
               </div>
             </div>
             
@@ -168,7 +168,7 @@ export default function MonthlyReportPage() {
                        <div className="flex gap-4 text-sm">
                           <span className="text-slate-500">Paid: <b className="text-slate-900">{group.paidCount}</b></span>
                           <span className="text-slate-500">Free: <b className="text-slate-900">{group.freeCardCount}</b></span>
-                          <span className="text-slate-500">Income: <b className="text-indigo-600 font-bold">Rs. {group.totalIncome.toLocaleString()}</b></span>
+                          <span className="text-slate-500">Income: <b className="text-blue-600 font-bold">Rs. {group.totalIncome.toLocaleString()}</b></span>
                        </div>
                     </div>
                     

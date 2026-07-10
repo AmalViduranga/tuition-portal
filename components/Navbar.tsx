@@ -64,7 +64,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
     <header className="sticky top-0 z-40 border-b border-slate-200/60 bg-white/80 backdrop-blur-2xl shadow-sm transition-all duration-300">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tight text-indigo-700 md:text-lg hover:opacity-90 transition-opacity">
+          <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tight text-blue-700 md:text-lg hover:opacity-90 transition-opacity">
             <Image
               src="/AV_Logo_01-removebg-preview.png"
               alt="AV Classes Logo"
@@ -75,7 +75,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
             />
             <span className="hidden sm:inline-block">{siteName}</span>
           </Link>
-          <span className="hidden sm:inline-block rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
+          <span className="hidden sm:inline-block rounded-full bg-blue-50 border border-blue-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
             Beta
           </span>
         </div>
@@ -88,8 +88,8 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
               href={link.href}
               className={`rounded-lg px-3 py-2 ${
                 pathname === link.href
-                  ? "bg-indigo-50 text-indigo-700 font-medium"
-                  : "text-slate-700 hover:bg-indigo-50 hover:text-indigo-700"
+                  ? "bg-blue-50 text-blue-700 font-medium"
+                  : "text-slate-700 hover:bg-blue-50 hover:text-blue-700"
               }`}
             >
               {link.label}
@@ -100,9 +100,9 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
             <div className="relative ml-2" ref={profileMenuRef}>
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-700">
                   {profile.full_name?.charAt(0) || user.email?.charAt(0) || (profile.role === 'admin' ? "A" : "S")}
                 </div>
                 <span className="max-w-[120px] truncate">
@@ -114,29 +114,29 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-indigo-100 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-slate-200 bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <div className="border-b border-slate-100 px-4 py-2">
                     <p className="text-xs text-slate-500">Signed in as</p>
                     <p className="truncate text-sm font-medium text-slate-900">{user.email}</p>
                     {profile.role === 'admin' && (
-                      <span className="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold uppercase text-indigo-700">
+                      <span className="mt-1 inline-block rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-700">
                         Admin
                       </span>
                     )}
                   </div>
-                  <Link href="/dashboard" className="block px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50">
+                  <Link href="/dashboard" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                     Dashboard
                   </Link>
-                  <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50">
+                  <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                     Profile
                   </Link>
                   {profile.role === 'admin' && (
-                    <Link href="/admin" className="block px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
+                    <Link href="/admin" className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                       Admin Panel
                     </Link>
                   )}
                   <form action={logout} className="border-t border-slate-100">
-                    <ActionSubmitButton className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+                    <ActionSubmitButton className="block w-full bg-transparent px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 hover:text-red-700 shadow-none border-none rounded-none">
                       Sign out
                     </ActionSubmitButton>
                   </form>
@@ -146,7 +146,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
           ) : (
             <LoadingLink
               href="/login"
-              className="ml-1 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-indigo-700 inline-flex"
+              className="ml-1 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-blue-700 inline-flex"
             >
               Student Login
             </LoadingLink>
@@ -157,7 +157,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
         <div className="md:hidden" ref={mobileMenuRef}>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex items-center justify-center rounded-lg border border-indigo-100 bg-white p-2 text-indigo-700 hover:bg-indigo-50 focus:outline-none"
+            className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:outline-none shadow-sm"
             aria-expanded={mobileMenuOpen}
           >
             <span className="sr-only">Open main menu</span>
@@ -174,7 +174,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
 
           {/* Mobile dropdown */}
           {mobileMenuOpen && (
-            <div className="absolute right-4 top-16 mt-2 w-56 origin-top-right rounded-xl border border-indigo-100 bg-white p-2 shadow-xl ring-1 ring-black ring-opacity-5">
+            <div className="absolute right-4 top-16 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-black ring-opacity-5">
               {user && profile && (
                 <div className="mb-2 border-b border-slate-100 px-3 pb-2">
                   <p className="text-sm font-medium text-slate-900">
@@ -182,7 +182,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                   </p>
                   <p className="truncate text-xs text-slate-500">{user.email}</p>
                   {profile.role === 'admin' && (
-                    <span className="mt-1 inline-block rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold uppercase text-indigo-700">
+                    <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-700">
                       Admin
                     </span>
                   )}
@@ -196,8 +196,8 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                   href={link.href}
                   className={`block rounded-lg px-3 py-2 text-sm ${
                     pathname === link.href
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-slate-700 hover:bg-indigo-50"
+                      ? "bg-blue-50 text-blue-700 font-medium"
+                      : "text-slate-700 hover:bg-blue-50"
                   }`}
                 >
                   {link.label}
@@ -207,25 +207,25 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
               <div className="mt-2 border-t border-slate-100 pt-2">
                 {user && profile ? (
                   <>
-                    <Link href="/dashboard" className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50">
+                    <Link href="/dashboard" className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                       Dashboard
                     </Link>
-                    <Link href="/dashboard/profile" className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50">
+                    <Link href="/dashboard/profile" className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                       Profile
                     </Link>
                     {profile.role === 'admin' && (
-                      <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50">
+                      <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                         Admin Panel
                       </Link>
                     )}
                     <form action={logout}>
-                      <ActionSubmitButton className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 mt-1">
+                      <ActionSubmitButton className="block w-full bg-transparent shadow-none border-none rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 hover:text-red-700 mt-1">
                         Sign out
                       </ActionSubmitButton>
                     </form>
                   </>
                 ) : (
-                  <LoadingLink href="/login" className="mt-1 block rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white">
+                  <LoadingLink href="/login" className="mt-1 block rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white">
                     Student Login
                   </LoadingLink>
                 )}

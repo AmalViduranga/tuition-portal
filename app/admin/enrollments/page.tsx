@@ -221,7 +221,7 @@ export default function AdminEnrollmentsPage() {
 
       {loading && enrollments.length === 0 ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : (
         <Table
@@ -234,7 +234,7 @@ export default function AdminEnrollmentsPage() {
                   <p className="font-medium flex items-center gap-2">
                     {enr.student_name || "Unknown"}
                     {enr.student_id === selectedStudentId && (
-                      <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
+                      <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
                     )}
                   </p>
                   <p className="text-xs text-slate-500">{enr.student_id.slice(0, 8)}...</p>
@@ -369,7 +369,7 @@ export default function AdminEnrollmentsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : error ? (
         <div className="text-center py-12 text-red-600">{error}</div>
@@ -384,7 +384,7 @@ export default function AdminEnrollmentsPage() {
                   <p className="font-medium flex items-center gap-2">
                     {pay.student_name || "Unknown"}
                     {pay.student_id === selectedStudentId && (
-                      <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
+                      <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
                     )}
                   </p>
                   <p className="text-xs text-slate-500">{pay.student_phone || pay.student_id.slice(0, 8)}</p>
@@ -505,7 +505,7 @@ export default function AdminEnrollmentsPage() {
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Active {title} Unlocks</h3>
           {loading ? (
             <div className="flex items-center justify-center py-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : (
             <Table
@@ -580,7 +580,7 @@ export default function AdminEnrollmentsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? "border-indigo-500 text-indigo-600"
+                  ? "border-blue-500 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               }`}
             >
@@ -812,7 +812,7 @@ function PaymentForm({ students, classes, plans, onSubmit, onStudentSelect }: Pa
              id="quick_approve" 
              checked={formData.quick_approve} 
              onChange={(e) => setFormData({...formData, quick_approve: e.target.checked})}
-             className="rounded text-indigo-600 focus:ring-indigo-500"
+             className="rounded text-blue-600 focus:ring-blue-500"
             />
            <label htmlFor="quick_approve" className="text-sm font-medium text-slate-700">Quick Approve (1.5mo from today)</label>
          </div>
@@ -1010,8 +1010,8 @@ function EditEnrollmentFlow({ enrollment, onClose, onSuccess }: { enrollment: En
               <p>End: <span className="font-mono">{enrollment.access_end_date?.split('T')[0] || "None"}</span></p>
               <p>Amount: <span className="font-mono">{enrollment.amount_paid}</span></p>
             </div>
-            <div className="bg-indigo-50 p-3">
-              <h4 className="font-bold text-indigo-900 mb-2">New Details</h4>
+            <div className="bg-blue-50 p-3">
+              <h4 className="font-bold text-blue-900 mb-2">New Details</h4>
               <p>Mode: <span className="font-mono">{formData.access_mode}</span></p>
               <p>Start: <span className="font-mono">{formData.start_access_date}</span></p>
               <p>End: <span className="font-mono">{formData.access_end_date || "None"}</span></p>

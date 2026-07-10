@@ -25,7 +25,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
           type="email"
           required
           autoComplete="email"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="your.email@example.com"
         />
       </div>
@@ -40,7 +40,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
             type={showPassword ? "text" : "password"}
             required
             autoComplete="current-password"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="Enter your password"
           />
           <button

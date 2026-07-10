@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { LayoutGrid, List } from "lucide-react";
 import { Card, SearchBar, Select } from "@/components/ui";
-import { RecordingWatchModal, StudentRecordingRow } from "@/components/recordings";
+import { RecordingWatchModal, StudentRecordingRow, StudentRecordingCard } from "@/components/recordings";
 import type { StudentRecordingsPayload } from "@/lib/recordings/student-recordings";
+import { uniqueBy } from "@/lib/utils/arrays";
 
 type Recording = StudentRecordingsPayload["recordings"][number];
 
@@ -27,6 +29,19 @@ export default function StudentRecordingsClient({
   const [loading, setLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
   const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("recordingViewMode");
+    if (saved === "list" || saved === "grid") {
+      setViewMode(saved);
+    }
+  }, []);
+
+  const handleViewModeChange = (mode: "list" | "grid") => {
+    setViewMode(mode);
+    localStorage.setItem("recordingViewMode", mode);
+  };
 
   const fetchRecordings = useCallback(async (classId: string) => {
     try {
@@ -124,25 +139,47 @@ export default function StudentRecordingsClient({
               onChange={(e) => handleClassFilterChange(e.target.value)}
               options={[
                 { value: "", label: "All classes" },
-                ...accessibleClasses.map((c) => ({ value: c.id, label: c.name })),
+                ...uniqueBy(accessibleClasses, (c) => c.id).map((c) => ({ value: c.id, label: c.name })),
               ]}
             />
           </div>
         ) : null}
       </div>
 
-      <Card padding="sm">
-        <SearchBar
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search by title, description, or class…"
-        />
+      <Card padding="sm" className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex-1">
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search by title, description, or class…"
+          />
+        </div>
+        <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+          <button
+            onClick={() => handleViewModeChange("list")}
+            className={`p-1.5 rounded-md transition-colors ${
+              viewMode === "list" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+            aria-label="List view"
+          >
+            <List className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => handleViewModeChange("grid")}
+            className={`p-1.5 rounded-md transition-colors ${
+              viewMode === "grid" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            }`}
+            aria-label="Grid view"
+          >
+            <LayoutGrid className="w-5 h-5" />
+          </button>
+        </div>
       </Card>
 
       {loading ? (
         <div className="flex justify-center py-16">
           <div
-            className="h-9 w-9 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"
+            className="h-9 w-9 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"
             aria-label="Loading"
           />
         </div>
@@ -177,13 +214,21 @@ export default function StudentRecordingsClient({
                   {items.length}
                 </span>
               </div>
-              <ul className="space-y-3">
-                {items.map((rec) => (
-                  <li key={rec.id}>
-                    <StudentRecordingRow recording={rec} onOpen={() => void openRecording(rec)} />
-                  </li>
-                ))}
-              </ul>
+              {viewMode === "list" ? (
+                <ul className="space-y-3">
+                  {items.map((rec) => (
+                    <li key={`${title}-${rec.id}`}>
+                      <StudentRecordingRow recording={rec} onOpen={() => void openRecording(rec)} />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((rec) => (
+                    <StudentRecordingCard key={`${title}-${rec.id}`} recording={rec} onOpen={() => void openRecording(rec)} />
+                  ))}
+                </div>
+              )}
             </section>
           ))}
         </div>

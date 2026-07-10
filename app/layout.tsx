@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 import { createClient } from "@/lib/supabase/server";
 import SiteWrapper from "@/components/SiteWrapper";
 import PromotionPopup from "@/components/PromotionPopup";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -21,25 +17,41 @@ export const metadata: Metadata = {
   icons: {
     icon: "/AV_Logo_01-removebg-preview.png",
   },
-  title: "A/L Maths Sri Lanka | Best Mathematics Tuition | MathsLK",
-  description: "Join MathsLK for top tier A/L Maths Sri Lanka classes. Access structured theory, revision, past papers, and online recordings with Amal Viduranga.",
+  title: "Amal Viduranga Classes | G.C.E A/L Mathematics Tuition | MathsLK",
+  description: "Join Amal Viduranga for the best G.C.E. Advanced Level Mathematics tuition in Sri Lanka. Access recordings, materials, class schedules, and your online student portal.",
   keywords: [
     "A/L Maths Sri Lanka",
     "A/L Mathematics",
     "Maths 07",
+    "Amal Viduranga",
     "Sri Lanka tuition",
     "online maths classes",
-    "revision class",
-    "theory class",
     "A/L exam preparation",
   ],
+  authors: [{ name: "Amal Viduranga" }],
+  creator: "Amal Viduranga",
+  publisher: "MathsLK",
   openGraph: {
-    title: "A/L Maths Sri Lanka | Best Mathematics Tuition | MathsLK",
+    title: "Amal Viduranga Classes | G.C.E A/L Mathematics Tuition",
     description: "Looking for A/L Maths Sri Lanka? Join MathsLK for the best structured learning environment, active revision, and online past papers access.",
     url: "https://mathslk.online",
     siteName: "MathsLK",
     type: "website",
     locale: "en_LK",
+    images: [
+      {
+        url: "/AV_Logo_01-removebg-preview.png",
+        width: 800,
+        height: 600,
+        alt: "Amal Viduranga Classes Logo",
+      }
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Amal Viduranga Classes | G.C.E A/L Mathematics Tuition",
+    description: "Join Amal Viduranga for the best G.C.E. Advanced Level Mathematics tuition in Sri Lanka.",
+    images: ["/AV_Logo_01-removebg-preview.png"],
   },
   robots: {
     index: true,
@@ -70,13 +82,14 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[radial-gradient(circle_at_top,_#eef2ff_0%,_#f8fafc_40%,_#f8fafc_100%)] text-slate-900">
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
         <SiteWrapper user={user} profile={profile}>
           {children}
         </SiteWrapper>
         <PromotionPopup />
+        <SpeedInsights />
       </body>
     </html>
   );

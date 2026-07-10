@@ -1,6 +1,6 @@
 export default function PrivacyPolicyPage() {
   return (
-    <section className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm md:p-8">
+    <section className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm md:p-8">
       <h1 className="text-3xl font-extrabold text-slate-900">Privacy Policy</h1>
       <p className="mt-4 text-slate-700">
         We value your privacy. Student account details and class access information are used only for managing tuition

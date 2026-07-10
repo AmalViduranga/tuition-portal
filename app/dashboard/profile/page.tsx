@@ -44,7 +44,7 @@ export default async function StudentProfilePage() {
             <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <User className="h-5 w-5 text-indigo-500" />
+                  <User className="h-5 w-5 text-blue-500" />
                   Personal Information
                 </h2>
                 <p className="text-sm text-slate-500 mt-1">Update your basic profile details.</p>
@@ -61,7 +61,7 @@ export default async function StudentProfilePage() {
             <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-indigo-500" />
+                  <Shield className="h-5 w-5 text-blue-500" />
                   Account Security
                 </h2>
                 <p className="text-sm text-slate-500 mt-1">Change your current password.</p>
@@ -119,7 +119,7 @@ export default async function StudentProfilePage() {
           <Card>
             <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-indigo-500" />
+                <GraduationCap className="h-5 w-5 text-blue-500" />
                 My Enrolled Classes
               </h2>
             </div>
@@ -172,7 +172,7 @@ export default async function StudentProfilePage() {
                   );
                 })}
                 <div className="pt-2">
-                  <Link href="/dashboard" className="w-full inline-flex justify-center text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                  <Link href="/dashboard" className="w-full inline-flex justify-center text-sm font-medium text-blue-600 hover:text-blue-700">
                     Go to Dashboard &rarr;
                   </Link>
                 </div>

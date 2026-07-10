@@ -8,7 +8,7 @@ export default function InactiveAccountPage() {
           Your account is currently inactive. This may be due to non-payment or administrative action.
         </p>
         <p className="text-sm text-slate-500">
-          Please contact the class administrator at <span className="font-medium text-indigo-600">admin@example.com</span> to resolve this issue.
+          Please contact the class administrator at <span className="font-medium text-blue-600">admin@example.com</span> to resolve this issue.
         </p>
       </div>
     </div>

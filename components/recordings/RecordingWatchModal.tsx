@@ -29,7 +29,7 @@ export default function RecordingWatchModal({ recording, onClose }: RecordingWat
       <div className="max-h-[95vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
         <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-indigo-600">
+            <p className="text-xs font-medium uppercase tracking-wide text-blue-600">
               {recording.class_groups?.name ?? "Class recording"}
             </p>
             <h2 id="recording-modal-title" className="mt-1 text-lg font-semibold text-slate-900 sm:text-xl">

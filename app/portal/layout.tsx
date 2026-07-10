@@ -25,7 +25,7 @@ export default async function PortalLayout({
           <h1 className="text-2xl font-bold text-red-600">Account Inactive</h1>
           <p className="mt-2 text-slate-600">Your account has been deactivated. Please contact support.</p>
           <form action={logout} className="mt-4">
-            <button type="submit" className="text-indigo-600 font-medium hover:underline">Logout</button>
+            <button type="submit" className="text-blue-600 font-medium hover:underline">Logout</button>
           </form>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default async function PortalLayout({
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shadow-sm backdrop-blur transition-all">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="flex items-center gap-2 text-xl font-bold tracking-tight text-indigo-700 hover:opacity-90 transition-opacity">
+            <Link href="/dashboard" className="flex items-center gap-2 text-xl font-bold tracking-tight text-blue-700 hover:opacity-90 transition-opacity">
               <Image
                 src="/AV_Logo_01-removebg-preview.png"
                 alt="AV Classes Logo"
@@ -49,7 +49,7 @@ export default async function PortalLayout({
               <span className="hidden sm:inline-block">Student Dashboard</span>
               <span className="sm:hidden">Dashboard</span>
             </Link>
-            <span className="hidden sm:inline-block rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
+            <span className="hidden sm:inline-block rounded-full bg-blue-50 border border-blue-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
               Beta
             </span>
           </div>
@@ -57,15 +57,21 @@ export default async function PortalLayout({
             {profile?.role === "admin" && (
               <Link
                 href="/admin"
-                className="hidden sm:inline-flex items-center rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
+                className="hidden sm:inline-flex items-center rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
               >
                 Admin Panel
               </Link>
             )}
             <StudentNotifications />
+            <Link
+              href="/dashboard/profile"
+              className="inline-flex items-center rounded-lg bg-white border border-slate-200 shadow-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            >
+              Profile
+            </Link>
             <form action={logout}>
               <ActionSubmitButton
-                className="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 transition-colors"
+                className="inline-flex items-center rounded-lg bg-slate-900 shadow-sm border border-transparent px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               >
                 Sign out
               </ActionSubmitButton>

@@ -10,7 +10,7 @@ export function LoginSubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className={`mt-6 w-full flex justify-center items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed`}
+      className={`mt-6 w-full flex justify-center items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed`}
     >
       {pending ? (
         <>

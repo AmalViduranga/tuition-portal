@@ -165,24 +165,24 @@ export default function EarningsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       ) : (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-indigo-600 text-white border-0 shadow-lg relative overflow-hidden group">
+            <Card className="bg-blue-600 text-white border-0 shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-500">
                 <span className="text-6xl">💰</span>
               </div>
-              <p className="text-indigo-100 text-sm font-medium uppercase tracking-wider">Total Monthly Earnings</p>
+              <p className="text-blue-100 text-sm font-medium uppercase tracking-wider">Total Monthly Earnings</p>
               <h2 className="text-4xl font-extrabold mt-2">Rs. {stats.currentIncome.toLocaleString()}</h2>
               <div className="mt-4 flex items-center text-sm">
                 <span className={`px-2 py-0.5 rounded-full font-bold ${stats.currentIncome >= stats.prevIncome ? 'bg-white/20' : 'bg-white/10'}`}>
                    {stats.currentIncome >= stats.prevIncome ? '↑' : '↓'} 
                    {stats.prevIncome > 0 ? (((stats.currentIncome - stats.prevIncome) / stats.prevIncome) * 100).toFixed(1) : '100'}%
                 </span>
-                <span className="ml-2 text-indigo-100">vs prev month</span>
+                <span className="ml-2 text-blue-100">vs prev month</span>
               </div>
             </Card>
 
@@ -219,7 +219,7 @@ export default function EarningsPage() {
                           <p className="text-xs text-slate-500">{item.students} paid students</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-indigo-600">Rs. {item.income.toLocaleString()}</p>
+                          <p className="font-bold text-blue-600">Rs. {item.income.toLocaleString()}</p>
                           <p className="text-[10px] text-slate-400 capitalize">{( (item.income / (stats.currentIncome || 1)) * 100).toFixed(0)}% of total</p>
                         </div>
                       </div>

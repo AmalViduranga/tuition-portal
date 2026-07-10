@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Card, SearchBar, Select, Badge } from "@/components/ui";
 import type { StudentMaterialsPayload } from "@/lib/materials/student-materials";
+import { uniqueBy } from "@/lib/utils/arrays";
 
 type Material = StudentMaterialsPayload["materials"][number];
 
@@ -121,7 +122,7 @@ export default function StudentMaterialsClient({
               onChange={(e) => handleClassFilterChange(e.target.value)}
               options={[
                 { value: "", label: "All classes" },
-                ...accessibleClasses.map((c) => ({ value: c.id, label: c.name })),
+                ...uniqueBy(accessibleClasses, (c) => c.id).map((c) => ({ value: c.id, label: c.name })),
               ]}
             />
           </div>
@@ -145,7 +146,7 @@ export default function StudentMaterialsClient({
       ) : loading ? (
         <div className="flex justify-center py-16">
           <div
-            className="h-9 w-9 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"
+            className="h-9 w-9 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"
             aria-label="Loading"
           />
         </div>
@@ -184,7 +185,7 @@ export default function StudentMaterialsClient({
                 {items.map((mat) => (
                   <li key={mat.id}>
                     <Card
-                      className="group flex flex-col justify-between overflow-hidden transition-all hover:border-indigo-200 hover:shadow-md"
+                      className="group flex flex-col justify-between overflow-hidden transition-all hover:border-blue-200 hover:shadow-md"
                       padding="none"
                     >
                       <div className="p-4 flex flex-col h-full relative">
@@ -227,7 +228,7 @@ export default function StudentMaterialsClient({
                           <a
                             href={`/api/student/materials/${mat.id}/download?action=download`}
                             download
-                            className="inline-flex flex-1 items-center justify-center rounded-lg bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-100"
+                            className="inline-flex flex-1 items-center justify-center rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
                           >
                             Download
                           </a>

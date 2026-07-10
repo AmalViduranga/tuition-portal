@@ -214,7 +214,7 @@ export default function AdminClassesClient({ initialClasses }: { initialClasses:
 
         {loading && classes.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : error && classes.length === 0 ? (
           <div className="text-center py-12 text-red-600">{error}</div>
@@ -222,7 +222,7 @@ export default function AdminClassesClient({ initialClasses }: { initialClasses:
           <div className="relative">
              {loading && classes.length > 0 && (
                 <div className="absolute inset-0 z-10 bg-white/50 flex items-center justify-center pointer-events-none">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                 </div>
              )}
             <Table

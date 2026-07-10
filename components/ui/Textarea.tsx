@@ -25,7 +25,7 @@ export default function Textarea({
       )}
       <textarea
         id={textareaId}
-        className={`w-full rounded-lg border ${error ? "border-red-500" : "border-slate-300"} px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors resize-none ${className}`}
+        className={`w-full rounded-lg border ${error ? "border-red-500" : "border-slate-300"} px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors resize-none ${className}`}
         {...props}
       />
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}

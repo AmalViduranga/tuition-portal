@@ -1,7 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Card } from "@/components/ui";
+import { extractYouTubeVideoId } from "@/lib/recordings/youtube";
+import { uniqueBy } from "@/lib/utils/arrays";
 
 export default async function PortalHomePage() {
   const { supabase, user } = await requireUser();
@@ -64,7 +67,7 @@ export default async function PortalHomePage() {
       {/* Welcome Section */}
       <Card>
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-2xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-2xl">
             {hour < 12 ? "🌅" : hour < 18 ? "☀️" : "🌙"}
           </div>
           <div>
@@ -118,7 +121,7 @@ export default async function PortalHomePage() {
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Your Classes</h2>
-          <Link href="/portal/classes" className="text-sm text-indigo-600 hover:text-indigo-700">
+          <Link href="/portal/classes" className="text-sm text-blue-600 hover:text-blue-700">
             View all →
           </Link>
         </div>
@@ -131,7 +134,7 @@ export default async function PortalHomePage() {
           </div>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
-            {(enrollments || []).slice(0, 4).map((enrollment: { class_id: string; start_access_date: string; class_groups: { name: string } | { name: string }[] }) => {
+            {uniqueBy(enrollments || [], (e) => e.class_id).slice(0, 4).map((enrollment: { class_id: string; start_access_date: string; class_groups: { name: string } | { name: string }[] }) => {
               const group = Array.isArray(enrollment.class_groups)
                 ? enrollment.class_groups[0]
                 : enrollment.class_groups;
@@ -147,7 +150,7 @@ export default async function PortalHomePage() {
                   <div className="mt-3">
                     <Link
                       href={`/portal/class/${enrollment.class_id}`}
-                      className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
                     >
                       Open Class →
                     </Link>
@@ -163,7 +166,7 @@ export default async function PortalHomePage() {
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Recent Recordings</h2>
-          <Link href="/portal/recordings" className="text-sm text-indigo-600 hover:text-indigo-700">
+          <Link href="/portal/recordings" className="text-sm text-blue-600 hover:text-blue-700">
             View all →
           </Link>
         </div>
@@ -189,15 +192,30 @@ export default async function PortalHomePage() {
                 >
                   <Link href={`/portal/recordings`} className="block">
                     <div className="aspect-video relative bg-slate-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`https://img.youtube.com/vi/${recording.youtube_video_id}/mqdefault.jpg`}
-                        alt={recording.title}
-                        className="w-full h-full object-cover"
-                      />
+                      {(() => {
+                        const cleanId = extractYouTubeVideoId(recording.youtube_video_id);
+                        if (!cleanId) {
+                          return (
+                            <div className="flex h-full w-full items-center justify-center bg-slate-100">
+                              <svg className="h-10 w-10 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                          );
+                        }
+                        return (
+                          <Image
+                            src={`https://img.youtube.com/vi/${cleanId}/mqdefault.jpg`}
+                            alt={recording.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                        );
+                      })()}
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                          <svg className="w-6 h-6 text-indigo-600 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-6 h-6 text-blue-600 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         </div>

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, Button, Input, Textarea, SearchBar, Badge, DateFormat, Modal, Select } from "@/components/ui";
-import { youtubeThumbnailFallbackUrl, youtubeThumbnailUrl, getYouTubeMetadata } from "@/lib/recordings/youtube";
+import { getYouTubeMetadata } from "@/lib/recordings/youtube";
+import { RecordingThumbnail } from "@/components/recordings";
 
 type Recording = {
   id: string;
@@ -407,7 +408,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
       <div className="space-y-8">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="h-9 w-9 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+            <div className="h-9 w-9 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
           </div>
         ) : error ? (
           <Card>
@@ -458,15 +459,10 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
                               rel="noopener noreferrer"
                               className="relative h-12 w-20 flex-shrink-0 overflow-hidden rounded bg-slate-100 shadow-sm transition-transform hover:scale-105"
                             >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={rec.thumbnail_url || youtubeThumbnailUrl(rec.youtube_video_id)}
-                                alt=""
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                  const el = e.target as HTMLImageElement;
-                                  el.src = youtubeThumbnailFallbackUrl(rec.youtube_video_id);
-                                }}
+                              <RecordingThumbnail
+                                thumbnailUrl={rec.thumbnail_url}
+                                youtubeVideoId={rec.youtube_video_id}
+                                title={rec.title}
                               />
                             </a>
                             <div className="min-w-0">
@@ -607,7 +603,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
                   name="published"
                   checked={formData.published}
                   onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                  className="rounded border-slate-300 text-indigo-600"
+                  className="rounded border-slate-300 text-blue-600"
                 />
                 <span className="text-sm text-slate-700">Published (visible to students)</span>
               </label>
@@ -704,7 +700,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
                   name="published"
                   checked={formData.published}
                   onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                  className="rounded border-slate-300 text-indigo-600"
+                  className="rounded border-slate-300 text-blue-600"
                 />
                 <span className="text-sm text-slate-700">Published</span>
               </label>
@@ -794,7 +790,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
                   name="default_published"
                   checked={bulkFormData.default_published}
                   onChange={(e) => setBulkFormData({ ...bulkFormData, default_published: e.target.checked })}
-                  className="rounded border-slate-300 text-indigo-600"
+                  className="rounded border-slate-300 text-blue-600"
                 />
                 <span className="text-sm text-slate-700">Publish all automatically</span>
               </label>

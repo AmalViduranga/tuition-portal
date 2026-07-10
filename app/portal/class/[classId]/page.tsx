@@ -44,7 +44,7 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
           <p className="mt-2 text-slate-600">{group.description}</p>
         )}
         <div className="mt-4 flex items-center gap-2">
-          <Badge variant="default" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-indigo-100">
+          <Badge variant="default" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100">
             Enrollment Active
           </Badge>
           <p className="text-xs text-slate-500">
@@ -65,12 +65,12 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
             <article 
               key={material.id} 
               id={material.id}
-              className={`rounded-md border p-3 transition-colors duration-500 ${highlight === material.id ? 'border-indigo-500 bg-indigo-50 shadow-md' : 'border-slate-200'}`}
+              className={`rounded-md border p-3 transition-colors duration-500 ${highlight === material.id ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-slate-200'}`}
             >
               <p className="font-medium">{material.title}</p>
               <p className="text-sm text-slate-600">Released: {material.release_at}</p>
               <div className="mt-3 flex items-center gap-4">
-                <a href={material.file_url} target="_blank" rel="noreferrer" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+                <a href={material.file_url} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
                   Open PDF
                 </a>
                 <a href={`${material.file_url}?download=`} download className="text-sm font-medium text-emerald-600 hover:text-emerald-800 transition-colors">
