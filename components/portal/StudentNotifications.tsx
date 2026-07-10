@@ -52,13 +52,13 @@ export default function StudentNotifications() {
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex items-center justify-center p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="relative flex items-center justify-center p-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-sm"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
-        <span className="absolute top-1 right-1.5 flex h-2.5 w-2.5">
+        <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
         </span>
       </button>
 

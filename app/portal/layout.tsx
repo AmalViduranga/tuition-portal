@@ -49,7 +49,7 @@ export default async function PortalLayout({
               <span className="hidden sm:inline-block">Student Dashboard</span>
               <span className="sm:hidden">Dashboard</span>
             </Link>
-            <span className="hidden sm:inline-block rounded-full bg-blue-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+            <span className="hidden sm:inline-block rounded-full bg-blue-50 border border-blue-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
               Beta
             </span>
           </div>
@@ -65,13 +65,13 @@ export default async function PortalLayout({
             <StudentNotifications />
             <Link
               href="/dashboard/profile"
-              className="inline-flex items-center rounded-lg bg-white border border-slate-200 shadow-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center rounded-lg bg-white border border-slate-200 shadow-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               Profile
             </Link>
             <form action={logout}>
               <ActionSubmitButton
-                className="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 transition-colors"
+                className="inline-flex items-center rounded-lg bg-slate-900 shadow-sm border border-transparent px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               >
                 Sign out
               </ActionSubmitButton>
