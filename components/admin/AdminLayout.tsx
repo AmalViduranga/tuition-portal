@@ -57,11 +57,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   priority
                   className="h-8 w-8 object-contain shrink-0"
                 />
-                <span className="text-lg font-bold text-indigo-700 whitespace-nowrap overflow-hidden block">
+                <span className="text-lg font-bold text-blue-700 whitespace-nowrap overflow-hidden block">
                   Admin Panel
                 </span>
               </Link>
-              <span className="rounded-full bg-indigo-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700">
+              <span className="rounded-full bg-blue-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
                 Beta
               </span>
             </div>
@@ -100,7 +100,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     isCollapsed ? "lg:justify-center" : ""
                   } ${
                     isActive
-                      ? "bg-indigo-50 text-indigo-700"
+                      ? "bg-blue-50 text-blue-700"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`}
                 >
@@ -167,13 +167,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center gap-3 sm:gap-4 ml-4 shrink-0">
             <Link
               href="/"
-              className="text-sm font-medium text-slate-600 hover:text-indigo-600 hidden sm:block"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 hidden sm:block"
             >
               View Site
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-lg bg-indigo-600 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+              className="rounded-lg bg-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold text-white hover:bg-blue-700"
             >
               <span className="hidden sm:inline">Student Dashboard</span>
               <span className="sm:hidden">Dashboard</span>

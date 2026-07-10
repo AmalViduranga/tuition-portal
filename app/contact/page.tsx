@@ -12,8 +12,8 @@ export default function ContactPage() {
 
   return (
     <div className="flex flex-col gap-8 md:gap-12 pb-10">
-      <section className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-white p-8 text-center shadow-sm md:p-12">
-        <p className="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-sm font-semibold text-cyan-700">
+      <section className="relative overflow-hidden rounded-3xl border border-blue-100 bg-white p-8 text-center shadow-sm md:p-12">
+        <p className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
           <MessageSquare className="h-4 w-4" /> Get In Touch
         </p>
         <h1 className="mt-4 text-4xl font-extrabold text-slate-900 md:text-5xl">Contact Us</h1>
@@ -39,8 +39,8 @@ export default function ContactPage() {
       </section>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <article className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm hover:border-indigo-200 transition-colors">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 mb-6">
+        <article className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm hover:border-blue-200 transition-colors">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-600 mb-6">
             <Phone className="h-8 w-8" />
           </div>
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Phone / WhatsApp</h2>
@@ -50,8 +50,8 @@ export default function ContactPage() {
           </a>
         </article>
 
-        <article className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm hover:border-cyan-200 transition-colors">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-50 text-cyan-600 mb-6">
+        <article className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm hover:border-emerald-200 transition-colors">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mb-6">
             <Mail className="h-8 w-8" />
           </div>
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Email</h2>
@@ -61,8 +61,8 @@ export default function ContactPage() {
           </a>
         </article>
 
-        <article className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm hover:border-indigo-200 transition-colors">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 mb-6">
+        <article className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm hover:border-blue-200 transition-colors">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-600 mb-6">
             <MapPin className="h-8 w-8" />
           </div>
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Location</h2>
@@ -70,7 +70,7 @@ export default function ContactPage() {
         </article>
       </div>
 
-      <section className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-8 md:p-12 text-center mt-4">
+      <section className="rounded-3xl border border-blue-100 bg-blue-50/50 p-8 md:p-12 text-center mt-4">
         <h2 className="text-2xl font-bold text-slate-900 md:text-3xl mb-2">Connect with us</h2>
         <p className="text-slate-600 max-w-lg mx-auto mb-8">Follow our social media channels for updates, past paper discussions, and free educational content.</p>
         
@@ -98,13 +98,13 @@ export default function ContactPage() {
           </a>
         </div>
         
-        <div className="mt-10 pt-8 border-t border-indigo-100/60 max-w-2xl mx-auto flex flex-col items-center">
-          <p className="text-lg font-bold text-indigo-900 mb-4">Registration is open for the new intake</p>
+        <div className="mt-10 pt-8 border-t border-blue-100/60 max-w-2xl mx-auto flex flex-col items-center">
+          <p className="text-lg font-bold text-blue-900 mb-4">Registration is open for the new intake</p>
           <a
             href={`https://wa.me/${whatsappNumber}`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-md hover:bg-indigo-700 transition-all"
+            className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-4 text-base font-semibold text-white shadow-md hover:bg-blue-700 transition-all"
           >
             Join the Class <ArrowRight className="h-5 w-5" />
           </a>

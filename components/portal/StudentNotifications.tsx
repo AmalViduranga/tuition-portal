@@ -52,7 +52,7 @@ export default function StudentNotifications() {
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex items-center justify-center p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="relative flex items-center justify-center p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
@@ -69,7 +69,7 @@ export default function StudentNotifications() {
             <div className="flex gap-2">
               <button 
                 onClick={handleMarkAllSeen}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
                 title="Mark all as read"
               >
                 <CheckCheck className="w-3 h-3" />

@@ -65,7 +65,7 @@ export default function AdminSiteContentPage() {
     return (
       <Card>
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </Card>
     );
@@ -174,7 +174,7 @@ export default function AdminSiteContentPage() {
         <h2 className="text-lg font-semibold mb-4">Preview</h2>
         <div className="bg-slate-50 rounded-lg p-6 space-y-6">
           <div>
-            <h3 className="text-2xl font-bold text-indigo-700">{content.site_name || "Your Site Name"}</h3>
+            <h3 className="text-2xl font-bold text-blue-700">{content.site_name || "Your Site Name"}</h3>
           </div>
 
           <div>
@@ -196,7 +196,7 @@ export default function AdminSiteContentPage() {
 
           <div>
             <h4 className="font-semibold text-slate-900">{content.subject_name || "Subject Name"}</h4>
-            <p className="text-sm text-indigo-600 font-medium">Code: {content.subject_code || "-"}</p>
+            <p className="text-sm text-blue-600 font-medium">Code: {content.subject_code || "-"}</p>
             {content.subject_description && (
               <ul className="mt-2 space-y-1">
                 {content.subject_description.split("\n").map((line, i) =>

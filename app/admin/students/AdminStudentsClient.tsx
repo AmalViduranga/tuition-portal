@@ -494,7 +494,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-600">{error}</div>
@@ -618,7 +618,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
                   name="must_change_password"
                   checked={formData.must_change_password}
                   onChange={(e) => setFormData({ ...formData, must_change_password: e.target.checked })}
-                  className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
+                  className="rounded-md border-slate-300 text-blue-600 focus:ring-blue-500 h-5 w-5"
                 />
                 <span className="text-sm font-semibold text-slate-800">
                   Require password change on first login
@@ -661,7 +661,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
             
             {enrollmentLoading && studentEnrollments.length === 0 ? (
               <div className="flex items-center justify-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mr-2"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
                 <span className="text-sm text-slate-500 font-medium">Loading enrollments...</span>
               </div>
             ) : studentEnrollments.length === 0 ? (

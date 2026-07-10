@@ -339,7 +339,7 @@ export default function AdminMaterialsClient({ initialMaterials, initialClasses 
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : error ? (
           <div className="text-center py-12 text-red-600">{error}</div>
@@ -414,7 +414,7 @@ export default function AdminMaterialsClient({ initialMaterials, initialClasses 
                 setFormData({ ...formData, file });
               }}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
             <p className="mt-1 text-xs text-slate-500">
               PDF, images, documents accepted. Max size: 50MB
@@ -436,7 +436,7 @@ export default function AdminMaterialsClient({ initialMaterials, initialClasses 
                   name="published"
                   checked={formData.published}
                   onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                  className="rounded border-slate-300 text-indigo-600"
+                  className="rounded border-slate-300 text-blue-600"
                 />
                 <span className="text-sm text-slate-700">Published</span>
               </label>
@@ -509,7 +509,7 @@ export default function AdminMaterialsClient({ initialMaterials, initialClasses 
                 const file = e.target.files?.[0] || null;
                 setFormData({ ...formData, file });
               }}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
             <p className="mt-1 text-xs text-slate-500">
               Leave empty to keep current file
@@ -531,7 +531,7 @@ export default function AdminMaterialsClient({ initialMaterials, initialClasses 
                   name="published"
                   checked={formData.published}
                   onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                  className="rounded border-slate-300 text-indigo-600"
+                  className="rounded border-slate-300 text-blue-600"
                 />
                 <span className="text-sm text-slate-700">Published</span>
               </label>

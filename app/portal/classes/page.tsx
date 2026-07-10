@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { Card, DateFormat, Badge } from "@/components/ui";
+import { uniqueBy } from "@/lib/utils/arrays";
 
 export default async function StudentClassesPage() {
   const { supabase, user } = await requireUser();
@@ -47,7 +48,7 @@ export default async function StudentClassesPage() {
         </Card>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {enrollments.map((enr: { class_id: string; start_access_date: string; access_mode: string; access_end_date?: string; class_groups: { id: string; name: string; description?: string; is_active: boolean } | { id: string; name: string; description?: string; is_active: boolean }[] }) => {
+          {uniqueBy(enrollments, (enr) => enr.class_id).map((enr: { class_id: string; start_access_date: string; access_mode: string; access_end_date?: string; class_groups: { id: string; name: string; description?: string; is_active: boolean } | { id: string; name: string; description?: string; is_active: boolean }[] }) => {
             const classGroup = Array.isArray(enr.class_groups) ? enr.class_groups[0] : enr.class_groups;
             
             if (!classGroup) return null;
@@ -106,7 +107,7 @@ export default async function StudentClassesPage() {
 
                   <Link
                     href={`/portal/class/${classGroup.id}`}
-                    className="block w-full text-center rounded-lg bg-indigo-50 text-indigo-600 px-4 py-2 font-medium hover:bg-indigo-100 transition-colors"
+                    className="block w-full text-center rounded-lg bg-blue-50 text-blue-600 px-4 py-2 font-medium hover:bg-blue-100 transition-colors"
                   >
                     View Class Details
                   </Link>

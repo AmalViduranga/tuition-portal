@@ -6,7 +6,7 @@ import { loadStudentRecordings } from "@/lib/recordings/student-recordings";
 import { loadStudentMaterials } from "@/lib/materials/student-materials";
 import { getStudentAccessContext, isClassAccessActive } from "@/lib/recordings/access-logic";
 import { PasswordChangeForm, WhatsAppButton } from "./ClientFeatures";
-
+import { RecordingThumbnail } from "@/components/recordings";
 export const metadata: Metadata = {
   title: "Student Dashboard | MathsLK",
   description: "Access your A/L Mathematics classes, materials, recordings, and account settings.",
@@ -62,16 +62,15 @@ export default async function StudentDashboardPage() {
   return (
     <div className="space-y-8 pb-12">
       {/* 1. Welcome Section */}
-      <section className="relative overflow-hidden rounded-2xl bg-indigo-600 px-6 py-10 shadow-lg sm:px-12 sm:py-16">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+      <section className="relative overflow-hidden rounded-2xl bg-blue-600 px-6 py-10 shadow-lg sm:px-12 sm:py-16">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="text-white">
-            <h2 className="text-indigo-100 font-medium uppercase tracking-wider text-sm mb-1">{greeting}</h2>
+            <h2 className="text-blue-100 font-medium uppercase tracking-wider text-sm mb-1">{greeting}</h2>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
               Welcome back, {profile?.full_name?.split(" ")[0]}!
             </h1>
-            <p className="mt-2 max-w-xl text-indigo-100 text-lg">
+            <p className="mt-2 max-w-xl text-blue-100 text-lg">
               You have {enrollments.length} enrollment {enrollments.length === 1 ? 'record' : 'records'}. 
               {latestExpiry && ` Your next access period ends around ${latestExpiry}.`}
             </p>
@@ -79,7 +78,7 @@ export default async function StudentDashboardPage() {
           <div className="flex shrink-0">
             <Link 
               href="/portal/recordings" 
-              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 font-semibold text-indigo-600 shadow-sm transition-all hover:bg-slate-50 hover:scale-105"
+              className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 font-semibold text-blue-600 shadow-sm transition-all hover:bg-slate-50 hover:scale-105"
             >
               Start Learning
             </Link>
@@ -93,15 +92,15 @@ export default async function StudentDashboardPage() {
           
           {/* Quick Actions Navigation */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link href="/portal/recordings" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-indigo-100">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-2xl text-indigo-600 transition-colors group-hover:bg-indigo-100">🎥</span>
+            <Link href="/portal/recordings" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-blue-100">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-2xl text-blue-600 transition-colors group-hover:bg-blue-100">🎥</span>
               <span className="text-sm font-semibold text-slate-700">Recordings</span>
             </Link>
-            <Link href="/portal/materials" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-indigo-100">
+            <Link href="/portal/materials" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-blue-100">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-2xl text-blue-600 transition-colors group-hover:bg-blue-100">📚</span>
               <span className="text-sm font-semibold text-slate-700">Materials</span>
             </Link>
-            <Link href="/portal/classes" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-indigo-100">
+            <Link href="/portal/classes" className="group flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md hover:ring-blue-100">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-2xl text-emerald-600 transition-colors group-hover:bg-emerald-100">🏛️</span>
               <span className="text-sm font-semibold text-slate-700">My Classes</span>
             </Link>
@@ -111,7 +110,7 @@ export default async function StudentDashboardPage() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-slate-900">Latest Recordings</h2>
-              <Link href="/portal/recordings" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+              <Link href="/portal/recordings" className="text-sm font-medium text-blue-600 hover:text-blue-700">
                 View all →
               </Link>
             </div>
@@ -121,20 +120,26 @@ export default async function StudentDashboardPage() {
               </Card>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {accessibleRecordings.map((rec: { id: string; youtube_video_id: string; title: string; class_groups?: { name?: string } | { name?: string }[] | null }) => (
-                  <Link key={rec.id} href="/portal/recordings" className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:shadow-md">
-                    <div className="aspect-video w-full bg-slate-100 relative">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`https://img.youtube.com/vi/${rec.youtube_video_id}/mqdefault.jpg`}
-                        alt={rec.title}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                {accessibleRecordings.map((rec: { id: string; youtube_video_id: string; title: string; thumbnail_url?: string | null; class_groups?: { name?: string } | { name?: string }[] | null }) => (
+                  <Link key={rec.id} href="/portal/recordings" className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5">
+                    <div className="aspect-video w-full bg-slate-100 relative overflow-hidden">
+                      <RecordingThumbnail
+                        thumbnailUrl={rec.thumbnail_url}
+                        youtubeVideoId={rec.youtube_video_id}
+                        title={rec.title}
+                        className="transition-transform duration-500 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <span className="flex h-12 w-12 scale-90 items-center justify-center rounded-full bg-white/95 text-blue-600 opacity-0 shadow-lg transition-all group-hover:scale-100 group-hover:opacity-100">
+                          <svg className="ml-1 h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      </div>
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-slate-900 line-clamp-2 text-sm">{rec.title}</h3>
-                      <p className="text-xs text-slate-500 truncate">{(Array.isArray(rec.class_groups) ? rec.class_groups[0] : rec.class_groups)?.name}</p>
+                      <p className="text-xs text-slate-500 truncate mt-1">{(Array.isArray(rec.class_groups) ? rec.class_groups[0] : rec.class_groups)?.name}</p>
                     </div>
                   </Link>
                 ))}
@@ -146,7 +151,7 @@ export default async function StudentDashboardPage() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-slate-900">Recent Materials</h2>
-              <Link href="/portal/materials" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+              <Link href="/portal/materials" className="text-sm font-medium text-blue-600 hover:text-blue-700">
                 View all →
               </Link>
             </div>
@@ -157,9 +162,9 @@ export default async function StudentDashboardPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-1">
                 {accessibleMaterials.map((mat: { id: string; file_url: string; file_type?: string | null; title: string; release_at: string; class_groups?: { name?: string } | { name?: string }[] | null }) => (
-                  <a key={mat.id} href={mat.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-indigo-200 hover:shadow-sm">
+                  <a key={mat.id} href={mat.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-blue-200 hover:shadow-sm">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-xl text-indigo-600">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xl text-blue-600">
                         {mat.file_type?.includes("pdf") ? "📕" : "📄"}
                       </div>
                       <div>
@@ -169,7 +174,7 @@ export default async function StudentDashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <span className="text-sm font-medium text-indigo-600">Open</span>
+                    <span className="text-sm font-medium text-blue-600">Open</span>
                   </a>
                 ))}
               </div>
@@ -184,7 +189,7 @@ export default async function StudentDashboardPage() {
           <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0 shadow-md">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-lg font-bold">Profile Details</h2>
-              <Link href="/dashboard/profile" className="text-xs font-semibold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors">
+              <Link href="/dashboard/profile" className="text-xs font-semibold uppercase tracking-wider text-blue-400 hover:text-blue-300 transition-colors">
                 Edit
               </Link>
             </div>

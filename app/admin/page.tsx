@@ -45,7 +45,7 @@ export default async function AdminHomePage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Recent Students</h2>
-            <Link href="/admin/students" className="text-sm text-indigo-600 hover:text-indigo-700">
+            <Link href="/admin/students" className="text-sm text-blue-600 hover:text-blue-700">
               View all →
             </Link>
           </div>
@@ -72,7 +72,7 @@ export default async function AdminHomePage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Recent Recordings</h2>
-            <Link href="/admin/recordings" className="text-sm text-indigo-600 hover:text-indigo-700">
+            <Link href="/admin/recordings" className="text-sm text-blue-600 hover:text-blue-700">
               View all →
             </Link>
           </div>
@@ -105,7 +105,7 @@ export default async function AdminHomePage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Recent Materials</h2>
-            <Link href="/admin/materials" className="text-sm text-indigo-600 hover:text-indigo-700">
+            <Link href="/admin/materials" className="text-sm text-blue-600 hover:text-blue-700">
               View all →
             </Link>
           </div>

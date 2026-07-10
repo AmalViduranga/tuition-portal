@@ -4,14 +4,14 @@ import { CalendarDays, Clock, MapPin, MonitorPlay } from "lucide-react";
 export default function SchedulePage() {
   return (
     <div className="flex flex-col gap-8 md:gap-12 pb-10">
-      <section className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-white p-8 text-center shadow-sm md:p-12">
-         <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-indigo-500 via-cyan-500 to-indigo-500" />
+      <section className="relative overflow-hidden rounded-3xl border border-blue-100 bg-white p-8 text-center shadow-sm md:p-12">
+         <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-500" />
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <p className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 text-sm font-semibold text-violet-700">
             <CalendarDays className="h-4 w-4" /> Weekly Plan
           </p>
-          <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
-            <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+          <p className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
+            <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
             2028 A/L Intake Now Open
           </p>
         </div>
@@ -23,22 +23,22 @@ export default function SchedulePage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {classGroups.map((group, idx) => (
-          <article key={idx} className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+          <article key={idx} className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:border-blue-300 hover:shadow-md transition-all">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                <MonitorPlay className="h-6 w-6" />
             </div>
             <h2 className="text-xl font-bold text-slate-900 mb-4">{group.name}</h2>
             <div className="space-y-4">
                <div className="flex items-center gap-3 text-slate-600 bg-slate-50 p-3 rounded-xl">
-                 <CalendarDays className="h-5 w-5 text-indigo-500" />
+                 <CalendarDays className="h-5 w-5 text-blue-500" />
                  <span className="font-medium">{group.day}</span>
                </div>
                <div className="flex items-center gap-3 text-slate-600 bg-slate-50 p-3 rounded-xl">
-                 <Clock className="h-5 w-5 text-indigo-500" />
+                 <Clock className="h-5 w-5 text-blue-500" />
                  <span className="font-medium">{group.time}</span>
                </div>
                <div className="flex items-center gap-3 text-slate-600 bg-slate-50 p-3 rounded-xl">
-                 <MapPin className="h-5 w-5 text-indigo-500" />
+                 <MapPin className="h-5 w-5 text-blue-500" />
                  <span className="font-medium">{group.mode}</span>
                </div>
             </div>

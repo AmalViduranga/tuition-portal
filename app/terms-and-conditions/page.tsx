@@ -1,6 +1,6 @@
 export default function TermsAndConditionsPage() {
   return (
-    <section className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm md:p-8">
+    <section className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm md:p-8">
       <h1 className="text-3xl font-extrabold text-slate-900">Terms & Conditions</h1>
       <p className="mt-4 text-slate-700">By using this website and student portal, you agree to the following terms:</p>
       <ul className="mt-4 list-disc space-y-2 pl-6 text-slate-700">

@@ -40,7 +40,7 @@ export default async function LoginPage({ searchParams }: Props) {
         <div className="mt-4 text-center">
           <Link
             href="/forgot-password"
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+            className="text-sm font-medium text-blue-600 hover:text-blue-700"
           >
             Forgot password?
           </Link>
@@ -49,7 +49,7 @@ export default async function LoginPage({ searchParams }: Props) {
         <div className="mt-6 border-t border-slate-200 pt-4 text-center">
           <p className="text-xs text-slate-500">
             Don&apos;t have an account?{" "}
-            <Link href="/contact" className="text-indigo-600 hover:text-indigo-700 font-medium">
+            <Link href="/contact" className="text-blue-600 hover:text-blue-700 font-medium">
               Contact us
             </Link>{" "}
             to request access.

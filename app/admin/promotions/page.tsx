@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/utils/error";
 import { Card, Button, Input, Textarea } from "@/components/ui";
 import { Trash2, CheckCircle, XCircle } from "lucide-react";
+import Image from "next/image";
 
 interface Promotion {
   id: string;
@@ -188,7 +189,7 @@ export default function AdminPromotionsPage() {
     return (
       <Card>
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </Card>
     );
@@ -223,8 +224,8 @@ export default function AdminPromotionsPage() {
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
                     file:text-sm file:font-semibold
-                    file:bg-indigo-50 file:text-indigo-700
-                    hover:file:bg-indigo-100"
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100"
                   required
                 />
               </div>
@@ -249,7 +250,7 @@ export default function AdminPromotionsPage() {
                   id="isActive"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                 />
                 <label htmlFor="isActive" className="text-sm font-medium text-slate-700">
                   Set as Active Immediately
@@ -303,11 +304,12 @@ export default function AdminPromotionsPage() {
             {promotions.map((promo) => (
               <div key={promo.id} className="border border-slate-200 rounded-lg overflow-hidden flex flex-col bg-white">
                 <div className="relative h-48 w-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={promo.image_url}
                     alt={promo.title || "Promotion"}
-                    className="max-h-full max-w-full object-contain"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute top-2 right-2 flex gap-1">
                     <button

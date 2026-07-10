@@ -49,10 +49,10 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
         {children}
       </main>
       
-      <section className="border-t border-indigo-100 bg-white/80">
+      <section className="border-t border-blue-100 bg-white/80">
         <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 md:grid-cols-4">
           <div className="md:col-span-1">
-            <h3 className="text-lg font-bold text-indigo-700 tracking-tight mb-3">MathsLK</h3>
+            <h3 className="text-lg font-bold text-blue-700 tracking-tight mb-3">MathsLK</h3>
             <p className="text-sm text-slate-500 leading-relaxed mb-4">
               Master A/L Mathematics with confidence through structured learning, clear theories, and comprehensive past papers.
             </p>
@@ -92,43 +92,43 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Quick Links</h3>
             <div className="mt-3 flex flex-col gap-2 text-sm">
-              <Link href="/" className="text-slate-700 hover:text-indigo-700">Home</Link>
-              <Link href="/about" className="text-slate-700 hover:text-indigo-700">About Teacher</Link>
-              <Link href="/results" className="text-slate-700 hover:text-indigo-700">Previous Results</Link>
-              <Link href="/schedule" className="text-slate-700 hover:text-indigo-700">Class Schedule</Link>
-              <Link href="/contact" className="text-slate-700 hover:text-indigo-700">Contact</Link>
+              <Link href="/" className="text-slate-700 hover:text-blue-700">Home</Link>
+              <Link href="/about" className="text-slate-700 hover:text-blue-700">About Teacher</Link>
+              <Link href="/results" className="text-slate-700 hover:text-blue-700">Previous Results</Link>
+              <Link href="/schedule" className="text-slate-700 hover:text-blue-700">Class Schedule</Link>
+              <Link href="/contact" className="text-slate-700 hover:text-blue-700">Contact</Link>
             </div>
           </div>
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Student Access</h3>
             <div className="mt-3 flex flex-col gap-2 text-sm">
-              <LoadingLink href="/login" className="text-slate-700 hover:text-indigo-700 inline-flex items-center">Student Login</LoadingLink>
-              <Link href="/dashboard" className="text-slate-700 hover:text-indigo-700">Dashboard</Link>
+              <LoadingLink href="/login" className="text-slate-700 hover:text-blue-700 inline-flex items-center">Student Login</LoadingLink>
+              <Link href="/dashboard" className="text-slate-700 hover:text-blue-700">Dashboard</Link>
             </div>
           </div>
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Legal</h3>
             <div className="mt-3 flex flex-col gap-2 text-sm">
-              <Link href="/privacy-policy" className="text-slate-700 hover:text-indigo-700">Privacy Policy</Link>
-              <Link href="/terms-and-conditions" className="text-slate-700 hover:text-indigo-700">Terms & Conditions</Link>
+              <Link href="/privacy-policy" className="text-slate-700 hover:text-blue-700">Privacy Policy</Link>
+              <Link href="/terms-and-conditions" className="text-slate-700 hover:text-blue-700">Terms & Conditions</Link>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-indigo-100 bg-white/90">
+      <footer className="border-t border-blue-100 bg-white/90">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-5 text-sm text-slate-600">
           <p className="w-full text-center sm:w-auto sm:text-left">© 2026 Amal Viduranga. All rights reserved.</p>
           <div className="flex w-full flex-wrap items-center justify-center gap-4 sm:w-auto">
-            <Link href="/privacy-policy" className="hover:text-indigo-700">Privacy</Link>
+            <Link href="/privacy-policy" className="hover:text-blue-700">Privacy</Link>
             <span className="text-slate-300">|</span>
-            <Link href="/terms-and-conditions" className="hover:text-indigo-700">Terms</Link>
+            <Link href="/terms-and-conditions" className="hover:text-blue-700">Terms</Link>
             <span className="hidden sm:inline text-slate-300">|</span>
             <a
               href="https://www.linkedin.com/in/amal-viduranga-3a681b27b"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-indigo-600 hover:text-indigo-700 block w-full text-center sm:w-auto sm:inline"
+              className="font-medium text-blue-600 hover:text-blue-700 block w-full text-center sm:w-auto sm:inline"
             >
               Designed by Amal Viduranga
             </a>

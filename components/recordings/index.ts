@@ -4,3 +4,4 @@ export { default as YouTubeEmbed } from "@/components/videos/YouTubeEmbed";
 export { default as StudentRecordingRow } from "./StudentRecordingRow";
 export type { StudentRecordingCardData } from "./StudentRecordingCard";
 export type { StudentRecordingRowData } from "./StudentRecordingRow";
+export { default as RecordingThumbnail } from "./RecordingThumbnail";

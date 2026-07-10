@@ -31,8 +31,8 @@ export default async function Home(props: { searchParams: SearchParams }) {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0B0F19] via-[#0B0F19]/90 to-[#0B0F19]"></div>
         
         {/* Glow Effects */}
-        <div className="absolute -left-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-indigo-600/20 blur-[120px]"></div>
-        <div className="absolute -right-[10%] bottom-[10%] h-[400px] w-[400px] rounded-full bg-cyan-500/20 blur-[100px]"></div>
+        <div className="absolute -left-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-blue-600/20 blur-[120px]"></div>
+        <div className="absolute -right-[10%] bottom-[10%] h-[400px] w-[400px] rounded-full bg-emerald-500/20 blur-[100px]"></div>
 
         {/* Floating Mathematical Symbols */}
         <div className="absolute left-[10%] top-[15%] text-4xl text-white/5 font-serif select-none hidden md:block">∫</div>
@@ -47,18 +47,18 @@ export default async function Home(props: { searchParams: SearchParams }) {
             <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left z-10">
               
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-8">
-                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs sm:text-sm font-medium text-indigo-200 backdrop-blur-md">
-                  <span className="flex h-2 w-2 rounded-full bg-indigo-400"></span>
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-xs sm:text-sm font-medium text-blue-200 backdrop-blur-md">
+                  <span className="flex h-2 w-2 rounded-full bg-blue-400"></span>
                   #1 A/L Maths Sri Lanka
                 </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs sm:text-sm font-medium text-cyan-200 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-                  <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs sm:text-sm font-medium text-emerald-200 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
                   2028 Intake Now Open
                 </div>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-[1.15]">
-                Master A/L Mathematics (07) with <br className="hidden lg:block" /><span className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent drop-shadow-sm">Confidence</span>
+                Master A/L Mathematics (07) with <br className="hidden lg:block" /><span className="bg-gradient-to-r from-emerald-400 via-blue-400 to-slate-400 bg-clip-text text-transparent drop-shadow-sm">Confidence</span>
               </h1>
               
               <p className="text-lg sm:text-xl text-slate-300 mb-8 max-w-[600px] font-light leading-relaxed">
@@ -68,7 +68,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                 <Link
                   href="/contact"
-                  className="group relative flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.6)] transition-all hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(99,102,241,0.8)] overflow-hidden"
+                  className="group relative flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-4 text-base font-semibold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.6)] transition-all hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(99,102,241,0.8)] overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
                   <span className="relative z-10 flex items-center gap-2">Join the Class <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></span>
@@ -91,7 +91,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
                 {/* Mock header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-700/50">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded bg-gradient-to-br from-blue-500 to-slate-600 flex items-center justify-center">
                       <GraduationCap className="h-5 w-5 text-white" />
                     </div>
                     <div>
@@ -109,7 +109,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
                 {/* Mock content grid */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-xl bg-slate-800/50 p-4 border border-slate-700/30">
-                    <div className="flex items-center gap-3 mb-2 text-cyan-400">
+                    <div className="flex items-center gap-3 mb-2 text-emerald-400">
                       <PlayCircle className="h-5 w-5" />
                       <span className="text-sm font-semibold text-white">Recordings</span>
                     </div>
@@ -117,7 +117,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
                   </div>
                   
                   <div className="rounded-xl bg-slate-800/50 p-4 border border-slate-700/30">
-                    <div className="flex items-center gap-3 mb-2 text-indigo-400">
+                    <div className="flex items-center gap-3 mb-2 text-blue-400">
                       <FileText className="h-5 w-5" />
                       <span className="text-sm font-semibold text-white">Materials</span>
                     </div>
@@ -125,7 +125,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
                   </div>
                   
                   <div className="rounded-xl bg-slate-800/50 p-4 border border-slate-700/30">
-                    <div className="flex items-center gap-3 mb-2 text-purple-400">
+                    <div className="flex items-center gap-3 mb-2 text-slate-400">
                       <Clock className="h-5 w-5" />
                       <span className="text-sm font-semibold text-white">Schedule</span>
                     </div>
@@ -143,8 +143,8 @@ export default async function Home(props: { searchParams: SearchParams }) {
               </div>
               
               {/* Floating decorative elements behind the card */}
-              <div className="absolute -top-6 -right-6 z-10 h-24 w-24 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 opacity-20 blur-xl"></div>
-              <div className="absolute -bottom-10 -left-10 z-10 h-32 w-32 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 opacity-20 blur-2xl"></div>
+              <div className="absolute -top-6 -right-6 z-10 h-24 w-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-blue-600 opacity-20 blur-xl"></div>
+              <div className="absolute -bottom-10 -left-10 z-10 h-32 w-32 rounded-full bg-gradient-to-tr from-blue-500 to-slate-500 opacity-20 blur-2xl"></div>
             </div>
             
           </div>
@@ -155,22 +155,22 @@ export default async function Home(props: { searchParams: SearchParams }) {
       <section className="mx-auto w-full max-w-5xl px-4 sm:px-6 relative z-30 -mt-16 sm:-mt-20">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
           <div className="group flex flex-col items-center justify-center rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-            <div className="h-12 w-12 rounded-full bg-indigo-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-               <GraduationCap className="h-6 w-6 text-indigo-600" />
+            <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+               <GraduationCap className="h-6 w-6 text-blue-600" />
             </div>
             <h3 className="text-3xl font-extrabold text-slate-900">Highest</h3>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Z-Score (2.80+)</p>
           </div>
           <div className="group flex flex-col items-center justify-center rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-            <div className="h-12 w-12 rounded-full bg-cyan-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-               <TrendingUp className="h-6 w-6 text-cyan-600" />
+            <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+               <TrendingUp className="h-6 w-6 text-emerald-600" />
             </div>
             <h3 className="text-3xl font-extrabold text-slate-900">100%</h3>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Pass Rate in 2024</p>
           </div>
           <div className="group flex flex-col items-center justify-center rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-            <div className="h-12 w-12 rounded-full bg-purple-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-               <Users className="h-6 w-6 text-purple-600" />
+            <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+               <Users className="h-6 w-6 text-slate-600" />
             </div>
             <h3 className="text-3xl font-extrabold text-slate-900">Individual</h3>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Student Attention</p>
@@ -186,11 +186,11 @@ export default async function Home(props: { searchParams: SearchParams }) {
         </div>
         <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
           {subject.description.map((item, idx) => (
-            <div key={idx} className="group relative flex flex-col gap-4 rounded-2xl border border-slate-200/60 bg-white p-8 shadow-sm transition-all hover:shadow-xl hover:border-indigo-200">
+            <div key={idx} className="group relative flex flex-col gap-4 rounded-2xl border border-slate-200/60 bg-white p-8 shadow-sm transition-all hover:shadow-xl hover:border-blue-200">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Calculator className="h-16 w-16" />
               </div>
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <CheckCircle className="h-6 w-6" />
               </div>
               <p className="text-slate-700 leading-relaxed font-medium relative z-10">{item}</p>
@@ -203,44 +203,44 @@ export default async function Home(props: { searchParams: SearchParams }) {
       <section className="mt-20 sm:mt-32 px-4 sm:px-6 mx-auto max-w-7xl">
         <div className="overflow-hidden rounded-[2.5rem] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col lg:flex-row">
           <div className="lg:w-1/2 p-10 sm:p-16 flex flex-col justify-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-100 px-4 py-2 text-xs font-bold uppercase tracking-widest text-indigo-600 w-fit">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-100 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-600 w-fit">
               <BookOpen className="h-4 w-4" /> About the Teacher
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4">{teacher.name}</h2>
-            <div className="h-1 w-12 bg-indigo-500 rounded-full mb-6"></div>
-            <p className="text-indigo-600 font-bold mb-6 text-lg">{teacher.qualification}</p>
+            <div className="h-1 w-12 bg-blue-500 rounded-full mb-6"></div>
+            <p className="text-blue-600 font-bold mb-6 text-lg">{teacher.qualification}</p>
             <p className="text-slate-600 mb-8 leading-relaxed text-lg">
               Achieved 3A passes for Mathematics, Engineering Technology, and Science for Technology. Highest Z-Score: 2.8075. Colombo District 2nd and All Island 30th.
             </p>
-            <Link href="/about" className="inline-flex w-fit items-center gap-2 font-bold text-indigo-600 hover:text-indigo-800 transition-colors group">
+            <Link href="/about" className="inline-flex w-fit items-center gap-2 font-bold text-blue-600 hover:text-blue-800 transition-colors group">
               Read Full Profile <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           
           <div className="lg:w-1/2 bg-[#0A1128] p-10 sm:p-16 text-white flex flex-col justify-center relative overflow-hidden">
              {/* Abstract math decor */}
-             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-400 via-transparent to-transparent bg-[length:20px_20px]"></div>
+             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent bg-[length:20px_20px]"></div>
              <div className="absolute -bottom-20 -right-20 opacity-20">
-               <svg width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="22"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+               <svg width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="22"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
              </div>
              
-             <h3 className="text-2xl font-bold mb-8 relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Teaching Philosophy</h3>
+             <h3 className="text-2xl font-bold mb-8 relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">Teaching Philosophy</h3>
              <ul className="space-y-6 relative z-10">
                 <li className="flex gap-4 items-start group">
-                  <div className="mt-1 bg-indigo-500/20 p-2 rounded-lg group-hover:bg-indigo-500/40 transition-colors">
-                    <Star className="h-5 w-5 text-cyan-400" />
+                  <div className="mt-1 bg-blue-500/20 p-2 rounded-lg group-hover:bg-blue-500/40 transition-colors">
+                    <Star className="h-5 w-5 text-emerald-400" />
                   </div>
                   <span className="text-slate-300 text-lg leading-relaxed">Simplify difficult concepts to build strong foundations</span>
                 </li>
                 <li className="flex gap-4 items-start group">
-                  <div className="mt-1 bg-indigo-500/20 p-2 rounded-lg group-hover:bg-indigo-500/40 transition-colors">
-                    <Star className="h-5 w-5 text-cyan-400" />
+                  <div className="mt-1 bg-blue-500/20 p-2 rounded-lg group-hover:bg-blue-500/40 transition-colors">
+                    <Star className="h-5 w-5 text-emerald-400" />
                   </div>
                   <span className="text-slate-300 text-lg leading-relaxed">Use modern, interactive teaching methods</span>
                 </li>
                 <li className="flex gap-4 items-start group">
-                  <div className="mt-1 bg-indigo-500/20 p-2 rounded-lg group-hover:bg-indigo-500/40 transition-colors">
-                    <Star className="h-5 w-5 text-cyan-400" />
+                  <div className="mt-1 bg-blue-500/20 p-2 rounded-lg group-hover:bg-blue-500/40 transition-colors">
+                    <Star className="h-5 w-5 text-emerald-400" />
                   </div>
                   <span className="text-slate-300 text-lg leading-relaxed">Provide continuous support and doubt-clearing sessions</span>
                 </li>
@@ -271,13 +271,13 @@ export default async function Home(props: { searchParams: SearchParams }) {
               </span>
             </div>
             <div className="mb-8">
-              <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{pastResults.batch2024.results}</p>
+              <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-slate-600">{pastResults.batch2024.results}</p>
             </div>
             {pastResults.batch2024.highlights && (
               <ul className="space-y-4">
                 {pastResults.batch2024.highlights.slice(0, 3).map((hl, i) => (
                   <li key={i} className="flex gap-4 items-start text-slate-700">
-                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div>
+                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div>
                     <span className="text-base font-medium">{hl}</span>
                   </li>
                 ))}
@@ -286,26 +286,26 @@ export default async function Home(props: { searchParams: SearchParams }) {
           </div>
           
           {/* 2025 Batch */}
-          <div className="group relative rounded-3xl border-2 border-indigo-100 bg-gradient-to-b from-indigo-50/50 to-white p-8 sm:p-10 shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
+          <div className="group relative rounded-3xl border-2 border-blue-100 bg-gradient-to-b from-blue-50/50 to-white p-8 sm:p-10 shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
             <div className="absolute -top-4 right-8">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-cyan-500 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-white shadow-lg">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-emerald-500 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-white shadow-lg">
                 <Star className="h-3.5 w-3.5 fill-white" /> Latest
               </span>
             </div>
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between border-b border-indigo-100/50 pb-6 gap-4">
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between border-b border-blue-100/50 pb-6 gap-4">
               <h3 className="text-2xl font-bold text-slate-900">{pastResults.batch2025.title}</h3>
-              <span className="inline-flex rounded-full bg-indigo-100 px-4 py-1.5 text-sm font-bold text-indigo-700 whitespace-nowrap w-fit">
+              <span className="inline-flex rounded-full bg-blue-100 px-4 py-1.5 text-sm font-bold text-blue-700 whitespace-nowrap w-fit">
                 {pastResults.batch2025.totalStudents} Students
               </span>
             </div>
             <div className="mb-8">
-              <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-600">{pastResults.batch2025.results}</p>
+              <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-600">{pastResults.batch2025.results}</p>
             </div>
             {('highlights' in pastResults.batch2025) && (
               <ul className="space-y-4">
                 {(pastResults.batch2025 as { highlights: string[] }).highlights.slice(0, 3).map((hl: string, i: number) => (
                   <li key={i} className="flex gap-4 items-start text-slate-700">
-                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>
+                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>
                     <span className="text-base font-medium">{hl}</span>
                   </li>
                 ))}
@@ -327,15 +327,15 @@ export default async function Home(props: { searchParams: SearchParams }) {
           </div>
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 relative z-10">
             {classGroups.map((group, idx) => (
-              <div key={idx} className="group rounded-2xl bg-white p-8 shadow-sm border border-slate-200 transition-all hover:shadow-lg hover:border-indigo-300 hover:-translate-y-1">
+              <div key={idx} className="group rounded-2xl bg-white p-8 shadow-sm border border-slate-200 transition-all hover:shadow-lg hover:border-blue-300 hover:-translate-y-1">
                 <h3 className="text-xl font-extrabold text-slate-900 mb-6">{group.name}</h3>
                 <div className="space-y-4 text-slate-600 font-medium">
                   <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl">
-                    <Clock className="h-5 w-5 text-indigo-500 shrink-0" />
+                    <Clock className="h-5 w-5 text-blue-500 shrink-0" />
                     <span>{group.day}, {group.time}</span>
                   </div>
                   <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl">
-                    <MapPin className="h-5 w-5 text-cyan-500 shrink-0" />
+                    <MapPin className="h-5 w-5 text-emerald-500 shrink-0" />
                     <span>{group.mode}</span>
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
             ))}
           </div>
           <div className="mt-12 text-center relative z-10">
-             <Link href="/schedule" className="inline-flex items-center gap-2 font-bold text-indigo-600 hover:text-indigo-800 underline underline-offset-4 decoration-2 decoration-indigo-200 hover:decoration-indigo-500 transition-all">
+             <Link href="/schedule" className="inline-flex items-center gap-2 font-bold text-blue-600 hover:text-blue-800 underline underline-offset-4 decoration-2 decoration-blue-200 hover:decoration-blue-500 transition-all">
                See detailed schedule options <ArrowRight className="h-4 w-4" />
              </Link>
           </div>
@@ -352,25 +352,25 @@ export default async function Home(props: { searchParams: SearchParams }) {
 
       {/* 7. Quick Contact CTA */}
       <section className="mt-20 sm:mt-32 px-4 sm:px-6 mx-auto max-w-5xl">
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 px-8 py-16 text-center shadow-2xl md:px-16 md:py-20">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-blue-600 via-blue-700 to-slate-800 px-8 py-16 text-center shadow-2xl md:px-16 md:py-20">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
           <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-white opacity-10 blur-3xl"></div>
           
           <div className="relative z-10">
             <h2 className="text-3xl font-black text-white sm:text-5xl leading-tight mb-6">Ready to secure your A pass?</h2>
-            <p className="mx-auto max-w-2xl text-indigo-100 text-lg sm:text-xl font-light mb-10">
+            <p className="mx-auto max-w-2xl text-blue-100 text-lg sm:text-xl font-light mb-10">
               Registration is open for the new intake. Get in touch with us to reserve your spot and begin your journey.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
                 href={`tel:${contactData.phone.replace('+', '')}`}
-                className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-indigo-700 shadow-lg transition-all hover:bg-slate-50 hover:scale-105"
+                className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-blue-700 shadow-lg transition-all hover:bg-slate-50 hover:scale-105"
               >
                 <Phone className="h-5 w-5 transition-transform group-hover:rotate-12" /> Call Now
               </a>
               <Link
                 href="/contact"
-                className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-indigo-300/30 bg-indigo-800/40 backdrop-blur-sm px-8 py-4 text-base font-bold text-white transition-all hover:bg-indigo-800/60"
+                className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-blue-300/30 bg-blue-800/40 backdrop-blur-sm px-8 py-4 text-base font-bold text-white transition-all hover:bg-blue-800/60"
               >
                 Contact Methods <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>

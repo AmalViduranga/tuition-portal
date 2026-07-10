@@ -27,11 +27,11 @@ export default function PortalNav() {
               href={item.href}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all ${
                 isActive
-                  ? "bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200/50"
+                  ? "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/50"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
               }`}
             >
-              <Icon className={`h-4 w-4 ${isActive ? "text-indigo-600" : "text-slate-500"}`} />
+              <Icon className={`h-4 w-4 ${isActive ? "text-blue-600" : "text-slate-500"}`} />
               {item.label}
             </Link>
           );

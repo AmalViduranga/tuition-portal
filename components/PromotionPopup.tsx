@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { usePathname, useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import Image from "next/image";
 
 interface Promotion {
   id: string;
@@ -85,11 +86,11 @@ export default function PromotionPopup() {
           className="relative max-h-[80vh] w-full cursor-pointer overflow-y-auto"
           onClick={handleImageClick}
         >
-          {/* We use an img tag with object-contain to ensure the whole poster is visible without being cropped */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={promotion.image_url}
             alt={promotion.title || "Promotion"}
+            width={1200}
+            height={1200}
             className="w-full h-auto object-contain"
           />
           {(promotion.title || promotion.description) && (
