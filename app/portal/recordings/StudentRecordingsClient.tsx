@@ -19,8 +19,10 @@ function normalizeClassGroup(
 
 export default function StudentRecordingsClient({
   initialData,
+  highlight,
 }: {
   initialData: StudentRecordingsPayload;
+  highlight?: string;
 }) {
   const [recordings, setRecordings] = useState(initialData.recordings);
   const [accessibleClasses, setAccessibleClasses] = useState(initialData.accessible_classes);
@@ -218,14 +220,14 @@ export default function StudentRecordingsClient({
                 <ul className="space-y-3">
                   {items.map((rec) => (
                     <li key={`${title}-${rec.id}`}>
-                      <StudentRecordingRow recording={rec} onOpen={() => void openRecording(rec)} />
+                      <StudentRecordingRow recording={rec} isHighlighted={rec.id === highlight} onOpen={() => void openRecording(rec)} />
                     </li>
                   ))}
                 </ul>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {items.map((rec) => (
-                    <StudentRecordingCard key={`${title}-${rec.id}`} recording={rec} onOpen={() => void openRecording(rec)} />
+                    <StudentRecordingCard key={`${title}-${rec.id}`} recording={rec} isHighlighted={rec.id === highlight} onOpen={() => void openRecording(rec)} />
                   ))}
                 </div>
               )}

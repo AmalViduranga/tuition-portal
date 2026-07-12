@@ -19,6 +19,13 @@ export default defineConfig({
     video: 'on-first-retry',
   },
 
+  webServer: process.env.CI ? {
+    command: 'npm run start',
+    url: 'http://localhost:3000',
+    reuseExistingServer: false,
+    timeout: 120 * 1000,
+  } : undefined,
+
   projects: [
     {
       name: 'chromium',

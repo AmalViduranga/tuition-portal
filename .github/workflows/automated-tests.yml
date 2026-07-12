@@ -13,10 +13,10 @@ jobs:
     
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -28,7 +28,7 @@ jobs:
         run: npm run lint
 
       - name: Run TypeScript Compiler Check
-        run: npm run build || true # Just check for now, can be replaced with `npx tsc --noEmit` if needed.
+        run: npm run build
         
       - name: Run Unit & Component Tests (Vitest)
         run: npm run test:run
@@ -48,7 +48,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report

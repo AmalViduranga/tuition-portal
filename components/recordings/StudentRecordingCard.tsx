@@ -16,14 +16,16 @@ export type StudentRecordingCardData = {
 
 interface StudentRecordingCardProps {
   recording: StudentRecordingCardData;
+  isHighlighted?: boolean;
   onOpen: () => void;
 }
 
-export default function StudentRecordingCard({ recording, onOpen }: StudentRecordingCardProps) {
+export default function StudentRecordingCard({ recording, isHighlighted, onOpen }: StudentRecordingCardProps) {
   return (
     <div
       role="button"
       tabIndex={0}
+      id={recording.id}
       onClick={onOpen}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -31,7 +33,11 @@ export default function StudentRecordingCard({ recording, onOpen }: StudentRecor
           onOpen();
         }
       }}
-      className="group w-full flex flex-col text-left rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+      className={`group w-full flex flex-col text-left rounded-2xl overflow-hidden border bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+        isHighlighted
+          ? "border-blue-500 ring-1 ring-blue-500"
+          : "border-slate-200 hover:border-blue-200"
+      }`}
     >
       <div className="relative aspect-video bg-slate-100 overflow-hidden">
         <RecordingThumbnail

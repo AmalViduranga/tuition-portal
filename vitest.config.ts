@@ -12,6 +12,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './')
     },
     include: ['**/*.test.ts', '**/*.test.tsx'],
-    exclude: ['tests/e2e/**/*', 'node_modules', '.next'],
+    exclude: [
+      'tests/e2e/**/*', 
+      'node_modules', 
+      '.next',
+      'playwright-report/**/*',
+      'test-results/**/*',
+      'blob-report/**/*',
+      'coverage/**/*'
+    ],
   },
 })

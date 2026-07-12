@@ -17,8 +17,10 @@ function normalizeClassGroup(
 
 export default function StudentMaterialsClient({
   initialData,
+  highlight,
 }: {
   initialData: StudentMaterialsPayload;
+  highlight?: string;
 }) {
   const [materials, setMaterials] = useState(initialData.materials);
   const [accessibleClasses, setAccessibleClasses] = useState(initialData.accessible_classes);
@@ -183,9 +185,11 @@ export default function StudentMaterialsClient({
               </div>
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((mat) => (
-                  <li key={mat.id}>
+                  <li key={mat.id} id={mat.id}>
                     <Card
-                      className="group flex flex-col justify-between overflow-hidden transition-all hover:border-blue-200 hover:shadow-md"
+                      className={`group flex flex-col justify-between overflow-hidden transition-all hover:border-blue-200 hover:shadow-md ${
+                        mat.id === highlight ? "border-blue-500 bg-blue-50/50 shadow-md ring-1 ring-blue-500" : ""
+                      }`}
                       padding="none"
                     >
                       <div className="p-4 flex flex-col h-full relative">

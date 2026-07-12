@@ -7,6 +7,7 @@ import { loadStudentMaterials } from "@/lib/materials/student-materials";
 import { getStudentAccessContext, isClassAccessActive } from "@/lib/recordings/access-logic";
 import { PasswordChangeForm, WhatsAppButton } from "./ClientFeatures";
 import { RecordingThumbnail } from "@/components/recordings";
+import { MaterialOpenLink } from "@/components/materials/MaterialOpenLink";
 export const metadata: Metadata = {
   title: "Student Dashboard | MathsLK",
   description: "Access your A/L Mathematics classes, materials, recordings, and account settings.",
@@ -162,7 +163,7 @@ export default async function StudentDashboardPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-1">
                 {accessibleMaterials.map((mat: { id: string; file_url: string; file_type?: string | null; title: string; release_at: string; class_groups?: { name?: string } | { name?: string }[] | null }) => (
-                  <a key={mat.id} href={mat.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-blue-200 hover:shadow-sm">
+                  <MaterialOpenLink key={mat.id} materialId={mat.id} action="view" className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-blue-200 hover:shadow-sm">
                     <div className="flex items-center gap-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xl text-blue-600">
                         {mat.file_type?.includes("pdf") ? "📕" : "📄"}
@@ -175,7 +176,7 @@ export default async function StudentDashboardPage() {
                       </div>
                     </div>
                     <span className="text-sm font-medium text-blue-600">Open</span>
-                  </a>
+                  </MaterialOpenLink>
                 ))}
               </div>
             )}

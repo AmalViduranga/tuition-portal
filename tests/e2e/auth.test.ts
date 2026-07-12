@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 const runAuthTests = !!process.env.E2E_STUDENT_EMAIL && !!process.env.E2E_STUDENT_PASSWORD;
 
 test.describe('Authentication Flows', () => {
-  test.skip(!runAuthTests, 'Skipping authenticated tests because E2E credentials are not provided.');
+  test.skip(!runAuthTests, 'Authenticated E2E tests skipped because dedicated test credentials are not configured.');
 
   test('Student can log in and view dashboard', async ({ page }) => {
     await page.goto('/login');

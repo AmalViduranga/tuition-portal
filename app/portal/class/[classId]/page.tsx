@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui";
 import { loadStudentRecordings } from "@/lib/recordings/student-recordings";
 import { loadStudentMaterials } from "@/lib/materials/student-materials";
 import ClassRecordingsList from "@/components/recordings/ClassRecordingsList";
+import { MaterialOpenLink } from "@/components/materials/MaterialOpenLink";
 
 type Props = {
   params: Promise<{ classId: string }>;
@@ -70,12 +71,12 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
               <p className="font-medium">{material.title}</p>
               <p className="text-sm text-slate-600">Released: {material.release_at}</p>
               <div className="mt-3 flex items-center gap-4">
-                <a href={material.file_url} target="_blank" rel="noreferrer" className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+                <MaterialOpenLink materialId={material.id} action="view" className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
                   Open PDF
-                </a>
-                <a href={`${material.file_url}?download=`} download className="text-sm font-medium text-emerald-600 hover:text-emerald-800 transition-colors">
+                </MaterialOpenLink>
+                <MaterialOpenLink materialId={material.id} action="download" className="text-sm font-medium text-emerald-600 hover:text-emerald-800 transition-colors">
                   Download
-                </a>
+                </MaterialOpenLink>
               </div>
             </article>
           ))}

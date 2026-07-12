@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStudentAccessContext, isItemAccessible } from "@/lib/recordings/access-logic";
+import { extractStoragePath } from "@/lib/utils/storage";
 
 export async function GET(
   request: NextRequest,
@@ -44,16 +45,16 @@ export async function GET(
       );
     }
 
-    // 3. Extract the file path from the public URL.
-    // Example: https://xxx.supabase.co/storage/v1/object/public/materials/materials/filename.pdf
-    const urlParts = material.file_url.split('/public/materials/');
-    if (urlParts.length < 2) {
+    // 3. Extract the file path safely from the public URL or database string
+    let filePath: string;
+    try {
+      filePath = extractStoragePath(material.file_url, "materials");
+    } catch {
       return NextResponse.json(
         { error: "Invalid material file path" },
         { status: 500 }
       );
     }
-    const filePath = urlParts[1];
 
     // 4. Generate a signed URL securely on the server
     const adminSupabase = createAdminClient();

@@ -3,6 +3,7 @@ import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { grantNewReleaseAccess } from "@/lib/admin/grant-manager";
 import { createAuditLog } from "@/lib/audit/audit-log";
+import { extractStoragePath } from "@/lib/utils/storage";
 
 export async function GET(request: NextRequest) {
   try {
@@ -258,11 +259,9 @@ export async function DELETE(request: NextRequest) {
     // 2. Delete the file from storage if it exists
     if (material.file_url) {
       try {
-        // Sample URL: https://xxx.supabase.co/storage/v1/object/public/materials/materials/filename.pdf
-        // We need 'materials/filename.pdf'
-        const urlParts = material.file_url.split('/public/materials/');
-        if (urlParts.length > 1) {
-          const filePath = urlParts[1];
+        // We extract the file path safely
+        try {
+          const filePath = extractStoragePath(material.file_url, "materials");
           const { error: storageError } = await adminSupabase.storage
             .from("materials")
             .remove([filePath]);
@@ -271,6 +270,8 @@ export async function DELETE(request: NextRequest) {
             console.error("Storage delete error:", storageError);
             // We continue even if storage delete fails to ensure DB is cleaned up
           }
+        } catch (storageErr) {
+          console.error("Storage path parse error:", storageErr);
         }
       } catch (storageErr) {
         console.error("Storage cleanup error:", storageErr);

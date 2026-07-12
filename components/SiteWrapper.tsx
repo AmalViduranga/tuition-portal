@@ -52,7 +52,7 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
       <section aria-label="Site Links" className="border-t border-blue-100 bg-white/80">
         <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 md:grid-cols-4">
           <div className="md:col-span-1">
-            <h3 className="text-lg font-bold text-blue-700 tracking-tight mb-3">MathsLK</h3>
+            <h2 className="text-lg font-bold text-blue-700 tracking-tight mb-3">MathsLK</h2>
             <p className="text-sm text-slate-500 leading-relaxed mb-4">
               Master A/L Mathematics with confidence through structured learning, clear theories, and comprehensive past papers.
             </p>
@@ -90,7 +90,7 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Quick Links</h3>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Quick Links</h2>
             <div className="mt-3 flex flex-col gap-2 text-sm">
               <Link href="/" className="text-slate-700 hover:text-blue-700">Home</Link>
               <Link href="/about" className="text-slate-700 hover:text-blue-700">About Teacher</Link>
@@ -100,14 +100,14 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Student Access</h3>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Student Access</h2>
             <div className="mt-3 flex flex-col gap-2 text-sm">
               <LoadingLink href="/login" className="text-slate-700 hover:text-blue-700 inline-flex items-center">Student Login</LoadingLink>
               <Link href="/dashboard" className="text-slate-700 hover:text-blue-700">Dashboard</Link>
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Legal</h3>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Legal</h2>
             <div className="mt-3 flex flex-col gap-2 text-sm">
               <Link href="/privacy-policy" className="text-slate-700 hover:text-blue-700">Privacy Policy</Link>
               <Link href="/terms-and-conditions" className="text-slate-700 hover:text-blue-700">Terms & Conditions</Link>
