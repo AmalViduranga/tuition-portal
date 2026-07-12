@@ -158,14 +158,14 @@ export default async function Home(props: { searchParams: SearchParams }) {
             <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                <GraduationCap className="h-6 w-6 text-blue-600" />
             </div>
-            <h3 className="text-3xl font-extrabold text-slate-900">Highest</h3>
+            <h2 className="text-3xl font-extrabold text-slate-900">Highest</h2>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Z-Score (2.80+)</p>
           </div>
           <div className="group flex flex-col items-center justify-center rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
             <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                <TrendingUp className="h-6 w-6 text-emerald-600" />
             </div>
-            <h3 className="text-3xl font-extrabold text-slate-900">100%</h3>
+            <h2 className="text-3xl font-extrabold text-slate-900">100%</h2>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Pass Rate in 2024</p>
           </div>
           <div className="group flex flex-col items-center justify-center rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">

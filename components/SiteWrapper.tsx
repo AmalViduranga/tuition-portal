@@ -49,7 +49,7 @@ export default function SiteWrapper({ children, user, profile }: SiteWrapperProp
         {children}
       </main>
       
-      <section className="border-t border-blue-100 bg-white/80">
+      <section aria-label="Site Links" className="border-t border-blue-100 bg-white/80">
         <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 md:grid-cols-4">
           <div className="md:col-span-1">
             <h3 className="text-lg font-bold text-blue-700 tracking-tight mb-3">MathsLK</h3>

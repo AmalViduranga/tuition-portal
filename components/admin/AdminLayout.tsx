@@ -61,9 +61,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   Admin Panel
                 </span>
               </Link>
-              <span className="rounded-full bg-blue-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
-                Beta
-              </span>
+
             </div>
             {isCollapsed && (
               <div className="hidden lg:flex items-center justify-center">

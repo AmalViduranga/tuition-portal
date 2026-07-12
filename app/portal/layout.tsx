@@ -49,9 +49,7 @@ export default async function PortalLayout({
               <span className="hidden sm:inline-block">Student Dashboard</span>
               <span className="sm:hidden">Dashboard</span>
             </Link>
-            <span className="hidden sm:inline-block rounded-full bg-blue-50 border border-blue-100 px-2 mt-0.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
-              Beta
-            </span>
+
           </div>
           <div className="flex items-center gap-4">
             {profile?.role === "admin" && (
