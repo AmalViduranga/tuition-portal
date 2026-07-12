@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { getStudentPendingNotifications, markStudentNotificationSeen, markAllStudentNotificationsSeen, NotificationItem } from "@/app/portal/notifications/actions"
+import { getNotificationDestination } from "@/lib/utils/notifications"
 import { Button } from "@/components/ui"
 import { Bell, X, FileText, Video, CheckCheck } from "lucide-react"
 
@@ -31,7 +32,10 @@ export default function StudentNotifications() {
       await markStudentNotificationSeen(item.resource_type, item.resource_id)
       setNotifications(prev => prev.filter(n => n.resource_id !== item.resource_id))
       if (navigate) {
-        window.location.href = `/portal/class/${item.class_id}?highlight=${item.resource_id}#${item.resource_id}`
+        window.location.href = getNotificationDestination({
+          resourceType: item.resource_type,
+          resourceId: item.resource_id,
+        })
       }
     } catch (err) {
       console.error(err)

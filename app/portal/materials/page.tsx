@@ -8,9 +8,14 @@ export const metadata: Metadata = {
   description: "Download A/L Mathematics past papers, theory notes, and revision documents securely.",
 };
 
-export default async function MaterialsPage() {
+type Props = {
+  searchParams: Promise<{ highlight?: string }>;
+};
+
+export default async function MaterialsPage({ searchParams }: Props) {
   const { supabase, user } = await requireUser();
+  const { highlight } = await searchParams;
   const initialData = await loadStudentMaterials(supabase, user.id, null);
 
-  return <StudentMaterialsClient initialData={initialData} />;
+  return <StudentMaterialsClient initialData={initialData} highlight={highlight} />;
 }

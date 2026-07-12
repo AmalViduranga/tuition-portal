@@ -8,9 +8,14 @@ export const metadata: Metadata = {
   description: "Watch your A/L Mathematics class recordings, structured by theory and revision.",
 };
 
-export default async function RecordingsPage() {
+type Props = {
+  searchParams: Promise<{ highlight?: string }>;
+};
+
+export default async function RecordingsPage({ searchParams }: Props) {
   const { supabase, user } = await requireUser();
+  const { highlight } = await searchParams;
   const initialData = await loadStudentRecordings(supabase, user.id, null);
 
-  return <StudentRecordingsClient initialData={initialData} />;
+  return <StudentRecordingsClient initialData={initialData} highlight={highlight} />;
 }
