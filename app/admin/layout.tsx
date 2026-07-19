@@ -1,5 +1,7 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdmin } from "@/lib/auth";
+import { getSessionExpiration } from "@/lib/auth/session";
+import { SessionGuard } from "@/components/auth/SessionGuard";
 
 export default async function AdminLayoutWrapper({
   children,
@@ -7,6 +9,12 @@ export default async function AdminLayoutWrapper({
   children: React.ReactNode;
 }) {
   await requireAdmin();
+  const expiresAt = await getSessionExpiration();
 
-  return <AdminLayout>{children}</AdminLayout>;
+  return (
+    <>
+      <SessionGuard expiresAt={expiresAt} />
+      <AdminLayout>{children}</AdminLayout>
+    </>
+  );
 }

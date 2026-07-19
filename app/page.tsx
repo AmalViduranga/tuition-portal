@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import { classGroups, pastResults, subject, teacher, contactData } from "@/lib/content";
 import { ArrowRight, BookOpen, CheckCircle, Clock, GraduationCap, MapPin, Phone, Star, TrendingUp, Users, Calculator, FileText, PlayCircle } from "lucide-react";
+import ExamCountdown from "@/components/home/ExamCountdown";
 
 export const metadata: Metadata = {
   title: "A/L Maths Sri Lanka | Best Mathematics Tuition | MathsLK",
@@ -86,7 +87,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
             </div>
 
             {/* Right Column: Decorative Visual Dashboard */}
-            <div className="lg:col-span-6 relative hidden sm:block perspective-[1000px] h-full flex items-center justify-center">
+            <div className="lg:col-span-6 relative hidden sm:flex flex-col h-full items-center justify-center perspective-[1000px]">
               <div className="relative z-20 w-full rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 shadow-2xl p-6 transform rotate-y-[-5deg] rotate-x-[5deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700 ease-out max-w-md mx-auto">
                 {/* Mock header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-700/50">
@@ -142,9 +143,16 @@ export default async function Home(props: { searchParams: SearchParams }) {
                 </div>
               </div>
               
+              <ExamCountdown />
+
               {/* Floating decorative elements behind the card */}
               <div className="absolute -top-6 -right-6 z-10 h-24 w-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-blue-600 opacity-20 blur-xl"></div>
               <div className="absolute -bottom-10 -left-10 z-10 h-32 w-32 rounded-full bg-gradient-to-tr from-blue-500 to-slate-500 opacity-20 blur-2xl"></div>
+            </div>
+
+            {/* Mobile/Tablet Exam Countdown (shown under left column on small screens, under right column on large screens) */}
+            <div className="lg:col-span-12 block sm:hidden w-full mt-4">
+              <ExamCountdown />
             </div>
             
           </div>

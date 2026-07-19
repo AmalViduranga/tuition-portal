@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
+import { verifySessionMarker, clearSessionMarker } from "@/lib/auth/session";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -46,6 +47,28 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && (isPortal || isDashboard || isStudent || isAdmin || isAuthPage)) {
+    // Session expiration enforcement
+    const isValidSession = await verifySessionMarker(user.id);
+    if (!isValidSession) {
+      await clearSessionMarker();
+      await supabase.auth.signOut();
+      
+      if (!isAuthPage || request.nextUrl.searchParams.get("reason") !== "session_expired") {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = "/login";
+        redirectUrl.searchParams.set("reason", "session_expired");
+        const redirectResponse = NextResponse.redirect(redirectUrl);
+        // Copy cookies that might have been deleted by signOut
+        supabaseResponse.cookies.getAll().forEach(cookie => {
+          redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+        });
+        return redirectResponse;
+      } else {
+        // Already on login page with reason=session_expired. Just let it render, but return supabaseResponse to keep cookie deletions.
+        return supabaseResponse;
+      }
+    }
+
     // Only resolve the user role on the server for protected or auth routes to save DB calls on public routes.
     const { data: profile } = await supabase
       .from("profiles")
