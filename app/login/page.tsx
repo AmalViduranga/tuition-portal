@@ -3,7 +3,7 @@ import Image from "next/image";
 import { LoginForm } from "./login-form";
 
 type Props = {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; reason?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: Props) {
@@ -32,6 +32,12 @@ export default async function LoginPage({ searchParams }: Props) {
         {params.error ? (
           <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {params.error}
+          </div>
+        ) : null}
+
+        {params.reason === "session_expired" ? (
+          <div className="mt-4 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-800">
+            Your eight-hour session has expired. Please sign in again.
           </div>
         ) : null}
 
