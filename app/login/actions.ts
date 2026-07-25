@@ -6,10 +6,9 @@ import crypto from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuditLog } from "@/lib/audit/audit-log";
-import { createSessionMarker, clearSessionMarker } from "@/lib/auth/session";
 
 export async function login(formData: FormData) {
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "/dashboard");
   const supabase = await createClient();
@@ -61,8 +60,6 @@ export async function login(formData: FormData) {
       targetId: user.id,
     });
 
-    await createSessionMarker(user.id);
-
     return redirect("/admin");
   }
 
@@ -77,8 +74,6 @@ export async function login(formData: FormData) {
     targetType: "user",
     targetId: user.id,
   });
-
-  await createSessionMarker(user.id);
 
   // Auto-bootstrap logic removed for security.
   // Admins must be manually assigned via database query.
@@ -168,7 +163,6 @@ export async function logout() {
   }
 
   await supabase.auth.signOut();
-  await clearSessionMarker();
   redirect("/");
 }
 
