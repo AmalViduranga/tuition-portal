@@ -5,8 +5,6 @@ import { logout } from "@/app/login/actions";
 import StudentNotifications from "@/components/portal/StudentNotifications";
 import { ActionSubmitButton } from "@/components/ui";
 import PortalNav from "@/app/portal/PortalNav";
-import { getSessionExpiration } from "@/lib/auth/session";
-import { SessionGuard } from "@/components/auth/SessionGuard";
 
 export default async function DashboardLayout({
   children,
@@ -34,11 +32,8 @@ export default async function DashboardLayout({
     );
   }
 
-  const expiresAt = await getSessionExpiration();
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <SessionGuard expiresAt={expiresAt} />
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shadow-sm backdrop-blur transition-all">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
