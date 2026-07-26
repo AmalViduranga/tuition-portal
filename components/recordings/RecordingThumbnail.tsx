@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getYoutubeThumbnailLevels, extractYouTubeVideoId } from "@/lib/recordings/youtube";
 
 interface RecordingThumbnailProps {
@@ -18,6 +17,11 @@ export default function RecordingThumbnail({
   className = "",
 }: RecordingThumbnailProps) {
   const [fallbackLevel, setFallbackLevel] = useState(0);
+
+  // Reset fallback level when video changes
+  useEffect(() => {
+    setFallbackLevel(0);
+  }, [youtubeVideoId, thumbnailUrl]);
 
   const cleanId = extractYouTubeVideoId(youtubeVideoId);
   const youtubeLevels = cleanId ? getYoutubeThumbnailLevels(cleanId) : [];
@@ -37,12 +41,13 @@ export default function RecordingThumbnail({
 
   return (
     <div className={`relative h-full w-full ${className}`}>
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={currentSource}
         alt={title}
-        fill
-        className="object-cover"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover"
         onError={() => {
           setFallbackLevel((prev) => prev + 1);
         }}

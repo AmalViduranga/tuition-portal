@@ -59,7 +59,6 @@ export async function POST(request: NextRequest) {
     const youtubeVideoId = String(formData.get("youtube_video_id") ?? "");
     const releaseAt = String(formData.get("release_at") ?? "");
     const published = formData.get("published") === "on";
-    const thumbnailFile = formData.get("thumbnail") as File | null;
 
     if (!classId || !title || !youtubeVideoId || !releaseAt) {
       return NextResponse.json(
@@ -67,40 +66,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    let thumbnailUrl = null;
-
-    if (thumbnailFile && thumbnailFile.size > 0) {
-      const fileExt = thumbnailFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `recordings/${fileName}`;
-
-      const { error: uploadError } = await adminSupabase.storage
-        .from("thumbnails")
-        .upload(filePath, thumbnailFile, {
-          upsert: false,
-          contentType: thumbnailFile.type,
-        });
-
-      if (uploadError) {
-        throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
-      }
-
-      const { data: { publicUrl } } = adminSupabase.storage
-        .from("thumbnails")
-        .getPublicUrl(filePath);
-
-      thumbnailUrl = publicUrl;
-    }
-
-    if (!thumbnailUrl && youtubeVideoId) {
-      const { getYouTubeMetadata } = await import("@/lib/recordings/youtube");
-      const metadata = await getYouTubeMetadata(youtubeVideoId);
-      if (metadata) {
-        thumbnailUrl = metadata.thumbnail_url;
-      }
-    }
-
+    
     const { data: inserted, error } = await adminSupabase.from("recordings").insert({
       class_id: classId,
       title,
@@ -108,7 +74,6 @@ export async function POST(request: NextRequest) {
       youtube_video_id: youtubeVideoId,
       release_at: releaseAt,
       published,
-      thumbnail_url: thumbnailUrl,
     }).select("id").single();
 
     if (error) throw error;
@@ -153,7 +118,6 @@ export async function PUT(request: NextRequest) {
     const youtubeVideoId = String(formData.get("youtube_video_id") ?? "");
     const releaseAt = String(formData.get("release_at") ?? "");
     const published = formData.get("published") === "on";
-    const thumbnailFile = formData.get("thumbnail") as File | null;
 
     if (!recordingId || !classId || !title || !youtubeVideoId || !releaseAt) {
       return NextResponse.json(
@@ -169,7 +133,6 @@ export async function PUT(request: NextRequest) {
       youtube_video_id: string;
       release_at: string;
       published: boolean;
-      thumbnail_url?: string;
     } = {
       class_id: classId,
       title,
@@ -178,29 +141,6 @@ export async function PUT(request: NextRequest) {
       release_at: releaseAt,
       published,
     };
-
-    if (thumbnailFile && thumbnailFile.size > 0) {
-      const fileExt = thumbnailFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `recordings/${fileName}`;
-
-      const { error: uploadError } = await adminSupabase.storage
-        .from("thumbnails")
-        .upload(filePath, thumbnailFile, {
-          upsert: false,
-          contentType: thumbnailFile.type,
-        });
-
-      if (uploadError) {
-        throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
-      }
-
-      const { data: { publicUrl } } = adminSupabase.storage
-        .from("thumbnails")
-        .getPublicUrl(filePath);
-
-      updateData.thumbnail_url = publicUrl;
-    }
 
     const { error } = await adminSupabase
       .from("recordings")
