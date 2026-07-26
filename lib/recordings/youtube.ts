@@ -37,10 +37,11 @@ export function extractYouTubeVideoId(input: string | null | undefined): string 
   } else if (
     hostname === "youtube.com" ||
     hostname === "www.youtube.com" ||
+    hostname === "m.youtube.com" ||
     hostname === "youtube-nocookie.com" ||
     hostname === "www.youtube-nocookie.com"
   ) {
-    if (url.pathname.startsWith("/embed/") || url.pathname.startsWith("/v/") || url.pathname.startsWith("/shorts/")) {
+    if (url.pathname.startsWith("/embed/") || url.pathname.startsWith("/v/") || url.pathname.startsWith("/shorts/") || url.pathname.startsWith("/live/")) {
       // e.g. https://www.youtube.com/embed/AinV7Bbpiuc
       extractedId = url.pathname.split("/")[2];
     } else if (url.pathname === "/watch") {
@@ -62,9 +63,8 @@ export function getYoutubeThumbnailLevels(videoId: string) {
   if (!cleanId) return [];
 
   return [
-    `https://img.youtube.com/vi/${cleanId}/maxresdefault.jpg`,
-    `https://img.youtube.com/vi/${cleanId}/hqdefault.jpg`,
-    `https://img.youtube.com/vi/${cleanId}/mqdefault.jpg`,
+    `https://i.ytimg.com/vi/${cleanId}/maxresdefault.jpg`,
+    `https://i.ytimg.com/vi/${cleanId}/hqdefault.jpg`,
   ];
 }
 

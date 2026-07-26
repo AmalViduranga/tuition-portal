@@ -53,7 +53,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
     youtube_video_id: "",
     release_at: "",
     published: true,
-    thumbnail: null as File | null,
   });
   const [bulkFormData, setBulkFormData] = useState({
     class_id: "",
@@ -123,7 +122,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
       form.append("youtube_video_id", formData.youtube_video_id);
       form.append("release_at", formData.release_at);
       if (formData.published) form.append("published", "on");
-      if (formData.thumbnail) form.append("thumbnail", formData.thumbnail);
 
       const response = await fetch("/api/admin/recordings", {
         method: "POST",
@@ -143,7 +141,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
         youtube_video_id: "",
         release_at: "",
         published: true,
-        thumbnail: null,
       });
       await fetchRecordings();
     } catch (err) {
@@ -164,7 +161,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
       youtube_video_id: recording.youtube_video_id,
       release_at: recording.release_at,
       published: recording.published,
-      thumbnail: null,
     });
     setIsEditModalOpen(true);
   };
@@ -185,7 +181,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
       form.append("youtube_video_id", formData.youtube_video_id);
       form.append("release_at", formData.release_at);
       if (formData.published) form.append("published", "on");
-      if (formData.thumbnail) form.append("thumbnail", formData.thumbnail);
 
       const response = await fetch("/api/admin/recordings", {
         method: "PUT",
@@ -206,7 +201,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
         youtube_video_id: "",
         release_at: "",
         published: true,
-        thumbnail: null,
       });
       await fetchRecordings();
     } catch (err) {
@@ -541,7 +535,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
             youtube_video_id: "",
             release_at: "",
             published: true,
-            thumbnail: null,
           });
         }}
         title="Add Recording"
@@ -609,17 +602,6 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
               </label>
             </div>
           </div>
-          <Input
-            label="Custom Thumbnail (optional)"
-            name="thumbnail"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = (e.target as HTMLInputElement).files?.[0] || null;
-              setFormData({ ...formData, thumbnail: file });
-            }}
-            helperText="Upload custom thumbnail (otherwise auto-loaded from YouTube)"
-          />
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
             <Button
               type="button"

@@ -153,28 +153,6 @@ export async function toggleClassStatus(formData: FormData) {
 
 export async function addRecording(formData: FormData) {
   const { supabase } = await requireAdmin();
-  const file = formData.get("thumbnail") as File | null;
-  let thumbnailUrl = null;
-
-  // Upload thumbnail if provided
-  if (file && file.size > 0) {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `recordings/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("thumbnails")
-      .upload(filePath, file, { upsert: false });
-
-    if (uploadError) throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("thumbnails")
-      .getPublicUrl(filePath);
-
-    thumbnailUrl = publicUrl;
-  }
-
   const { data: insertedRecording, error: insertError } = await supabase.from("recordings").insert({
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
@@ -182,7 +160,6 @@ export async function addRecording(formData: FormData) {
     youtube_video_id: String(formData.get("youtube_video_id") ?? ""),
     release_at: String(formData.get("release_at") ?? ""),
     published: formData.get("published") === "on",
-    thumbnail_url: thumbnailUrl,
   }).select().single();
 
   if (insertError) {
@@ -206,7 +183,7 @@ export async function updateRecording(formData: FormData) {
   const { supabase } = await requireAdmin();
   const recordingId = String(formData.get("recording_id") ?? "");
 
-  const updateData: { class_id: string; title: string; description: string; youtube_video_id: string; release_at: string; published: boolean; thumbnail_url?: string; } = {
+  const updateData: { class_id: string; title: string; description: string; youtube_video_id: string; release_at: string; published: boolean; } = {
     class_id: String(formData.get("class_id") ?? ""),
     title: String(formData.get("title") ?? ""),
     description: String(formData.get("description") ?? ""),
@@ -214,26 +191,6 @@ export async function updateRecording(formData: FormData) {
     release_at: String(formData.get("release_at") ?? ""),
     published: formData.get("published") === "on",
   };
-
-  // Handle thumbnail upload
-  const file = formData.get("thumbnail") as File | null;
-  if (file && file.size > 0) {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `recordings/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("thumbnails")
-      .upload(filePath, file, { upsert: false });
-
-    if (uploadError) throw new Error(`Thumbnail upload failed: ${uploadError.message}`);
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("thumbnails")
-      .getPublicUrl(filePath);
-
-    updateData.thumbnail_url = publicUrl;
-  }
 
   const { data: updatedRecording, error: updateError } = await supabase
     .from("recordings")
