@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getYoutubeThumbnailLevels, extractYouTubeVideoId } from "@/lib/recordings/youtube";
 
 interface RecordingThumbnailProps {
@@ -16,20 +16,21 @@ export default function RecordingThumbnail({
   title,
   className = "",
 }: RecordingThumbnailProps) {
-  const [fallbackLevel, setFallbackLevel] = useState(0);
+  const currentIdentity = `${youtubeVideoId}-${thumbnailUrl || ""}`;
+  const [fallbackState, setFallbackState] = useState({
+    identity: currentIdentity,
+    level: 0,
+  });
 
-  // Reset fallback level when video changes
-  useEffect(() => {
-    setFallbackLevel(0);
-  }, [youtubeVideoId, thumbnailUrl]);
+  const effectiveLevel = fallbackState.identity === currentIdentity ? fallbackState.level : 0;
 
   const cleanId = extractYouTubeVideoId(youtubeVideoId);
   const youtubeLevels = cleanId ? getYoutubeThumbnailLevels(cleanId) : [];
   
   const sources = thumbnailUrl ? [thumbnailUrl, ...youtubeLevels] : youtubeLevels;
-  const currentSource = sources[fallbackLevel];
+  const currentSource = sources[effectiveLevel];
 
-  if (!currentSource || fallbackLevel >= sources.length) {
+  if (!currentSource || effectiveLevel >= sources.length) {
     return (
       <div className={`flex h-full w-full items-center justify-center bg-slate-100 ${className}`}>
         <svg className="h-10 w-10 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
@@ -49,7 +50,10 @@ export default function RecordingThumbnail({
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
         onError={() => {
-          setFallbackLevel((prev) => prev + 1);
+          setFallbackState({
+            identity: currentIdentity,
+            level: effectiveLevel + 1,
+          });
         }}
       />
     </div>

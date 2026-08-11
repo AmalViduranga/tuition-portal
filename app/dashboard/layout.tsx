@@ -5,6 +5,7 @@ import { logout } from "@/app/login/actions";
 import StudentNotifications from "@/components/portal/StudentNotifications";
 import { ActionSubmitButton } from "@/components/ui";
 import PortalNav from "@/app/portal/PortalNav";
+import ExamCountdown from "@/components/home/ExamCountdown";
 
 export default async function DashboardLayout({
   children,
@@ -36,8 +37,8 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shadow-sm backdrop-blur transition-all">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="flex items-center gap-2 text-xl font-bold tracking-tight text-blue-700 hover:opacity-90 transition-opacity">
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity shrink-0">
               <Image
                 src="/AV_Logo_01-removebg-preview.png"
                 alt="AV Classes Logo"
@@ -46,10 +47,14 @@ export default async function DashboardLayout({
                 priority
                 className="h-8 w-8 md:h-10 md:w-10 object-contain shrink-0"
               />
-              <span className="hidden sm:inline-block">Student Dashboard</span>
-              <span className="sm:hidden">Dashboard</span>
             </Link>
-
+            <div className="flex flex-col justify-center gap-0.5">
+              <Link href="/dashboard" className="text-xl font-bold tracking-tight text-blue-700 hover:opacity-90 transition-opacity leading-none">
+                <span className="hidden sm:inline-block">Student Dashboard</span>
+                <span className="sm:hidden">Dashboard</span>
+              </Link>
+              <ExamCountdown variant="compact" />
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {profile?.role === "admin" && (
