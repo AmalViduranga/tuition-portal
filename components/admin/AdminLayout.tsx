@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logout } from "@/app/login/actions";
 import { ActionSubmitButton } from "@/components/ui";
+import ExamCountdown from "@/components/home/ExamCountdown";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: "🏠" },
@@ -156,10 +157,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </svg>
           </button>
 
-          <div className="flex-1 ml-4 lg:ml-0 overflow-hidden">
-            <h1 className="text-lg font-semibold text-slate-900 truncate">
+          <div className="flex-1 ml-4 lg:ml-0 overflow-hidden flex flex-col justify-center gap-0.5">
+            <h1 className="text-lg font-semibold text-slate-900 truncate leading-none mt-1">
               {navItems.find((item) => item.href === pathname)?.label || "Admin"}
             </h1>
+            <ExamCountdown variant="compact" />
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 ml-4 shrink-0">

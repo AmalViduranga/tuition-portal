@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
 
 import { ActionSubmitButton, LoadingLink } from "@/components/ui";
+import ExamCountdown from "@/components/home/ExamCountdown";
 
 interface NavbarProps {
   siteName: string;
@@ -63,8 +64,8 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/60 bg-white/80 backdrop-blur-2xl shadow-sm transition-all duration-300">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 text-base font-bold tracking-tight text-blue-700 md:text-lg hover:opacity-90 transition-opacity">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Link href="/" className="flex items-center hover:opacity-90 transition-opacity shrink-0" aria-label="Home">
             <Image
               src="/AV_Logo_01-removebg-preview.png"
               alt="AV Classes Logo"
@@ -73,9 +74,13 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
               priority
               className="h-8 w-8 md:h-10 md:w-10 object-contain"
             />
-            <span className="hidden sm:inline-block">{siteName}</span>
           </Link>
-
+          <div className="flex flex-col justify-center gap-0.5">
+            <Link href="/" className="hidden sm:block text-base font-bold tracking-tight text-blue-700 md:text-lg hover:opacity-90 transition-opacity leading-none md:leading-none">
+              {siteName}
+            </Link>
+            <ExamCountdown variant="compact" />
+          </div>
         </div>
 
         {/* Desktop Nav */}

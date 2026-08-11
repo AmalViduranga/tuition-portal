@@ -6,7 +6,11 @@ import { Clock } from "lucide-react";
 
 const subscribeToHydration = () => () => {};
 
-export default function ExamCountdown() {
+interface ExamCountdownProps {
+  variant?: "landing" | "compact";
+}
+
+export default function ExamCountdown({ variant = "landing" }: ExamCountdownProps) {
   const mounted = useSyncExternalStore(
     subscribeToHydration,
     () => true,
@@ -59,6 +63,32 @@ export default function ExamCountdown() {
   const displayHours = mounted ? pad(hours) : "--";
   const displayMinutes = mounted ? pad(minutes) : "--";
   const displaySeconds = mounted ? pad(seconds) : "--";
+
+  if (variant === "compact") {
+    if (mounted && isCompleted) {
+      return (
+        <div className="text-[9px] sm:text-[10px] font-medium text-emerald-600 tracking-tight leading-none mt-0.5">
+          <span className="font-semibold">2026 A/L Maths</span><br/>Exam Started
+        </div>
+      );
+    }
+    
+    return (
+      <div 
+        className="text-[9px] sm:text-[10px] font-medium text-slate-500 tracking-tight tabular-nums mt-0.5"
+        aria-label="2026 A/L Maths Paper Starts In"
+        role="timer"
+      >
+        <div className="hidden lg:block">
+          <span className="font-semibold text-slate-700">2026 A/L Maths</span> &bull; Paper Starts In &ndash; {displayDays}D {displayHours}H {displayMinutes}M {displaySeconds}S
+        </div>
+        <div className="lg:hidden flex flex-col leading-[1.1]">
+          <span className="font-semibold text-slate-700">2026 A/L Maths</span>
+          <span>Starts In &ndash; {displayDays}D {displayHours}H {displayMinutes}M {displaySeconds}S</span>
+        </div>
+      </div>
+    );
+  }
 
   if (mounted && isCompleted) {
     return (
