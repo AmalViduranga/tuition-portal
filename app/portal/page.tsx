@@ -14,7 +14,7 @@ export default async function PortalHomePage() {
   const [{ data: enrollments }, { data: recentRecordings }] = await Promise.all([
     supabase
       .from("student_class_enrollments")
-      .select("class_id, start_access_date, class_groups(id, name)")
+      .select("class_id, start_access_date, class_groups(id, name, is_active)")
       .eq("student_id", user.id)
       .is("revoked_at", null)
       .order("created_at", { ascending: false }),
@@ -25,7 +25,7 @@ export default async function PortalHomePage() {
         title,
         youtube_video_id,
         release_at,
-        class_groups (id, name)
+        class_groups (id, name, is_active)
       `)
       .eq("published", true)
       .lte("release_at", new Date().toISOString().split("T")[0])
@@ -33,9 +33,14 @@ export default async function PortalHomePage() {
       .limit(6),
   ]);
 
-  // Filter recordings to only those the student has access to
+  const activeEnrollments = (enrollments || []).filter((e: { class_groups: { is_active?: boolean } | { is_active?: boolean }[] }) => {
+    const group = Array.isArray(e.class_groups) ? e.class_groups[0] : e.class_groups;
+    return group?.is_active === true;
+  });
+
+  // Filter recordings to only those the student has access to in active classes
   const accessibleClassIds = new Set(
-    (enrollments || []).map((e: { class_groups: { id: string } | { id: string }[] }) => {
+    activeEnrollments.map((e: { class_groups: { id: string } | { id: string }[] }) => {
       const group = Array.isArray(e.class_groups) ? e.class_groups[0] : e.class_groups;
       return group?.id;
     })
@@ -47,6 +52,7 @@ export default async function PortalHomePage() {
 
   const accessibleRecordings = (recentRecordings ?? []).filter((rec) => {
     const group = Array.isArray(rec.class_groups) ? rec.class_groups[0] : rec.class_groups;
+    if (group && (group as { is_active?: boolean }).is_active === false) return false;
     const isEnrolled = group && accessibleClassIds.has(group.id);
     return isEnrolled && accessContext.recordingGrants.has(rec.id);
   });
@@ -126,15 +132,15 @@ export default async function PortalHomePage() {
           </Link>
         </div>
 
-        {(enrollments || []).length === 0 ? (
+        {activeEnrollments.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-4xl mb-3">📚</div>
-            <p className="text-slate-600">You are not enrolled in any classes yet.</p>
+            <p className="text-slate-600">You are not enrolled in any active classes yet.</p>
             <p className="text-sm text-slate-500 mt-1">Contact your instructor to get started.</p>
           </div>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
-            {uniqueBy(enrollments || [], (e) => e.class_id).slice(0, 4).map((enrollment: { class_id: string; start_access_date: string; class_groups: { name: string } | { name: string }[] }) => {
+            {uniqueBy(activeEnrollments, (e) => e.class_id).slice(0, 4).map((enrollment: { class_id: string; start_access_date: string; class_groups: { name: string } | { name: string }[] }) => {
               const group = Array.isArray(enrollment.class_groups)
                 ? enrollment.class_groups[0]
                 : enrollment.class_groups;

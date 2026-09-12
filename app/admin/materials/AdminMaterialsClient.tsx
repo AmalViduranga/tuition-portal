@@ -52,7 +52,7 @@ export default function AdminMaterialsClient({ initialMaterials, initialClasses 
       setLoading(true);
       const [matRes, classRes] = await Promise.all([
         fetch("/api/admin/materials"),
-        fetch("/api/admin/classes"),
+        fetch("/api/admin/classes?active=true"),
       ]);
 
       if (!matRes.ok || !classRes.ok) throw new Error("Failed to fetch data");
