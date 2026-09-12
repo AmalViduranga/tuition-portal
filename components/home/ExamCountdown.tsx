@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 import { AL_2026_MATHEMATICS_07_START } from "@/lib/constants";
-import { Clock } from "lucide-react";
 
 const subscribeToHydration = () => () => {};
 
@@ -16,10 +15,9 @@ export default function ExamCountdown({ variant = "landing" }: ExamCountdownProp
     () => true,
     () => false
   );
+  const targetTimestamp = useRef(Date.parse(AL_2026_MATHEMATICS_07_START));
   const [remainingMs, setRemainingMs] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
-
-  const targetTimestamp = useRef(Date.parse(AL_2026_MATHEMATICS_07_START));
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -64,15 +62,11 @@ export default function ExamCountdown({ variant = "landing" }: ExamCountdownProp
   const displayMinutes = mounted ? pad(minutes) : "--";
   const displaySeconds = mounted ? pad(seconds) : "--";
 
+  if (isCompleted) {
+    return null;
+  }
+
   if (variant === "compact") {
-    if (mounted && isCompleted) {
-      return (
-        <div className="text-[9px] sm:text-[10px] font-medium text-emerald-600 tracking-tight leading-none mt-0.5">
-          <span className="font-semibold">2026 A/L Maths</span><br/>Exam Started
-        </div>
-      );
-    }
-    
     return (
       <div 
         className="text-[9px] sm:text-[10px] font-medium text-slate-500 tracking-tight tabular-nums mt-0.5"
@@ -86,20 +80,6 @@ export default function ExamCountdown({ variant = "landing" }: ExamCountdownProp
           <span className="font-semibold text-slate-700">2026 A/L Maths</span>
           <span>Starts In &ndash; {displayDays}D {displayHours}H {displayMinutes}M {displaySeconds}S</span>
         </div>
-      </div>
-    );
-  }
-
-  if (mounted && isCompleted) {
-    return (
-      <div className="mt-8 w-full rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 shadow-2xl p-6 text-center max-w-md mx-auto relative z-20">
-        <div className="flex justify-center mb-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-            <Clock className="h-5 w-5 text-white" />
-          </div>
-        </div>
-        <p className="text-white font-medium">The 2026 A/L Mathematics (07) paper has started.</p>
-        <p className="text-slate-400 text-sm mt-2">02 September 2026 &bull; 8:30 AM Sri Lanka Time</p>
       </div>
     );
   }

@@ -37,6 +37,14 @@ type FilterState = {
   publishedFilter: "all" | "published" | "draft";
 };
 
+function find2027ClassId(classList: Class[]): string {
+  const match = (classList || []).find((c) =>
+    c.name.toLowerCase().includes("2027 a/l") ||
+    c.name.toLowerCase().includes("2027")
+  );
+  return match?.id ?? "";
+}
+
 export default function AdminRecordingsClient({ initialRecordings, initialClasses }: { initialRecordings: Recording[], initialClasses: Class[] }) {
   const [recordings, setRecordings] = useState<Recording[]>(initialRecordings || []);
   const [classes, setClasses] = useState<Class[]>(initialClasses || []);
@@ -62,11 +70,21 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
+  const [filters, setFilters] = useState<FilterState>(() => ({
     search: "",
-    classFilter: "",
+    classFilter: find2027ClassId(initialClasses),
     publishedFilter: "all",
-  });
+  }));
+  const [hasSetDefaultClass, setHasSetDefaultClass] = useState(() => Boolean(find2027ClassId(initialClasses)));
+
+  if (!hasSetDefaultClass && classes.length > 0) {
+    const id = find2027ClassId(classes);
+    if (id) {
+      setHasSetDefaultClass(true);
+      setFilters((prev) => ({ ...prev, classFilter: id }));
+    }
+  }
+
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 

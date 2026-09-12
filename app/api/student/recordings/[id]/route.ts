@@ -46,7 +46,11 @@ export async function GET(
 
     if (recError) throw recError;
 
-    if (!recording) {
+    const classGroup = Array.isArray(recording?.class_groups)
+      ? recording.class_groups[0]
+      : recording?.class_groups;
+
+    if (!recording || (classGroup && (classGroup as { is_active?: boolean }).is_active === false)) {
       return NextResponse.json(
         { error: "Recording not found or you do not have access" },
         { status: 404 },

@@ -21,21 +21,22 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
     loadStudentRecordings(supabase, user.id, classId),
     loadStudentMaterials(supabase, user.id, classId),
     supabase.from("student_class_enrollments")
-      .select("class_groups(name, description)")
+      .select("class_groups(name, description, is_active)")
       .eq("student_id", user.id)
       .eq("class_id", classId)
       .maybeSingle()
   ]);
 
-  if (!enrollRes.data) {
+  const group = Array.isArray(enrollRes.data?.class_groups) 
+    ? enrollRes.data.class_groups[0] 
+    : enrollRes.data?.class_groups;
+
+  if (!enrollRes.data || !group?.is_active) {
     notFound();
   }
 
   const visibleRecordings = recordingsPayload.recordings;
   const visibleMaterials = materialsPayload.materials;
-  const group = Array.isArray(enrollRes.data?.class_groups) 
-    ? enrollRes.data.class_groups[0] 
-    : enrollRes.data.class_groups;
 
   return (
     <div className="space-y-6">

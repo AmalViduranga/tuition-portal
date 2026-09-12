@@ -26,7 +26,17 @@ export default function StudentRecordingsClient({
 }) {
   const [recordings, setRecordings] = useState(initialData.recordings);
   const [accessibleClasses, setAccessibleClasses] = useState(initialData.accessible_classes);
-  const [selectedClassId, setSelectedClassId] = useState("");
+  
+  // Default selected class should be 2027 A/L Mathematics if available
+  const defaultClassId = useMemo(() => {
+    const class2027 = initialData.accessible_classes.find((c) =>
+      c.name.toLowerCase().includes("2027 a/l") ||
+      c.name.toLowerCase().includes("2027")
+    );
+    return class2027?.id ?? "";
+  }, [initialData.accessible_classes]);
+
+  const [selectedClassId, setSelectedClassId] = useState(defaultClassId);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
@@ -83,14 +93,23 @@ export default function StudentRecordingsClient({
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return normalized;
-    return normalized.filter(
+    const activeClassIds = new Set(accessibleClasses.map((c) => c.id));
+    
+    // Inactive classes disappear from recordings view and search results
+    let list = normalized.filter((r) => activeClassIds.has(r.class_id));
+
+    if (selectedClassId) {
+      list = list.filter((r) => r.class_id === selectedClassId);
+    }
+
+    if (!q) return list;
+    return list.filter(
       (r) =>
         r.title.toLowerCase().includes(q) ||
         (r.description?.toLowerCase().includes(q) ?? false) ||
         (r.class_groups?.name.toLowerCase().includes(q) ?? false),
     );
-  }, [normalized, searchQuery]);
+  }, [normalized, searchQuery, selectedClassId, accessibleClasses]);
 
   const sections = useMemo(() => {
     if (selectedClassId) {

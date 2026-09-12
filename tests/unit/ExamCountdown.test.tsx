@@ -26,13 +26,13 @@ describe("ExamCountdown", () => {
     expect(screen.getAllByText("00").length).toBe(2); // 00 minutes and 00 seconds
   });
 
-  it("should show completed state when target has passed", () => {
+  it("should render null when target has passed", () => {
     // Let's set time after the start
     vi.setSystemTime(new Date("2026-09-02T04:00:00.000Z")); // 9:30 AM SL time
     
-    render(<ExamCountdown />);
+    const { container } = render(<ExamCountdown />);
     
-    expect(screen.getByText("The 2026 A/L Mathematics (07) paper has started.")).toBeDefined();
+    expect(container.firstChild).toBeNull();
   });
 
   it("should update countdown when time advances", () => {

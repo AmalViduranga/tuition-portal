@@ -70,6 +70,10 @@ export async function loadStudentRecordings(
     }
   });
 
+  if (accessible_classes.length === 0) {
+    return { recordings: [], accessible_classes: [] };
+  }
+
   if (classIdFilter && !accessible_classes.some((c) => c.id === classIdFilter)) {
     return { recordings: [], accessible_classes };
   }
@@ -90,7 +94,7 @@ export async function loadStudentRecordings(
       published,
       thumbnail_url,
       class_id,
-      class_groups (id, name),
+      class_groups (id, name, is_active),
       views_count
     `,
     )
@@ -113,10 +117,12 @@ export async function loadStudentRecordings(
   // Get full access context (enrollments, payment periods, unlocks) for evaluating the rules
   const accessContext = await getStudentAccessContext(supabase, userId);
 
-  // Filter securely on the server side based on business rules
-  const accessibleRecordings = (rawRecordings || []).filter((rec) => 
-    isRecordingAccessible(rec, accessContext)
-  );
+  // Filter securely on the server side based on business rules and ensure class is active
+  const accessibleRecordings = (rawRecordings || []).filter((rec) => {
+    const classGroup = Array.isArray(rec.class_groups) ? rec.class_groups[0] : rec.class_groups;
+    if (classGroup && classGroup.is_active === false) return false;
+    return isRecordingAccessible(rec, accessContext);
+  });
 
   const list = accessibleRecordings.map((rec) => ({
     ...rec,
