@@ -15,24 +15,23 @@ export default function PortalNav() {
   ];
 
   return (
-    <div className="mb-6 overflow-x-auto">
-      <nav className="flex space-x-2 rounded-xl bg-slate-100/80 p-1.5 ring-1 ring-slate-200">
+    <div className="mb-6 overflow-x-auto pb-1">
+      <nav className="inline-flex space-x-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 p-1.5 border border-slate-200/80 dark:border-slate-800">
         {navItems.map((item) => {
-          // Adjust active state logic to account for /dashboard or /portal
           const isActive = pathname === item.href || (pathname === "/portal" && item.href === "/dashboard");
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 ${
                 isActive
-                  ? "bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/50"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+                  ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs border border-slate-200/80 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/50"
               }`}
             >
-              <Icon className={`h-4 w-4 ${isActive ? "text-blue-600" : "text-slate-500"}`} />
-              {item.label}
+              <Icon className={`h-4 w-4 ${isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"}`} />
+              <span>{item.label}</span>
             </Link>
           );
         })}

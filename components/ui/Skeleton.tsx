@@ -9,11 +9,11 @@ export default function Skeleton({
   className = "",
   ...props
 }: SkeletonProps) {
-  const baseClasses = "animate-pulse bg-slate-200";
-  
+  const baseClasses = "animate-pulse bg-slate-200/80 dark:bg-slate-800/80";
+
   const variantClasses = {
-    text: "h-3 w-full rounded",
-    rectangular: "rounded-lg",
+    text: "h-3 w-full rounded-md",
+    rectangular: "rounded-xl",
     circular: "rounded-full",
   };
 

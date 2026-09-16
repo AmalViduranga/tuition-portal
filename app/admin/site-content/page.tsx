@@ -148,16 +148,48 @@ export default function AdminSiteContentPage() {
                 />
               </div>
             </div>
+
+            <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Current Class Lessons / Topics (Live on Homepage & Portal)</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Update the active lesson/topic currently being taught for each batch. Supports English and Sinhala text freely.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <Input
+                  label="2027 Theory Class - Current Lesson"
+                  value={content.current_lesson_2027_theory || ""}
+                  onChange={(e) => handleChange("current_lesson_2027_theory", e.target.value)}
+                  placeholder="e.g., Limits and Continuity or අනුකලනයේ මූලික සංකල්ප"
+                  helperText="Displayed on homepage and student portal"
+                />
+                <Input
+                  label="2027 Revision Class - Current Lesson"
+                  value={content.current_lesson_2027_revision || ""}
+                  onChange={(e) => handleChange("current_lesson_2027_revision", e.target.value)}
+                  placeholder="e.g., Past Paper Discussion - 2025 or පසුගිය විභාග ප්‍රශ්න සාකච්ඡාව"
+                  helperText="Displayed on homepage and student portal"
+                />
+                <Input
+                  label="2028 Theory Class - Current Lesson"
+                  value={content.current_lesson_2028_theory || ""}
+                  onChange={(e) => handleChange("current_lesson_2028_theory", e.target.value)}
+                  placeholder="e.g., Functions Introduction or ශ්‍රිත හැඳින්වීම"
+                  helperText="Displayed on homepage and student portal"
+                />
+              </div>
+            </div>
           </div>
 
           {error && (
-            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            <div className="mt-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-600">
+            <div className="mt-6 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-sm text-emerald-600 dark:text-emerald-400 font-medium">
               Content saved successfully!
             </div>
           )}
@@ -171,20 +203,38 @@ export default function AdminSiteContentPage() {
       </form>
 
       <Card>
-        <h2 className="text-lg font-semibold mb-4">Preview</h2>
-        <div className="bg-slate-50 rounded-lg p-6 space-y-6">
+        <h2 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Live Content Preview</h2>
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 space-y-6 border border-slate-100 dark:border-slate-800">
           <div>
-            <h3 className="text-2xl font-bold text-blue-700">{content.site_name || "Your Site Name"}</h3>
+            <h3 className="text-2xl font-bold text-blue-700 dark:text-blue-400">{content.site_name || "Your Site Name"}</h3>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Current Active Lessons</h4>
+            <div className="grid gap-2 sm:grid-cols-3 text-xs">
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/80">
+                <span className="font-bold text-slate-900 dark:text-white block">2027 Theory:</span>
+                <span className="text-slate-600 dark:text-slate-300 mt-0.5 block">{content.current_lesson_2027_theory || "Not set yet"}</span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/80">
+                <span className="font-bold text-slate-900 dark:text-white block">2027 Revision:</span>
+                <span className="text-slate-600 dark:text-slate-300 mt-0.5 block">{content.current_lesson_2027_revision || "Not set yet"}</span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/80">
+                <span className="font-bold text-slate-900 dark:text-white block">2028 Theory:</span>
+                <span className="text-slate-600 dark:text-slate-300 mt-0.5 block">{content.current_lesson_2028_theory || "Not set yet"}</span>
+              </div>
+            </div>
           </div>
 
           <div>
-            <h4 className="font-semibold text-slate-900">{content.teacher_name || "Teacher Name"}</h4>
-            <p className="text-sm text-slate-600 mt-1 italic">{content.teacher_qualification || "Qualification"}</p>
+            <h4 className="font-semibold text-slate-900 dark:text-white">{content.teacher_name || "Teacher Name"}</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 italic">{content.teacher_qualification || "Qualification"}</p>
             {content.teacher_description && (
               <ul className="mt-2 space-y-1">
                 {content.teacher_description.split("\n").map((line, i) =>
                   line.trim() ? (
-                    <li key={i} className="text-sm text-slate-700 flex items-start">
+                    <li key={i} className="text-sm text-slate-700 dark:text-slate-300 flex items-start">
                       <span className="mr-2">•</span>
                       <span>{line.trim()}</span>
                     </li>
@@ -195,13 +245,13 @@ export default function AdminSiteContentPage() {
           </div>
 
           <div>
-            <h4 className="font-semibold text-slate-900">{content.subject_name || "Subject Name"}</h4>
-            <p className="text-sm text-blue-600 font-medium">Code: {content.subject_code || "-"}</p>
+            <h4 className="font-semibold text-slate-900 dark:text-white">{content.subject_name || "Subject Name"}</h4>
+            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Code: {content.subject_code || "-"}</p>
             {content.subject_description && (
               <ul className="mt-2 space-y-1">
                 {content.subject_description.split("\n").map((line, i) =>
                   line.trim() ? (
-                    <li key={i} className="text-sm text-slate-700 flex items-start">
+                    <li key={i} className="text-sm text-slate-700 dark:text-slate-300 flex items-start">
                       <span className="mr-2">•</span>
                       <span>{line.trim()}</span>
                     </li>
@@ -213,5 +263,6 @@ export default function AdminSiteContentPage() {
         </div>
       </Card>
     </div>
+
   );
 }

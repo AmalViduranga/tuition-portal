@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import SiteWrapper from "@/components/SiteWrapper";
 import PromotionPopup from "@/components/PromotionPopup";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ThemeProvider, ToastProvider } from "@/components/ui";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -82,14 +83,26 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
-        <SiteWrapper user={user} profile={profile}>
-          {children}
-        </SiteWrapper>
-        <PromotionPopup />
-        <SpeedInsights />
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;if(t==="dark"||(!t&&d)){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark"}else{document.documentElement.classList.remove("dark");document.documentElement.style.colorScheme="light"}}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 transition-colors duration-200">
+        <ThemeProvider>
+          <ToastProvider>
+            <SiteWrapper user={user} profile={profile}>
+              {children}
+            </SiteWrapper>
+            <PromotionPopup />
+            <SpeedInsights />
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

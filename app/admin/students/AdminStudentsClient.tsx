@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createStudent, resetStudentPassword } from "@/app/admin/actions";
-import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table, Select } from "@/components/ui";
+import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Table, Select, useToast } from "@/components/ui";
 
 type Student = {
   id: string;
@@ -23,6 +23,7 @@ type Class = {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AdminStudentsPage({ initialStudents }: { initialStudents: Student[] }) {
+  const { toast } = useToast();
   const [students, setStudents] = useState<Student[]>(initialStudents || []);
   const [classes, setClasses] = useState<Class[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -88,7 +89,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
       const data = await res.json();
       setStudentEnrollments(data);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Error fetching enrollments");
+      toast.error(err instanceof Error ? err.message : "Error fetching enrollments");
     } finally {
       setEnrollmentLoading(false);
     }
@@ -120,8 +121,9 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
       
       setEnrollmentFormData({ class_id: "", start_access_date: "", access_mode: "paid", access_end_date: "", amount_paid: "" });
       await fetchStudentEnrollments(selectedStudentForEnrollments.id);
+      toast.success("Enrollment added successfully");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Error saving enrollment");
+      toast.error(err instanceof Error ? err.message : "Error saving enrollment");
     } finally {
       setEnrollmentLoading(false);
     }
@@ -137,8 +139,9 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
       const res = await fetch("/api/admin/enrollments/delete", { method: "POST", body: form });
       if (!res.ok) throw new Error("Failed to delete enrollment");
       await fetchStudentEnrollments(selectedStudentForEnrollments.id);
+      toast.success("Enrollment removed successfully");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Error deleting enrollment");
+      toast.error(err instanceof Error ? err.message : "Error deleting enrollment");
     } finally {
       setEnrollmentLoading(false);
     }
@@ -255,8 +258,9 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
 
       if (!response.ok) throw new Error("Failed to update status");
       await fetchStudents();
+      toast.success(`Student ${student.is_active ? "deactivated" : "activated"} successfully`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Unknown error");
+      toast.error(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setUpdatingStudentId(null);
     }
@@ -284,8 +288,9 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
       }
       
       await fetchStudents();
+      toast.success("Student permanently deleted");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Unknown error");
+      toast.error(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setUpdatingStudentId(null);
     }
@@ -305,11 +310,12 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
 
       if (result.ok) {
         setResetPasswordSuccess({ studentName: student.full_name, tempPassword: result.tempPassword });
+        toast.success(`Password reset for ${student.full_name}`);
       } else {
         throw new Error("Failed to reset password");
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Error resetting password");
+      toast.error(err instanceof Error ? err.message : "Error resetting password");
     } finally {
       setUpdatingStudentId(null);
     }

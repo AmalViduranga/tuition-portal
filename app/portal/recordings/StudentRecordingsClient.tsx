@@ -147,8 +147,8 @@ export default function StudentRecordingsClient({
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Class recordings</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Class Recordings</h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             Lessons you are eligible to watch, organized by class.
           </p>
         </div>
@@ -167,7 +167,7 @@ export default function StudentRecordingsClient({
         ) : null}
       </div>
 
-      <Card padding="sm" className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <Card padding="sm" className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1">
           <SearchBar
             value={searchQuery}
@@ -175,24 +175,28 @@ export default function StudentRecordingsClient({
             placeholder="Search by title, description, or class…"
           />
         </div>
-        <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+        <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
           <button
             onClick={() => handleViewModeChange("list")}
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode === "list" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            className={`p-1.5 rounded-lg transition-colors ${
+              viewMode === "list"
+                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             }`}
             aria-label="List view"
           >
-            <List className="w-5 h-5" />
+            <List className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleViewModeChange("grid")}
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode === "grid" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            className={`p-1.5 rounded-lg transition-colors ${
+              viewMode === "grid"
+                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             }`}
             aria-label="Grid view"
           >
-            <LayoutGrid className="w-5 h-5" />
+            <LayoutGrid className="w-4 h-4" />
           </button>
         </div>
       </Card>
@@ -207,11 +211,11 @@ export default function StudentRecordingsClient({
       ) : recordings.length === 0 ? (
         <Card>
           <div className="py-16 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-2xl">
               🎬
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">No recordings yet</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">No recordings yet</h2>
+            <p className="mx-auto mt-1.5 max-w-md text-xs text-slate-500 dark:text-slate-400">
               {selectedClassId
                 ? "There are no recordings for this class that you can access right now."
                 : "When your enrollments and payments are set up, published lessons will appear here."}
@@ -221,17 +225,17 @@ export default function StudentRecordingsClient({
       ) : filtered.length === 0 ? (
         <Card>
           <div className="py-16 text-center">
-            <p className="text-lg font-medium text-slate-900">No matches</p>
-            <p className="mt-2 text-sm text-slate-600">Try a different search or class filter.</p>
+            <p className="text-base font-bold text-slate-900 dark:text-white">No matches found</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Try a different search query or class filter.</p>
           </div>
         </Card>
       ) : (
         <div className="space-y-10">
           {sections.map(({ title, items }) => (
             <section key={title} className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-                <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+              <div className="flex items-center gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{title}</h2>
+                <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-400">
                   {items.length}
                 </span>
               </div>

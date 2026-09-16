@@ -482,6 +482,9 @@ export async function updateSiteContent(formData: FormData) {
     { key: "subject_name", value: String(formData.get("subject_name") ?? "") },
     { key: "subject_code", value: String(formData.get("subject_code") ?? "") },
     { key: "subject_description", value: String(formData.get("subject_description") ?? "") },
+    { key: "current_lesson_2027_theory", value: String(formData.get("current_lesson_2027_theory") ?? "") },
+    { key: "current_lesson_2027_revision", value: String(formData.get("current_lesson_2027_revision") ?? "") },
+    { key: "current_lesson_2028_theory", value: String(formData.get("current_lesson_2028_theory") ?? "") },
   ];
 
   if (teacherImageUrl || formData.has("teacher_image_url")) {
@@ -509,7 +512,10 @@ export async function updateSiteContent(formData: FormData) {
   revalidatePath("/admin/site-content");
   revalidatePath("/");
   revalidatePath("/about");
+  revalidatePath("/dashboard");
+  revalidatePath("/portal");
 }
+
 
 export async function resetStudentPassword(formData: FormData) {
   await requireAdmin();

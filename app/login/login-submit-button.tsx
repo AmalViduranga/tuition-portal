@@ -10,12 +10,12 @@ export function LoginSubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className={`mt-6 w-full flex justify-center items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed`}
+      className="mt-6 w-full flex justify-center items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.99] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
     >
       {pending ? (
         <>
-          <Loader2 className="h-5 w-5 animate-spin" />
-          Signing in...
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Signing in...</span>
         </>
       ) : (
         "Sign In"
@@ -23,3 +23,4 @@ export function LoginSubmitButton() {
     </button>
   );
 }
+

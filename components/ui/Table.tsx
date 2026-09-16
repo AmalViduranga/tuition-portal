@@ -20,28 +20,30 @@ export default function Table<T extends { id: string }>({
   data,
   emptyMessage = "No data available",
   onRowClick,
-  className = ""
+  className = "",
 }: TableProps<T>) {
   return (
-    <div className={`overflow-x-auto ${className}`}>
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-slate-200">
+    <div className={`overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm ${className}`}>
+      <table className="w-full text-left text-sm">
+        <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-800/40 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+          <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap ${column.className || ""}`}
+                className={`px-4.5 py-3.5 whitespace-nowrap ${column.className || ""}`}
               >
                 {column.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
           {data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-8 text-center text-slate-500">
-                {emptyMessage}
+              <td colSpan={columns.length} className="px-4 py-12 text-center text-slate-500 dark:text-slate-400">
+                <div className="flex flex-col items-center justify-center gap-1.5">
+                  <p className="text-sm font-medium">{emptyMessage}</p>
+                </div>
               </td>
             </tr>
           ) : (
@@ -49,13 +51,18 @@ export default function Table<T extends { id: string }>({
               <tr
                 key={item.id}
                 onClick={() => onRowClick?.(item)}
-                className={`${onRowClick ? "cursor-pointer hover:bg-slate-50" : ""} transition-colors`}
+                className={`group transition-colors duration-150 ${
+                  onRowClick ? "cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/40" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/20"
+                }`}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={`px-4 py-3 text-sm text-slate-900 whitespace-nowrap ${column.className || ""}`}>
+                  <td
+                    key={column.key}
+                    className={`px-4.5 py-3.5 text-slate-800 dark:text-slate-200 whitespace-nowrap ${column.className || ""}`}
+                  >
                     {column.render
                       ? column.render(item)
-                      : (item as Record<string, unknown>)[column.key] as ReactNode}
+                      : ((item as Record<string, unknown>)[column.key] as ReactNode)}
                   </td>
                 ))}
               </tr>
