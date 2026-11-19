@@ -8,7 +8,7 @@ export const teacher = {
     "Colombo District 2nd and All Island 30th from Engineering Technology Stream – G.C.E A/L 2022",
     "Achieved 3A passes for Mathematics, Engineering Technology, and Science for Technology",
     "Highest Z-Score: 2.8075",
-    "3 years of teaching experience (teaching from 2023 up to now)",
+    "4 years of teaching experience (teaching from 2023 up to now)",
     "Currently studying at the Faculty of Information Technology, University of Moratuwa",
     "Focus on simplifying difficult concepts and building student confidence",
     "Uses modern teaching methods and structured lesson plans",
@@ -57,31 +57,25 @@ export const contactData = {
 
 export const classGroups = [
   {
-    name: "2026 A/L Theory",
+    name: "2027 A/L Revision",
     day: "Saturday",
-    time: "7:00 PM - 10:00 PM",
-    mode: "Online via Zoom",
-  },
-  {
-    name: "2026 A/L Revision",
-    day: "Sunday",
-    time: "9:00 AM - 1:00 PM",
+    time: "6:00 PM - 10:00 PM",
     mode: "Online via Zoom",
   },
   {
     name: "2027 A/L Theory",
     day: "Sunday",
+    time: "7:00 PM - 10:00 PM",
+    mode: "Online via Zoom",
+  },
+  {
+    name: "2028 A/L Theory",
+    day: "Monday",
     time: "7:00 PM - 9:30 PM",
     mode: "Online via Zoom",
   },
   {
-    name: "2028 A/L",
-    day: "Saturday",
-    time: "3:00 PM - 5:00 PM",
-    mode: "Online via Zoom",
-  },
-  {
-    name: "Paper Class",
+    name: "Paper Class 2027 A/L",
     day: "Flexible",
     time: "Paper discussions given as recordings",
     mode: "Online via Website",

@@ -27,7 +27,7 @@ export default function StatsCard({
         <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           {title}
         </p>
-        <p className="mt-2 text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+        <p className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
           {typeof value === "number" ? value.toLocaleString() : value}
         </p>
 
@@ -52,7 +52,7 @@ export default function StatsCard({
         )}
       </div>
 
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/60 text-blue-600 dark:text-blue-400">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/60 text-blue-600 dark:text-blue-400">
         {typeof icon === "string" ? (
           <span className="text-xl">{icon}</span>
         ) : (
@@ -63,7 +63,7 @@ export default function StatsCard({
   );
 
   const containerClasses =
-    "block rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 hover:-translate-y-0.5";
+    "block rounded-lg border border-border bg-card p-5 transition-colors hover:border-blue-400 dark:hover:border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500";
 
   if (href) {
     return (

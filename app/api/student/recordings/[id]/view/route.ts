@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
+import { getStudentAccessContext, isRecordingAccessible } from "@/lib/recordings/access-logic";
 
 export async function POST(
   request: NextRequest,
@@ -9,8 +10,8 @@ export async function POST(
     const { supabase, user } = await requireUser();
     const { id } = await params;
 
-    // Verify student has access first (same logic as GET)
-    const { data: recording } = await supabase
+    // Verify student has access using the existing eligibility rules
+    const { data: recording, error: recError } = await supabase
       .from("recordings")
       .select(`
         id,
@@ -20,7 +21,9 @@ export async function POST(
         published
       `)
       .eq("id", id)
-      .single();
+      .maybeSingle();
+
+    if (recError) throw recError;
 
     if (!recording) {
       return NextResponse.json(
@@ -33,7 +36,7 @@ export async function POST(
       ? recording.class_groups[0]
       : recording.class_groups;
 
-    if (!classGroup?.is_active) {
+    if (classGroup && (classGroup as { is_active?: boolean }).is_active === false) {
       return NextResponse.json(
         { error: "Class not active" },
         { status: 403 }
@@ -48,16 +51,20 @@ export async function POST(
       );
     }
 
-    const { data: enrollment } = await supabase
-      .from("student_class_enrollments")
-      .select("id")
-      .eq("student_id", user.id)
-      .eq("class_id", classGroup.id)
-      .single();
+    const accessContext = await getStudentAccessContext(supabase, user.id);
+    const hasAccess = isRecordingAccessible(
+      {
+        id: recording.id,
+        class_id: recording.class_id,
+        release_at: recording.release_at,
+        published: recording.published,
+      },
+      accessContext,
+    );
 
-    if (!enrollment) {
+    if (!hasAccess) {
       return NextResponse.json(
-        { error: "Not enrolled" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -86,7 +93,7 @@ export async function POST(
   } catch (error) {
     console.error("Error logging view:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Could not record view right now." },
       { status: 500 }
     );
   }

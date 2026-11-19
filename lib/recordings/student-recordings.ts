@@ -55,7 +55,7 @@ export async function loadStudentRecordings(
 
   if (enrollError) throw enrollError;
 
-  const accessible_classes: AccessibleClass[] = [];
+  const accessibleClassMap = new Map<string, AccessibleClass>();
 
   enrollments?.forEach((enrollment) => {
     const classGroup = Array.isArray(enrollment.class_groups)
@@ -63,18 +63,23 @@ export async function loadStudentRecordings(
       : enrollment.class_groups;
 
     if (classGroup?.is_active && enrollment.start_access_date <= today) {
-      accessible_classes.push({
-        id: classGroup.id,
-        name: classGroup.name,
-      });
+      if (!accessibleClassMap.has(classGroup.id)) {
+        accessibleClassMap.set(classGroup.id, {
+          id: classGroup.id,
+          name: classGroup.name,
+        });
+      }
     }
   });
+
+  const accessible_classes = Array.from(accessibleClassMap.values());
+  const normalizedClassIdFilter = classIdFilter?.trim() || null;
 
   if (accessible_classes.length === 0) {
     return { recordings: [], accessible_classes: [] };
   }
 
-  if (classIdFilter && !accessible_classes.some((c) => c.id === classIdFilter)) {
+  if (normalizedClassIdFilter && !accessible_classes.some((c) => c.id === normalizedClassIdFilter)) {
     return { recordings: [], accessible_classes };
   }
 
@@ -103,8 +108,8 @@ export async function loadStudentRecordings(
     .in("class_id", accessible_classes.map((c) => c.id))
     .order("release_at", { ascending: false });
 
-  if (classIdFilter) {
-    query = query.eq("class_id", classIdFilter);
+  if (normalizedClassIdFilter) {
+    query = query.eq("class_id", normalizedClassIdFilter);
   }
 
   const { data: rawRecordings, error: recError } = await query;

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         created_at,
         revoked_at,
         revoke_reason,
-        student:profiles!student_id (full_name),
+        student:profiles!student_id (full_name, email),
         recording:recordings (title)
       `)
       .is('revoked_at', null)
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     if (error) {
        console.error("GET Recording Unlocks Error:", error);
        if (error.code === 'PGRST108') {
-          const { data: fallback } = await adminSupabase.from("recording_manual_unlocks").select("*, student:profiles!student_id(full_name)").limit(100);
+          const { data: fallback } = await adminSupabase.from("recording_manual_unlocks").select("*, student:profiles!student_id(full_name, email)").limit(100);
           return NextResponse.json(fallback || []);
        }
        throw error;
@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
         id: item.id,
         student_id: item.student_id,
         student_name: getVal(item.student, 'full_name') || "Unknown Student",
+        student_email: getVal(item.student, 'email'),
         recording_id: item.recording_id,
         recording_title: getVal(item.recording, 'title') || "Unknown Recording",
         created_at: item.created_at,

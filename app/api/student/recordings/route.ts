@@ -27,8 +27,9 @@ export async function GET(request: NextRequest) {
       accessible_classes: data.accessible_classes,
     });
   } catch (error) {
+    console.error("Error loading student recordings:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Could not load recordings. Please try again." },
       { status: 500 },
     );
   }

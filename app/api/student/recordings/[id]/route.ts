@@ -74,7 +74,7 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching recording:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Could not load this recording. Please try again." },
       { status: 500 },
     );
   }

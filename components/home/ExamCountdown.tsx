@@ -20,6 +20,7 @@ export default function ExamCountdown({ variant = "landing" }: ExamCountdownProp
   const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
+    if (isCompleted) return;
     const updateCountdown = () => {
       const now = Date.now();
       const diff = Math.max(targetTimestamp.current - now, 0);
@@ -48,7 +49,7 @@ export default function ExamCountdown({ variant = "landing" }: ExamCountdownProp
       clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [isCompleted]);
 
   const days = Math.floor(remainingMs / 86_400_000);
   const hours = Math.floor((remainingMs % 86_400_000) / 3_600_000);
@@ -62,22 +63,22 @@ export default function ExamCountdown({ variant = "landing" }: ExamCountdownProp
   const displayMinutes = mounted ? pad(minutes) : "--";
   const displaySeconds = mounted ? pad(seconds) : "--";
 
-  if (isCompleted) {
+  if (!mounted || isCompleted) {
     return null;
   }
 
   if (variant === "compact") {
     return (
       <div 
-        className="text-[9px] sm:text-[10px] font-medium text-slate-500 tracking-tight tabular-nums mt-0.5"
+        className="text-xs sm:text-xs font-medium text-slate-500 dark:text-slate-400 tracking-tight tabular-nums mt-0.5"
         aria-label="2026 A/L Maths Paper Starts In"
         role="timer"
       >
         <div className="hidden lg:block">
-          <span className="font-semibold text-slate-700">2026 A/L Maths</span> &bull; Paper Starts In &ndash; {displayDays}D {displayHours}H {displayMinutes}M {displaySeconds}S
+          <span className="font-semibold text-slate-700 dark:text-slate-200">2026 A/L Maths</span> &bull; Paper Starts In &ndash; {displayDays}D {displayHours}H {displayMinutes}M {displaySeconds}S
         </div>
         <div className="lg:hidden flex flex-col leading-[1.1]">
-          <span className="font-semibold text-slate-700">2026 A/L Maths</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-200">2026 A/L Maths</span>
           <span>Starts In &ndash; {displayDays}D {displayHours}H {displayMinutes}M {displaySeconds}S</span>
         </div>
       </div>
@@ -86,45 +87,45 @@ export default function ExamCountdown({ variant = "landing" }: ExamCountdownProp
 
   return (
     <div 
-      className="mt-8 w-full rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 shadow-2xl p-6 relative z-20 max-w-md mx-auto"
+      className="w-full rounded-lg bg-card border border-border p-6 sm:p-8"
       aria-label="Time remaining until the 2026 A/L Mathematics paper."
     >
-      <div className="flex flex-col items-center border-b border-slate-700/50 pb-4 mb-4">
-        <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-widest mb-1">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-4 mb-5">
+        <h2 className="text-base font-semibold text-foreground">
           2026 A/L Mathematics (07)
         </h2>
-        <p className="text-lg font-bold text-white">Paper Starts In</p>
+        <p className="text-sm text-muted-foreground">Paper Starts In</p>
       </div>
 
       <div className="grid grid-cols-4 gap-2 sm:gap-3 text-center" aria-hidden={!mounted}>
-        <div className="flex flex-col bg-slate-800/50 rounded-xl p-2 sm:p-3 border border-slate-700/30">
-          <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-blue-200 tabular-nums">
+        <div className="flex flex-col rounded-lg bg-muted p-3 sm:p-4">
+          <span className="text-2xl sm:text-4xl font-bold text-foreground tabular-nums">
             {displayDays}
           </span>
-          <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase mt-1">Days</span>
+          <span className="text-xs sm:text-sm text-muted-foreground mt-1">Days</span>
         </div>
-        <div className="flex flex-col bg-slate-800/50 rounded-xl p-2 sm:p-3 border border-slate-700/30">
-          <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-emerald-200 tabular-nums">
+        <div className="flex flex-col rounded-lg bg-muted p-3 sm:p-4">
+          <span className="text-2xl sm:text-4xl font-bold text-foreground tabular-nums">
             {displayHours}
           </span>
-          <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase mt-1">Hours</span>
+          <span className="text-xs sm:text-sm text-muted-foreground mt-1">Hours</span>
         </div>
-        <div className="flex flex-col bg-slate-800/50 rounded-xl p-2 sm:p-3 border border-slate-700/30">
-          <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-blue-400 to-emerald-300 tabular-nums">
+        <div className="flex flex-col rounded-lg bg-muted p-3 sm:p-4">
+          <span className="text-2xl sm:text-4xl font-bold text-foreground tabular-nums">
             {displayMinutes}
           </span>
-          <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase mt-1">Minutes</span>
+          <span className="text-xs sm:text-sm text-muted-foreground mt-1">Minutes</span>
         </div>
-        <div className="flex flex-col bg-slate-800/50 rounded-xl p-2 sm:p-3 border border-slate-700/30">
-          <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-slate-200 to-slate-400 tabular-nums">
+        <div className="flex flex-col rounded-lg bg-muted p-3 sm:p-4">
+          <span className="text-2xl sm:text-4xl font-bold text-foreground tabular-nums">
             {displaySeconds}
           </span>
-          <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase mt-1">Seconds</span>
+          <span className="text-xs sm:text-sm text-muted-foreground mt-1">Seconds</span>
         </div>
       </div>
 
       <div className="mt-4 text-center">
-        <p className="text-xs text-slate-400">
+        <p className="text-sm text-muted-foreground">
           02 September 2026 &bull; 8:30 AM <br className="sm:hidden" />
           <span className="hidden sm:inline"> </span>
           Sri Lanka Time

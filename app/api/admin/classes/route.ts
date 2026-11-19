@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidateClassViews } from "@/lib/server/revalidate-classes";
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,6 +57,8 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    revalidateClassViews();
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
@@ -89,6 +92,8 @@ export async function PUT(request: NextRequest) {
       .eq("id", classId);
 
     if (error) throw error;
+
+    revalidateClassViews();
 
     return NextResponse.json({ success: true });
   } catch (error) {

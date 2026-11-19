@@ -429,7 +429,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
         ) : filteredRecordings.length === 0 ? (
           <Card>
             <div className="py-16 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-3xl">
                 🎥
               </div>
               <h2 className="text-lg font-semibold text-slate-900">No recordings</h2>
@@ -449,7 +449,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
                   {recs.length}
                 </span>
               </div>
-              <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-x-auto">
+              <div className="overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-sm overflow-x-auto">
                 <table className="min-w-full divide-y divide-slate-200 text-sm">
                   <thead className="bg-slate-50/80">
                     <tr>
@@ -469,7 +469,7 @@ export default function AdminRecordingsClient({ initialRecordings, initialClasse
                               href={`https://www.youtube.com/watch?v=${rec.youtube_video_id}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="relative h-12 w-20 flex-shrink-0 overflow-hidden rounded bg-slate-100 shadow-sm transition-transform hover:scale-105"
+                              className="relative h-12 w-20 flex-shrink-0 overflow-hidden rounded bg-slate-100 shadow-sm transition-transform"
                             >
                               <RecordingThumbnail
                                 thumbnailUrl={rec.thumbnail_url}

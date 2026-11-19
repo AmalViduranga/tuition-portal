@@ -33,22 +33,21 @@ export default function StudentRecordingRow({ recording, isHighlighted, onOpen }
           onOpen();
         }
       }}
-      className={`group flex w-full items-center gap-4 rounded-xl border p-3 text-left shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 duration-300 ${
-        isHighlighted 
-          ? "border-blue-500 bg-white shadow-md ring-1 ring-blue-500" 
-          : "border-slate-200 bg-white hover:border-blue-200 hover:shadow-md hover:-translate-y-0.5"
+      className={`group flex w-full items-center gap-4 rounded-lg border p-3 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+        isHighlighted
+          ? "border-blue-500 bg-card ring-1 ring-blue-500"
+          : "border-border bg-card hover:border-blue-400 dark:hover:border-blue-600"
       }`}
     >
-      <div className="relative aspect-video w-32 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:w-40">
+      <div className="relative aspect-video w-32 flex-shrink-0 overflow-hidden rounded-lg bg-muted sm:w-40">
         <RecordingThumbnail
           thumbnailUrl={recording.thumbnail_url}
           youtubeVideoId={recording.youtube_video_id}
           title={recording.title}
-          className="transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/10">
-          <div className="flex h-10 w-10 scale-90 items-center justify-center rounded-full bg-white/95 text-blue-600 opacity-0 shadow-lg transition-all group-hover:scale-100 group-hover:opacity-100">
-            <svg className="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/25">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-blue-600 opacity-0 transition-opacity group-hover:opacity-100">
+            <svg className="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
@@ -57,7 +56,7 @@ export default function StudentRecordingRow({ recording, isHighlighted, onOpen }
 
       <div className="flex flex-1 min-w-0 flex-col py-0.5">
         <div className="flex items-start justify-between gap-4">
-          <h3 className="font-semibold text-slate-900 line-clamp-1 group-hover:text-blue-700 transition-colors">
+          <h3 className="font-semibold text-foreground line-clamp-1 group-hover:text-link transition-colors">
             {recording.title}
           </h3>
           {recording.is_manually_unlocked && (
@@ -68,13 +67,13 @@ export default function StudentRecordingRow({ recording, isHighlighted, onOpen }
         </div>
         
         {recording.description && (
-          <p className="mt-1 text-sm text-slate-600 line-clamp-1 hidden sm:block">
+          <p className="mt-1 text-sm text-muted-foreground line-clamp-1 hidden sm:block">
             {recording.description}
           </p>
         )}
 
-        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
-          <span className="font-medium text-blue-600/80">
+        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="font-medium text-link">
             {recording.class_groups?.name ?? "Other Class"}
           </span>
           <span className="flex items-center gap-1">
@@ -84,7 +83,7 @@ export default function StudentRecordingRow({ recording, isHighlighted, onOpen }
       </div>
 
       <div className="hidden sm:flex items-center pr-2">
-        <span className="inline-flex h-8 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+        <span className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors group-hover:bg-primary-hover">
           Watch
         </span>
       </div>

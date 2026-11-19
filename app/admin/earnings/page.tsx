@@ -2,33 +2,28 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, Button, Table, Badge, Select } from "@/components/ui";
+import { buildEnrollmentEarnings, colomboDateTime, enrollmentEarningsCsv, type EnrollmentRecord } from "@/lib/reports/enrollment-earnings";
 
-type EnrollmentRecord = {
-  id: string;
-  student_name: string;
-  class_name: string;
-  amount_paid: number;
-  access_mode: string;
-  start_access_date: string;
-  access_end_date: string;
-  created_at: string;
-};
 
 export default function EarningsPage() {
   const [data, setData] = useState<EnrollmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [error, setError] = useState("");
+  const [today] = useState(() => colomboDateTime(new Date().toISOString())!);
+  const [selectedMonth, setSelectedMonth] = useState(() => Number(today.slice(5, 7)) - 1);
+  const [selectedYear, setSelectedYear] = useState(() => Number(today.slice(0, 4)));
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
-        const res = await fetch("/api/admin/enrollments");
+        const res = await fetch("/api/admin/reports/enrollments", { cache: "no-store" });
+        if (!res.ok) throw new Error("Could not load a complete enrollment earnings report. Please reload to try again.");
         const json = await res.json();
         setData(json);
       } catch (err) {
         console.error("Failed to fetch earnings data:", err);
+        setError(err instanceof Error ? err.message : "Could not load enrollment earnings.");
       } finally {
         setLoading(false);
       }
@@ -42,91 +37,19 @@ export default function EarningsPage() {
   ];
 
   const years = useMemo(() => {
-    const currentYear = new Date().getFullYear();
+    const currentYear = Number(today.slice(0, 4));
     const startYear = 2024;
     const arr = [];
     for (let y = currentYear; y >= startYear; y--) {
       arr.push(y);
     }
     return arr;
-  }, []);
+  }, [today]);
 
-  // Filter logic
-  const stats = useMemo(() => {
-    const filtered = data.filter(enr => {
-      const d = new Date(enr.start_access_date);
-      return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
-    });
-
-    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
-    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
-    
-    const previous = data.filter(enr => {
-      const d = new Date(enr.start_access_date);
-      return d.getMonth() === prevMonth && d.getFullYear() === prevYear;
-    });
-
-    const calculateIncome = (records: EnrollmentRecord[]) => records.reduce((acc, curr) => {
-      const amount = Number(curr.amount_paid) || 0;
-      // Only count if access_mode is 'paid' and verified amount > 0
-      if (curr.access_mode === 'paid' && amount > 0) {
-        return acc + amount;
-      }
-      return acc;
-    }, 0);
-
-    const currentIncome = calculateIncome(filtered);
-    const prevIncome = calculateIncome(previous);
-    
-    const paidStudents = new Set(
-      filtered.filter(e => e.access_mode === 'paid' && (Number(e.amount_paid) || 0) > 0).map(e => e.id)
-    ).size;
-    
-    // Class-wise breakdown
-    const classMap: Record<string, { income: number, students: number }> = {};
-    filtered.forEach(enr => {
-      if (!classMap[enr.class_name]) {
-        classMap[enr.class_name] = { income: 0, students: 0 };
-      }
-      const amount = Number(enr.amount_paid) || 0;
-      // Calculate income correctly
-      if (enr.access_mode === 'paid' && amount > 0) {
-        classMap[enr.class_name].income += amount;
-      }
-      if (enr.access_mode === 'paid') {
-        classMap[enr.class_name].students += 1;
-      }
-    });
-
-    return {
-      filteredRecords: filtered,
-      currentIncome,
-      prevIncome,
-      paidStudents,
-      totalEnrollments: filtered.length,
-      classBreakdown: Object.entries(classMap).map(([name, stats]) => ({
-        name,
-        ...stats
-      }))
-    };
-  }, [data, selectedMonth, selectedYear]);
+  const stats = useMemo(() => buildEnrollmentEarnings(data, selectedMonth, selectedYear), [data, selectedMonth, selectedYear]);
 
   const handleDownloadReport = () => {
-    const headers = ["Student", "Class", "Mode", "Amount (Rs.)", "Start Date", "End Date", "Enrolled At"];
-    const rows = stats.filteredRecords.map(r => [
-      r.student_name,
-      r.class_name,
-      r.access_mode,
-      r.amount_paid,
-      r.start_access_date,
-      r.access_end_date,
-      r.created_at
-    ]);
-
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(row => row.join(","))
-    ].join("\n");
+    const csvContent = enrollmentEarningsCsv(stats.filteredRecords);
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -137,16 +60,17 @@ export default function EarningsPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Earnings Dashboard</h1>
-          <p className="text-sm text-slate-600 mt-1">Track monthly income and enrollment reporting</p>
+          <h1 className="text-2xl font-bold text-foreground">Earnings Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Track monthly income and enrollment reporting</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Select 
             value={selectedMonth.toString()} 
             onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
@@ -157,26 +81,25 @@ export default function EarningsPage() {
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
             options={years.map(y => ({ value: y.toString(), label: y.toString() }))}
           />
-          <Button onClick={handleDownloadReport} variant="outline" size="sm" className="ml-2">
-            📊 Download CSV
+          <Button onClick={handleDownloadReport} disabled={loading || !!error} variant="outline" size="sm">
+            Download CSV
           </Button>
         </div>
       </div>
 
-      {loading ? (
+      <p className="text-sm text-muted-foreground">Reporting uses the enrollment’s latest update in Asia/Colombo. Later edits or revocations can move its amount to a different month. Access dates are unchanged.</p>
+      {error ? <p role="alert" className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-4 text-red-700 dark:text-red-400">{error}</p> : loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
         </div>
       ) : (
         <>
+          {stats.missingDates > 0 && <p role="status" className="rounded-lg border border-amber-200 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/40 p-4 text-sm text-amber-900 dark:text-amber-300">{stats.missingDates} enrollment(s) have no valid update timestamp and cannot be assigned to a month. Their amounts remain in the all-time enrollment total.</p>}
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-blue-600 text-white border-0 shadow-lg relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-500">
-                <span className="text-6xl">💰</span>
-              </div>
+            <Card className="bg-primary text-primary-foreground border-0 relative overflow-hidden">
               <p className="text-blue-100 text-sm font-medium uppercase tracking-wider">Total Monthly Earnings</p>
-              <h2 className="text-4xl font-extrabold mt-2">Rs. {stats.currentIncome.toLocaleString()}</h2>
+              <h2 className="text-4xl font-bold mt-2 tabular-nums">Rs. {stats.currentIncome.toLocaleString()}</h2>
               <div className="mt-4 flex items-center text-sm">
                 <span className={`px-2 py-0.5 rounded-full font-bold ${stats.currentIncome >= stats.prevIncome ? 'bg-white/20' : 'bg-white/10'}`}>
                    {stats.currentIncome >= stats.prevIncome ? '↑' : '↓'} 
@@ -186,20 +109,20 @@ export default function EarningsPage() {
               </div>
             </Card>
 
-            <Card className="bg-white border-slate-200 shadow-sm flex flex-col justify-between">
+            <Card className="flex flex-col justify-between">
               <div>
-                <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">Paid Students</p>
-                <h2 className="text-3xl font-bold text-slate-900 mt-2">{stats.paidStudents}</h2>
+                <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Paid Students</p>
+                <h2 className="text-3xl font-bold text-foreground mt-2 tabular-nums">{stats.paidStudents}</h2>
               </div>
-              <p className="text-xs text-slate-500 mt-4">Actual paying members this month</p>
+              <p className="text-xs text-muted-foreground mt-4">Actual paying members this month</p>
             </Card>
 
-            <Card className="bg-white border-slate-200 shadow-sm flex flex-col justify-between">
+            <Card className="flex flex-col justify-between">
               <div>
-                <p className="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Enrollments</p>
-                <h2 className="text-3xl font-bold text-slate-900 mt-2">{stats.totalEnrollments}</h2>
+                <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Total Enrollments</p>
+                <h2 className="text-3xl font-bold text-foreground mt-2 tabular-nums">{stats.totalEnrollments}</h2>
               </div>
-              <p className="text-xs text-slate-500 mt-4">Total class memberships (inc. free/manual)</p>
+              <p className="text-xs text-muted-foreground mt-4">Total class memberships (inc. free/manual)</p>
             </Card>
           </div>
 
@@ -207,20 +130,20 @@ export default function EarningsPage() {
             {/* Class Breakdown */}
             <div className="lg:col-span-1">
               <Card>
-                <h2 className="text-lg font-bold text-slate-900 mb-6">Class-wise Income</h2>
+                <h2 className="text-lg font-bold text-foreground mb-6">Class-wise Income</h2>
                 <div className="space-y-6">
                   {stats.classBreakdown.length === 0 ? (
-                    <p className="text-center py-8 text-slate-500 italic">No classes found for this month</p>
+                    <p className="text-center py-8 text-muted-foreground italic">No classes found for this month</p>
                   ) : (
                     stats.classBreakdown.map((item, i) => (
                       <div key={i} className="flex items-center justify-between">
                         <div className="space-y-1">
-                          <p className="font-semibold text-slate-800">{item.name}</p>
-                          <p className="text-xs text-slate-500">{item.students} paid students</p>
+                          <p className="font-semibold text-foreground">{item.name}</p>
+                          <p className="text-xs text-muted-foreground">{item.students} paid students</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-blue-600">Rs. {item.income.toLocaleString()}</p>
-                          <p className="text-[10px] text-slate-400 capitalize">{( (item.income / (stats.currentIncome || 1)) * 100).toFixed(0)}% of total</p>
+                          <p className="font-bold text-link tabular-nums">Rs. {item.income.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{( (item.income / (stats.currentIncome || 1)) * 100).toFixed(0)}% of total</p>
                         </div>
                       </div>
                     ))
@@ -233,7 +156,7 @@ export default function EarningsPage() {
             <div className="lg:col-span-2">
               <Card>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-bold text-slate-900">Detailed Payment Records</h2>
+                  <h2 className="text-lg font-bold text-foreground">Enrollment records</h2>
                   <Badge variant="default">{stats.filteredRecords.length} Records</Badge>
                 </div>
                 <Table
@@ -242,43 +165,43 @@ export default function EarningsPage() {
                       key: "student",
                       header: "Student",
                       render: (r: EnrollmentRecord) => (
-                        <p className="font-medium text-slate-900">{r.student_name}</p>
+                        <p className="font-medium text-foreground">{r.student_name}</p>
                       )
                     },
                     {
                       key: "class",
                       header: "Class",
                       render: (r: EnrollmentRecord) => (
-                         <span className="text-slate-600 truncate max-w-[150px] inline-block">{r.class_name}</span>
+                         <span className="text-muted-foreground truncate max-w-[150px] inline-block">{r.class_name}</span>
                       )
                     },
                     {
                       key: "amount",
                       header: "Amount",
                       render: (r: EnrollmentRecord) => (
-                        <span className="font-bold text-slate-800 whitespace-nowrap">Rs. {(Number(r.amount_paid) || 0).toLocaleString()}</span>
+                        <span className="font-bold text-foreground whitespace-nowrap tabular-nums">Rs. {(Number(r.amount_paid) || 0).toLocaleString()}</span>
                       )
                     },
                     {
                       key: "mode",
                       header: "Mode",
                       render: (r: EnrollmentRecord) => (
-                        <Badge variant={r.access_mode === 'paid' ? 'success' : 'default'} className="scale-90 transform origin-left">
+                        <Badge variant={r.access_mode === 'paid' ? 'success' : 'default'}>
                           {r.access_mode}
                         </Badge>
                       )
                     },
                     {
                       key: "dates",
-                      header: "Start Date",
+                      header: "Enrollment updated (Sri Lanka)",
                       render: (r: EnrollmentRecord) => (
-                        <span className="text-xs text-slate-500 whitespace-nowrap">{r.start_access_date}</span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">{colomboDateTime(r.updated_at) ?? "Unavailable"}</span>
                       )
                     }
                   ]}
                   data={stats.filteredRecords}
                   emptyMessage="No records found for the selected period"
-                  className="rounded-lg border border-slate-100 overflow-hidden"
+                  className="rounded-lg border border-border overflow-hidden"
                 />
               </Card>
             </div>

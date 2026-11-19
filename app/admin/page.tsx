@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/auth";
+import { recentContentCutoff } from "@/lib/admin/dashboard-dates";
 import StatsCard from "@/components/admin/StatsCard";
 import Card from "@/components/ui/Card";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Users, BookOpen, CreditCard, Video, FileText, ArrowRight, UserPlus, Fol
 export default async function AdminHomePage() {
   const { supabase } = await requireAdmin();
 
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const sevenDaysAgo = recentContentCutoff();
 
   const [
     { count: totalStudents },
@@ -35,7 +36,7 @@ export default async function AdminHomePage() {
       {/* 1. Header welcome */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
             Dashboard Overview
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -45,7 +46,7 @@ export default async function AdminHomePage() {
         <div className="flex items-center gap-2.5">
           <Link
             href="/admin/students"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
           >
             <UserPlus className="h-4 w-4" />
             <span>Add Student</span>
@@ -107,10 +108,10 @@ export default async function AdminHomePage() {
               {studentsList.map((student) => (
                 <div
                   key={student.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold text-xs">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold text-xs">
                       {student.full_name?.charAt(0) || "S"}
                     </div>
                     <div>
@@ -153,10 +154,10 @@ export default async function AdminHomePage() {
               {recordingsList.map((rec) => (
                 <div
                   key={rec.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold text-xs">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold text-xs">
                       <Video className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -201,10 +202,10 @@ export default async function AdminHomePage() {
               {materialsList.map((mat) => (
                 <div
                   key={mat.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
                       <FileText className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -238,9 +239,9 @@ export default async function AdminHomePage() {
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/admin/students"
-              className="flex flex-col items-center text-center rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
+              className="flex flex-col items-center text-center rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 mb-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 mb-2.5">
                 <UserPlus className="h-5 w-5" />
               </div>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Register Student</span>
@@ -248,9 +249,9 @@ export default async function AdminHomePage() {
 
             <Link
               href="/admin/classes"
-              className="flex flex-col items-center text-center rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
+              className="flex flex-col items-center text-center rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 mb-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 mb-2.5">
                 <FolderPlus className="h-5 w-5" />
               </div>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Manage Classes</span>
@@ -258,9 +259,9 @@ export default async function AdminHomePage() {
 
             <Link
               href="/admin/recordings"
-              className="flex flex-col items-center text-center rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
+              className="flex flex-col items-center text-center rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 mb-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 mb-2.5">
                 <Video className="h-5 w-5" />
               </div>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Publish Recording</span>
@@ -268,9 +269,9 @@ export default async function AdminHomePage() {
 
             <Link
               href="/admin/materials"
-              className="flex flex-col items-center text-center rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
+              className="flex flex-col items-center text-center rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-2.5">
                 <FileText className="h-5 w-5" />
               </div>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Material</span>

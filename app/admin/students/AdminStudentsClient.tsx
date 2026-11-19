@@ -430,7 +430,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
 
       {createSuccess && (
         <div
-          className="rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm text-emerald-950 shadow-sm"
+          className="rounded-lg border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm text-emerald-950 shadow-sm"
           role="status"
         >
           <p className="font-medium">Student account created successfully.</p>
@@ -464,7 +464,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
 
       {resetPasswordSuccess && (
         <div
-          className="rounded-xl border border-blue-200 bg-blue-50/90 px-4 py-3 text-sm text-blue-950 shadow-sm"
+          className="rounded-lg border border-blue-200 bg-blue-50/90 px-4 py-3 text-sm text-blue-950 shadow-sm"
           role="status"
         >
           <p className="font-medium">Password reset successfully for {resetPasswordSuccess.studentName}.</p>
@@ -552,7 +552,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
         }
       >
         <form id="create-student-form" onSubmit={handleSubmit} className="space-y-6">
-          <div className="rounded-xl border-blue-100 bg-blue-50/50 px-4 py-3 text-xs text-blue-700 leading-relaxed shadow-sm">
+          <div className="rounded-lg border-blue-100 bg-blue-50/50 px-4 py-3 text-xs text-blue-700 leading-relaxed shadow-sm">
             <p className="font-semibold text-blue-800">Account Creation Only</p>
             <p className="mt-1">
               Adding a student here creates their login credentials. Content access (recordings/materials) will only be granted 
@@ -617,7 +617,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
 
             {/* Class Assignments are now managed via Enrollments button after creation */}
 
-            <section className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <section className="bg-slate-50 p-4 rounded-lg border border-slate-200">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -666,16 +666,16 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
             </div>
             
             {enrollmentLoading && studentEnrollments.length === 0 ? (
-              <div className="flex items-center justify-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              <div className="flex items-center justify-center py-10 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
                 <span className="text-sm text-slate-500 font-medium">Loading enrollments...</span>
               </div>
             ) : studentEnrollments.length === 0 ? (
-              <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              <div className="text-center py-10 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                 <p className="text-sm text-slate-500 font-medium italic">No active enrollments found.</p>
               </div>
             ) : (
-              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                 <Table
                   columns={[
                     { key: "class", header: "Class", render: (e: StudentEnrollmentRow) => <span className="font-semibold text-slate-900">{e.class_name || "-"}</span> },
@@ -707,7 +707,7 @@ export default function AdminStudentsPage({ initialStudents }: { initialStudents
             )}
           </section>
 
-          <section className="bg-slate-50/50 p-6 rounded-2xl border border-slate-200 shadow-inner">
+          <section className="bg-slate-50/50 p-6 rounded-lg border border-slate-200 shadow-inner">
             <h3 className="text-sm font-bold text-slate-800 mb-5 uppercase tracking-wider">Add New Enrollment</h3>
             <form id="add-enrollment-form" onSubmit={handleAddEnrollment} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

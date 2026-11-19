@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { logout } from "@/app/login/actions";
 import { ActionSubmitButton, ThemeToggle } from "@/components/ui";
 import ExamCountdown from "@/components/home/ExamCountdown";
@@ -49,19 +49,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebarOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarOpen]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#090D16] text-slate-900 dark:text-slate-100 relative flex transition-colors duration-200">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs lg:hidden animate-in fade-in"
+          className="fixed inset-0 z-40 bg-slate-950/60 lg:hidden animate-in fade-in"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 transform bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 shadow-xl lg:shadow-none transition-all duration-300 ease-in-out w-64 ${
+        className={`fixed inset-y-0 left-0 z-50 transform bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 shadow-sm lg:shadow-none transition-all duration-300 ease-in-out w-64 ${
           isCollapsed ? "lg:w-20" : "lg:w-64"
         } ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
         aria-label="Sidebar"
@@ -83,7 +92,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   priority
                   className="h-8 w-8 object-contain shrink-0"
                 />
-                <span className="text-base font-extrabold text-blue-600 dark:text-blue-400 tracking-tight whitespace-nowrap">
+                <span className="text-base font-bold text-blue-600 dark:text-blue-400 tracking-tight whitespace-nowrap">
                   Admin Portal
                 </span>
               </Link>
@@ -102,7 +111,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             )}
             <button
               type="button"
-              className="lg:hidden p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl transition-colors"
+              className="lg:hidden p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition-colors"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close sidebar"
             >
@@ -121,7 +130,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   title={isCollapsed ? item.label : undefined}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150 ${
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-150 ${
                     isCollapsed ? "lg:justify-center" : ""
                   } ${
                     isActive
@@ -147,7 +156,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link
               href="/"
               title={isCollapsed ? "Back to Public Site" : undefined}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors ${
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors ${
                 isCollapsed ? "lg:justify-center" : ""
               }`}
             >
@@ -157,7 +166,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+              className="hidden lg:flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
               title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             >
               {isCollapsed ? (
@@ -180,11 +189,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         }`}
       >
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md px-4 sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open sidebar menu"
             >
@@ -207,7 +216,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <span>View Site</span>
               <ExternalLink className="h-3 w-3 text-slate-400" />
@@ -215,7 +224,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
             <Link
               href="/dashboard"
-              className="inline-flex items-center rounded-xl bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors"
+              className="inline-flex items-center rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors"
             >
               <span className="hidden sm:inline">Student Dashboard</span>
               <span className="sm:hidden">Portal</span>
@@ -223,7 +232,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
             <form action={logout}>
               <ActionSubmitButton
-                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                 title="Log out"
               >
                 Log out
@@ -234,7 +243,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Page content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
-          <div className="mx-auto max-w-7xl w-full">{children}</div>
+          <div className="mx-auto max-w-[1600px] w-full">{children}</div>
         </main>
       </div>
     </div>

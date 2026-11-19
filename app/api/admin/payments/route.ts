@@ -16,7 +16,7 @@ export async function GET() {
       .from("student_class_payment_periods")
       .select(`
         *,
-        student:profiles!student_id (full_name, phone),
+        student:profiles!student_id (full_name, email, phone),
         class_groups (name),
         payment_plans (id, name)
       `)
@@ -28,7 +28,7 @@ export async function GET() {
        if (error.code === 'PGRST108' || error.message.includes("relationship")) {
           const { data: fallback, error: fallbackErr } = await adminSupabase
             .from("student_class_payment_periods")
-            .select("*, student:profiles!student_id(full_name, phone)")
+            .select("*, student:profiles!student_id(full_name, email, phone)")
             .limit(100);
           if (fallbackErr) throw fallbackErr;
           return NextResponse.json(fallback || []);
@@ -39,7 +39,7 @@ export async function GET() {
     const formatted = (data || []).map((item: {
       id: string;
       student_id: string;
-      student?: { full_name?: string; phone?: string } | { full_name?: string; phone?: string }[];
+      student?: { full_name?: string; email?: string | null; phone?: string } | { full_name?: string; email?: string | null; phone?: string }[];
       class_id: string;
       class_groups?: { name?: string } | { name?: string }[];
       payment_plan_id?: string;
@@ -51,8 +51,7 @@ export async function GET() {
       status: string;
       created_at: string;
     }) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const getVal = (obj: any, field: string) => {
+      const getVal = (obj: { full_name?: string; email?: string | null; phone?: string; name?: string } | { full_name?: string; email?: string | null; phone?: string; name?: string }[] | undefined, field: "full_name" | "email" | "phone" | "name") => {
         if (!obj) return null;
         return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
       };
@@ -61,6 +60,7 @@ export async function GET() {
         id: item.id,
         student_id: item.student_id,
         student_name: getVal(item.student, "full_name") || "Unknown",
+        student_email: getVal(item.student, "email"),
         student_phone: getVal(item.student, "phone") || "",
         class_id: item.class_id,
         class_name: getVal(item.class_groups, "name") || getVal(item.payment_plans, "name") || "Multiple/N-A",

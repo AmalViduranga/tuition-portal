@@ -6,61 +6,56 @@ import crypto from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuditLog } from "@/lib/audit/audit-log";
+import { safeNextPath } from "@/lib/utils/safe-redirect";
 
 export async function login(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/dashboard");
+  const next = safeNextPath(formData.get("next"), "/dashboard");
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.user) {
     await createAuditLog({
       action: "USER_LOGIN_FAILED",
-      actorEmail: email,
+      actorEmail: email.slice(0, 320),
       actorRole: null,
       targetType: "auth",
-      targetLabel: email,
+      targetLabel: email.slice(0, 320),
       metadata: { reason: error?.message || "invalid_credentials" },
     });
-    redirect(`/login?error=${encodeURIComponent(error?.message || "Invalid login credentials")}`);
+    // The visitor only ever sees a fixed message; the provider's wording stays in the audit log.
+    redirect(`/login?error=${error?.status === 429 ? "rate_limited" : "invalid_credentials"}`);
   }
 
   const user = data.user;
 
   if (!user) {
-    redirect("/login?error=Unable%20to%20load%20user%20session");
+    redirect("/login?error=session_unavailable");
   }
 
   // Server-side role lookup prevents relying only on client-side route checks.
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role, must_change_password")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
-  // Handle case where profile might not exist (e.g., deleted or trigger failed)
+  // An account without a readable profile is never given a role here. Profiles are
+  // created by an administrator (lib/admin/create-student-account.ts); roles are
+  // assigned in the database only.
   if (!profile) {
-    const adminSupabase = createAdminClient();
-    await adminSupabase.from("profiles").upsert({
-      id: user.id,
-      full_name: user.user_metadata?.full_name || "Admin",
-      email: user.email,
-      role: "admin",
-      is_active: true,
-      must_change_password: false
-    });
-
     await createAuditLog({
       actorId: user.id,
       actorEmail: user.email,
-      actorRole: "admin",
-      action: "USER_LOGIN",
+      actorRole: null,
+      action: "USER_LOGIN_FAILED",
       targetType: "user",
       targetId: user.id,
+      metadata: { reason: profileError ? "profile_lookup_failed" : "missing_profile" },
     });
-
-    return redirect("/admin");
+    await supabase.auth.signOut();
+    return redirect(`/login?error=${profileError ? "session_unavailable" : "account_not_set_up"}`);
   }
 
   // Normalize role for comparison (handle case sensitivity, whitespace)
@@ -118,7 +113,8 @@ export async function login(formData: FormData) {
     const cookieStore = await cookies();
     cookieStore.set("student_session_lock", lockId, { 
       httpOnly: true, 
-      secure: process.env.NODE_ENV === "production", 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 7 // 1 week
     });
@@ -126,7 +122,7 @@ export async function login(formData: FormData) {
   // ----------------------------------------------
 
   // Students go to their intended destination or dashboard
-  return redirect(next.startsWith("/") ? next : "/dashboard");
+  return redirect(next);
 }
 
 export async function logout() {
@@ -171,11 +167,11 @@ export async function updatePassword(formData: FormData) {
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
   if (password.length < 8) {
-    return redirect("/change-password?error=Password%20must%20be%20at%20least%208%20characters");
+    return redirect("/change-password?error=password_too_short");
   }
 
   if (password !== confirmPassword) {
-    return redirect("/change-password?error=Passwords%20do%20not%20match");
+    return redirect("/change-password?error=password_mismatch");
   }
 
   const supabase = await createClient();
@@ -189,7 +185,7 @@ export async function updatePassword(formData: FormData) {
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
-    return redirect(`/change-password?error=${encodeURIComponent(error.message)}`);
+    return redirect("/change-password?error=update_failed");
   }
 
   await supabase.from("profiles").update({ must_change_password: false }).eq("id", user.id);

@@ -33,7 +33,7 @@ export default function Select({
       <div className="relative">
         <select
           id={selectId}
-          className={`w-full appearance-none rounded-xl border ${
+          className={`w-full appearance-none rounded-lg border ${
             error
               ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500/20"
               : "border-slate-300 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 dark:focus:border-blue-500 dark:focus:ring-blue-500/30"

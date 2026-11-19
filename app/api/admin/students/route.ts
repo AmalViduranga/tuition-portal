@@ -3,6 +3,7 @@ import { createStudentAccount } from "@/lib/admin/create-student-account";
 import { requireAdminApi } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuditLog } from "@/lib/audit/audit-log";
+import { searchStudents } from "@/lib/admin/student-search";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,12 +11,17 @@ export async function GET(request: NextRequest) {
     if (!adminAuth.ok) return NextResponse.json({ error: adminAuth.error }, { status: adminAuth.status });
     const adminSupabase = createAdminClient();
     const url = new URL(request.url);
+    if (url.searchParams.has("search")) {
+      const search = url.searchParams.get("search") ?? "";
+      if (search.trim().length > 200) return NextResponse.json({ error: "Search must be 200 characters or fewer." }, { status: 400 });
+      return NextResponse.json(await searchStudents(adminSupabase, search), { headers: { "Cache-Control": "no-store" } });
+    }
     const simple = url.searchParams.get("simple") === "true";
 
     const { data: students, error } = simple
       ? await adminSupabase
           .from("profiles")
-          .select("id, full_name")
+          .select("id, full_name, email")
           .eq("role", "student")
           .order("full_name", { ascending: true })
       : await adminSupabase

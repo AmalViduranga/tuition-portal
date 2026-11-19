@@ -23,9 +23,9 @@ export default function Table<T extends { id: string }>({
   className = "",
 }: TableProps<T>) {
   return (
-    <div className={`overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm ${className}`}>
+    <div className={`overflow-x-auto rounded-lg border border-border bg-card ${className}`}>
       <table className="w-full text-left text-sm">
-        <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-800/40 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+        <thead className="border-b border-border bg-muted/60 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           <tr>
             {columns.map((column) => (
               <th

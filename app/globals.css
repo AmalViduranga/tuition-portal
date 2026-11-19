@@ -2,32 +2,35 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Design tokens — one palette for the public site, portal and admin. */
 :root {
   --background: #f8fafc;
-  --foreground: #0f172a;
+  --foreground: #15283e;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --border: #e2e8f0;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --card-foreground: #15283e;
+  --border: #d9e3ef;
+  --muted: #eff5fc;
+  --muted-foreground: #52647a;
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
   --primary-foreground: #ffffff;
-  --ring: #3b82f6;
+  --link: #1d4ed8;
+  --ring: #2563eb;
 }
 
 .dark {
   --background: #090d16;
-  --foreground: #f8fafc;
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
-  --border: #1e293b;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
+  --foreground: #edf2fa;
+  --card: #0f1928;
+  --card-foreground: #edf2fa;
+  --border: #2c3d52;
+  --muted: #132237;
+  --muted-foreground: #afbed0;
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
   --primary-foreground: #ffffff;
-  --ring: #60a5fa;
+  --link: #93b9ff;
+  --ring: #93b9ff;
 }
 
 @theme inline {
@@ -41,45 +44,49 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
-  --font-sans: var(--font-inter);
+  --color-link: var(--link);
+  --font-sans: var(--font-inter), var(--font-sinhala), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  transition: background-color 0.2s ease, color 0.2s ease;
+/*
+ * Element defaults live in the base layer so that utility classes on a component
+ * always win. (Previously these were unlayered and overrode every utility, which
+ * forced all buttons to the same solid blue.)
+ */
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter), var(--font-sinhala), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Sinhala text: a dedicated face and no Latin letter-spacing tweaks. */
+  [lang="si"] {
+    font-family: var(--font-sinhala), "Noto Sans Sinhala", "Nirmala UI", "Iskoola Pota", sans-serif;
+    letter-spacing: normal;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    @apply w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none ring-blue-500 focus:ring-2;
+  }
 }
 
-a {
-  transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
-}
-
-input:not([type="checkbox"]):not([type="radio"]),
-textarea,
-select {
-  @apply w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none ring-blue-500 focus:ring-2 transition-all;
-}
-
-button {
-  @apply cursor-pointer rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 transition-all;
-}
-
-/* Custom sleek scrollbar for SaaS look */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
-  border-radius: 9999px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.5);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.7);
+/* One shared page container: follows the viewport, then centres on ultrawide screens. */
+@layer components {
+  .container-fluid {
+    width: 100%;
+    max-width: 1600px;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 4rem);
+  }
 }

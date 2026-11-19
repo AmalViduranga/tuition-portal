@@ -4,7 +4,7 @@ export default function DashboardLoading() {
   return (
     <div className="space-y-8 pb-12">
       {/* 1. Welcome Section Skeleton */}
-      <section className="relative overflow-hidden rounded-2xl bg-slate-100 px-6 py-10 shadow-sm sm:px-12 sm:py-16">
+      <section className="relative overflow-hidden rounded-lg bg-slate-100 px-6 py-10 shadow-sm sm:px-12 sm:py-16">
         <Skeleton className="h-4 w-24 mb-2" />
         <Skeleton className="h-10 w-64 mb-4" />
         <Skeleton className="h-6 w-full max-w-xl" />
@@ -17,7 +17,7 @@ export default function DashboardLoading() {
           {/* Quick Actions Skeleton */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <div key={i} className="flex flex-col items-center justify-center gap-2 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
                 <Skeleton variant="circular" className="h-12 w-12" />
                 <Skeleton className="h-4 w-20" />
               </div>
@@ -32,7 +32,7 @@ export default function DashboardLoading() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div key={i} className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                   <Skeleton className="aspect-video w-full" />
                   <div className="p-4">
                     <Skeleton className="h-4 w-full mb-2" />
@@ -51,7 +51,7 @@ export default function DashboardLoading() {
             </div>
             <div className="grid gap-3 sm:grid-cols-1">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4">
+                <div key={i} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4">
                   <div className="flex items-center gap-4 w-full">
                     <Skeleton variant="rectangular" className="h-10 w-10 shrink-0" />
                     <div className="w-full">

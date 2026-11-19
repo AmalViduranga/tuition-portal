@@ -109,7 +109,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <div
               key={t.id}
               role="status"
-              className={`pointer-events-auto relative flex w-full items-start gap-3 rounded-2xl border p-4 shadow-xl backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-top-2 ${typeConfig.border} ${typeConfig.bg}`}
+              className={`pointer-events-auto relative flex w-full items-start gap-3 rounded-lg border p-4 shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-top-2 ${typeConfig.border} ${typeConfig.bg}`}
             >
               <span className={`mt-0.5 shrink-0 ${typeConfig.iconColor}`}>
                 <IconComponent className="h-5 w-5" />

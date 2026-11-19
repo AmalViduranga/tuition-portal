@@ -10,6 +10,7 @@ export default function AdminSiteContentPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     fetchContent();
@@ -27,6 +28,7 @@ export default function AdminSiteContentPage() {
         contentMap[item.key] = item.value || "";
       });
       setContent(contentMap);
+      setLoaded(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -38,6 +40,7 @@ export default function AdminSiteContentPage() {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    if (!loaded) { setError("Load site content successfully before saving changes."); return; }
     setSaving(true);
 
     try {
@@ -183,19 +186,19 @@ export default function AdminSiteContentPage() {
           </div>
 
           {error && (
-            <div className="mt-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl text-sm text-red-600 dark:text-red-400">
+            <div role="alert" className="mt-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mt-6 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+            <div role="status" className="mt-6 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-lg text-sm text-emerald-600 dark:text-emerald-400 font-medium">
               Content saved successfully!
             </div>
           )}
 
           <div className="mt-6 flex justify-end">
-            <Button type="submit" loading={saving}>
+            <Button type="submit" loading={saving} disabled={!loaded}>
               Save Changes
             </Button>
           </div>
@@ -204,12 +207,12 @@ export default function AdminSiteContentPage() {
 
       <Card>
         <h2 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Live Content Preview</h2>
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 space-y-6 border border-slate-100 dark:border-slate-800">
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 space-y-6 border border-slate-100 dark:border-slate-800">
           <div>
             <h3 className="text-2xl font-bold text-blue-700 dark:text-blue-400">{content.site_name || "Your Site Name"}</h3>
           </div>
 
-          <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-4">
+          <div className="rounded-lg border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">Current Active Lessons</h4>
             <div className="grid gap-2 sm:grid-cols-3 text-xs">
               <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/80">

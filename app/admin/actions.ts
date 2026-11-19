@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateClassViews } from "@/lib/server/revalidate-classes";
 import { createStudentAccount } from "@/lib/admin/create-student-account";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { randomInt } from "node:crypto";
 import { createAuditLog } from "@/lib/audit/audit-log";
+import { saveSiteContent } from "@/lib/admin/site-content";
 
 export async function createStudent(formData: FormData) {
   await requireAdmin();
@@ -96,7 +98,7 @@ export async function createClass(formData: FormData) {
     });
   }
 
-  revalidatePath("/admin/classes");
+  revalidateClassViews();
 }
 
 export async function updateClass(formData: FormData) {
@@ -119,7 +121,7 @@ export async function updateClass(formData: FormData) {
     targetLabel: name,
   });
 
-  revalidatePath("/admin/classes");
+  revalidateClassViews();
 }
 
 export async function toggleClassStatus(formData: FormData) {
@@ -148,7 +150,7 @@ export async function toggleClassStatus(formData: FormData) {
     metadata: { is_active: !classData?.is_active },
   });
 
-  revalidatePath("/admin/classes");
+  revalidateClassViews();
 }
 
 export async function addRecording(formData: FormData) {
@@ -472,32 +474,7 @@ export async function addManualMaterialUnlock(formData: FormData) {
 export async function updateSiteContent(formData: FormData) {
   const { supabase, user } = await requireAdmin();
 
-  const teacherImageUrl = String(formData.get("teacher_image_url") ?? "");
-
-  const updates = [
-    { key: "site_name", value: String(formData.get("site_name") ?? "") },
-    { key: "teacher_name", value: String(formData.get("teacher_name") ?? "") },
-    { key: "teacher_qualification", value: String(formData.get("teacher_qualification") ?? "") },
-    { key: "teacher_description", value: String(formData.get("teacher_description") ?? "") },
-    { key: "subject_name", value: String(formData.get("subject_name") ?? "") },
-    { key: "subject_code", value: String(formData.get("subject_code") ?? "") },
-    { key: "subject_description", value: String(formData.get("subject_description") ?? "") },
-    { key: "current_lesson_2027_theory", value: String(formData.get("current_lesson_2027_theory") ?? "") },
-    { key: "current_lesson_2027_revision", value: String(formData.get("current_lesson_2027_revision") ?? "") },
-    { key: "current_lesson_2028_theory", value: String(formData.get("current_lesson_2028_theory") ?? "") },
-  ];
-
-  if (teacherImageUrl || formData.has("teacher_image_url")) {
-    updates.push({ key: "teacher_image_url", value: teacherImageUrl });
-  }
-
-  const promises = updates.map(({ key, value }) =>
-    supabase
-      .from("site_settings")
-      .upsert({ key, value, updated_at: new Date().toISOString() })
-  );
-
-  await Promise.all(promises);
+  const updates = await saveSiteContent(supabase, formData);
 
   await createAuditLog({
     actorId: user.id,

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
-// Route segment config
-export const runtime = 'edge'
+// ImageResponse also runs in Node; this icon does not need the edge runtime.
+export const runtime = 'nodejs'
 
 // Image metadata
 export const size = {

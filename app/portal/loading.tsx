@@ -17,7 +17,7 @@ export default function PortalLoading() {
       {/* Quick Actions Skeleton */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-xl bg-white p-6 shadow-sm">
+            <div key={i} className="rounded-lg bg-white p-6 shadow-sm">
                <Skeleton variant="circular" className="h-10 w-10 mb-3" />
                <Skeleton className="h-6 w-32 mb-2" />
                <Skeleton className="h-4 w-48" />

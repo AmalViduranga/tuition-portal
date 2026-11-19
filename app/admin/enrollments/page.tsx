@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 import { Card, Button, Input, SearchBar, Badge, DateFormat, Modal, Select, Table } from "@/components/ui";
-import { Search, X } from "lucide-react";
+import StudentSearchSelect from "@/components/admin/StudentSearchSelect";
+import { matchesAccessSearch } from "@/lib/admin/access-search";
 
 type Enrollment = {
   id: string;
   student_id: string;
   student_name?: string;
+  student_email?: string | null;
   class_id: string;
   class_name?: string;
   start_access_date: string;
@@ -26,6 +28,7 @@ type PaymentPeriod = {
   id: string;
   student_id: string;
   student_name?: string;
+  student_email?: string | null;
   student_phone?: string;
   class_id: string;
   class_name?: string;
@@ -39,7 +42,8 @@ type PaymentPeriod = {
 
 type Student = {
   id: string;
-  full_name: string;
+  full_name: string | null;
+  email?: string | null;
 };
 
 type Class = {
@@ -61,6 +65,7 @@ type Unlock = {
   id: string;
   student_id: string;
   student_name: string;
+  student_email?: string | null;
   created_at: string;
   recording_id?: string;
   recording_title?: string;
@@ -165,8 +170,7 @@ export default function AdminEnrollmentsPage() {
 
     if (searchQuery) {
       result = result.filter((enr) =>
-        enr.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        enr.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesAccessSearch(searchQuery, enr.student_name, enr.student_email, enr.class_name)
       );
     }
 
@@ -183,8 +187,7 @@ export default function AdminEnrollmentsPage() {
 
     if (searchQuery) {
       result = result.filter((pay: PaymentPeriod) =>
-        pay.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        pay.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        matchesAccessSearch(searchQuery, pay.student_name, pay.student_email, pay.class_name)
       );
     }
 
@@ -235,7 +238,7 @@ export default function AdminEnrollmentsPage() {
                   <p className="font-medium flex items-center gap-2">
                     {enr.student_name || "Unknown"}
                     {enr.student_id === selectedStudentId && (
-                      <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
+                      <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
                     )}
                   </p>
                   <p className="text-xs text-slate-500">{enr.student_id.slice(0, 8)}...</p>
@@ -385,7 +388,7 @@ export default function AdminEnrollmentsPage() {
                   <p className="font-medium flex items-center gap-2">
                     {pay.student_name || "Unknown"}
                     {pay.student_id === selectedStudentId && (
-                      <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
+                      <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm font-semibold">Selected</span>
                     )}
                   </p>
                   <p className="text-xs text-slate-500">{pay.student_phone || pay.student_id.slice(0, 8)}</p>
@@ -481,8 +484,7 @@ export default function AdminEnrollmentsPage() {
     const unlocksData = type === "recording" ? recordingUnlocks : materialUnlocks;
 
     const filteredUnlocks = unlocksData.filter((u) => 
-      u.student_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (type === "recording" ? u.recording_title : u.material_title)?.toLowerCase().includes(searchQuery.toLowerCase())
+      matchesAccessSearch(searchQuery, u.student_name, u.student_email, type === "recording" ? u.recording_title : u.material_title)
     );
 
     return (
@@ -569,7 +571,7 @@ export default function AdminEnrollmentsPage() {
           <p className="text-sm text-slate-600 mt-1">Manage enrollments, payments, and manual unlocks</p>
         </div>
         <div className="w-64">
-           <SearchBar placeholder="Search by student or class..." value={searchQuery} onChange={(v) => setSearchQuery(v)} />
+           <SearchBar placeholder="Search student, email or class..." value={searchQuery} onChange={(v) => setSearchQuery(v)} />
         </div>
       </div>
 
@@ -599,136 +601,6 @@ export default function AdminEnrollmentsPage() {
   );
 }
 
-interface StudentSearchSelectProps {
-  students: Student[];
-  value: string;
-  onChange: (studentId: string) => void;
-  label?: string;
-  placeholder?: string;
-  required?: boolean;
-}
-
-function StudentSearchSelect({
-  students,
-  value,
-  onChange,
-  label = "Student",
-  placeholder = "Type student full name...",
-  required = false,
-}: StudentSearchSelectProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [prevValue, setPrevValue] = useState(value);
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Sync displayed name with currently selected student_id without an effect
-  const selectedStudent = useMemo(() => {
-    return students.find((s) => s.id === value) || null;
-  }, [students, value]);
-
-  if (prevValue !== value) {
-    setPrevValue(value);
-    setSearchTerm(selectedStudent ? selectedStudent.full_name : "");
-  }
-
-  // Filter matching students by full_name
-  const filteredStudents = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
-    if (!q) return students.slice(0, 50);
-    return students.filter((s) => s.full_name.toLowerCase().includes(q));
-  }, [students, searchTerm]);
-
-  // Click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSelect = (student: Student) => {
-    onChange(student.id);
-    setSearchTerm(student.full_name);
-    setIsOpen(false);
-  };
-
-  const handleClear = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onChange("");
-    setSearchTerm("");
-    setIsOpen(false);
-  };
-
-  return (
-    <div ref={containerRef} className="relative w-full">
-      {label && (
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          {label} {required && <span className="text-red-500">*</span>}
-        </label>
-      )}
-      <div className="relative">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setIsOpen(true);
-            if (!e.target.value) {
-              onChange("");
-            }
-          }}
-          onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
-          className="w-full rounded-lg border border-slate-300 pl-9 pr-8 py-2 text-sm min-h-[44px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white transition-colors"
-          required={required && !value}
-        />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        {value && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
-            title="Clear selection"
-            aria-label="Clear selection"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      {isOpen && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-xl divide-y divide-slate-100">
-          {filteredStudents.length > 0 ? (
-            filteredStudents.map((s) => {
-              const isSelected = s.id === value;
-              return (
-                <div
-                  key={s.id}
-                  onClick={() => handleSelect(s)}
-                  className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between ${
-                    isSelected ? "bg-blue-50 text-blue-700 font-semibold" : "hover:bg-slate-50 text-slate-800"
-                  }`}
-                >
-                  <span className="truncate">{s.full_name}</span>
-                  <span className="text-xs text-slate-400 font-mono ml-2 shrink-0">
-                    {s.id.slice(0, 8)}...
-                  </span>
-                </div>
-              );
-            })
-          ) : (
-            <div className="px-3 py-3 text-sm text-slate-500 text-center">
-              No students found
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 interface EnrollmentFormProps {
   students: Student[];
@@ -802,7 +674,7 @@ function EnrollmentForm({ students, classes, onSubmit, onStudentSelect }: Enroll
             setFormData({ ...formData, student_id: val });
             if (onStudentSelect) onStudentSelect(val);
           }}
-          placeholder="Type student name..."
+          placeholder="Search by student name or email"
           required
         />
         <Select
@@ -933,7 +805,7 @@ function PaymentForm({ students, classes, plans, onSubmit, onStudentSelect }: Pa
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-6">
       <div className="flex items-center justify-between">
          <h3 className="text-lg font-semibold text-slate-900">Add New Payment / Period</h3>
          <div className="flex items-center gap-2">
@@ -958,7 +830,7 @@ function PaymentForm({ students, classes, plans, onSubmit, onStudentSelect }: Pa
             setFormData({ ...formData, student_id: val });
             if (onStudentSelect) onStudentSelect(val);
           }}
-          placeholder="Type student name..."
+          placeholder="Search by student name or email"
           required
         />
         
@@ -1068,7 +940,7 @@ function UnlockForm({ students, items, itemLabel, onSubmit }: UnlockFormProps) {
           students={students}
           value={formData.student_id}
           onChange={(val) => setFormData({ ...formData, student_id: val })}
-          placeholder="Type student name..."
+          placeholder="Search by student name or email"
           required
         />
         <Select

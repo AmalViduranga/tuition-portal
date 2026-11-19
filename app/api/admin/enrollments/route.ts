@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         revoked_by,
         revoke_reason,
         updated_at,
-        student:profiles!student_id (full_name),
+        student:profiles!student_id (full_name, email),
         class:class_groups (name)
       `)
       .order("created_at", { ascending: false });
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const formatted = (rawData || []).map((item: {
       id: string;
       student_id: string;
-      student?: { full_name?: string } | { full_name?: string }[];
+      student?: { full_name?: string; email?: string | null } | { full_name?: string; email?: string | null }[];
       class_id: string;
       class?: { name?: string } | { name?: string }[];
       start_access_date: string;
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       updated_at?: string;
     }) => {
       // Map profile/class results reliably
-      const getVal = (obj: { full_name?: string; name?: string } | { full_name?: string; name?: string }[] | undefined, field: "full_name" | "name") => {
+      const getVal = (obj: { full_name?: string; name?: string; email?: string | null } | { full_name?: string; name?: string; email?: string | null }[] | undefined, field: "full_name" | "name" | "email") => {
           if (!obj) return null;
           return Array.isArray(obj) ? obj[0]?.[field] : obj[field];
       };
@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
         id: item.id || `${item.student_id}-${item.class_id}-${item.created_at}`,
         student_id: item.student_id,
         student_name: getVal(item.student, 'full_name') || "Unknown Student",
+        student_email: getVal(item.student, 'email'),
         class_id: item.class_id,
         class_name: getVal(item.class, 'name') || "Unknown Class",
         start_access_date: item.start_access_date,

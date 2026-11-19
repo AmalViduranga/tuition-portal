@@ -28,7 +28,7 @@ export default function Input({
       )}
       <input
         id={inputId}
-        className={`w-full rounded-xl border ${
+        className={`w-full rounded-lg border ${
           error
             ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500/20"
             : "border-slate-300 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20 dark:focus:border-blue-500 dark:focus:ring-blue-500/30"

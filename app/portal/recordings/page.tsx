@@ -9,13 +9,30 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<{ highlight?: string }>;
+  searchParams: Promise<{
+    class_id?: string | string[];
+    highlight?: string | string[];
+  }>;
 };
+
+function firstParam(value: string | string[] | undefined): string | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const trimmed = raw?.trim();
+  return trimmed ? trimmed : undefined;
+}
 
 export default async function RecordingsPage({ searchParams }: Props) {
   const { supabase, user } = await requireUser();
-  const { highlight } = await searchParams;
-  const initialData = await loadStudentRecordings(supabase, user.id, null);
+  const params = await searchParams;
+  const classId = firstParam(params.class_id);
+  const highlight = firstParam(params.highlight);
+  const initialData = await loadStudentRecordings(supabase, user.id, classId ?? null);
 
-  return <StudentRecordingsClient initialData={initialData} highlight={highlight} />;
+  return (
+    <StudentRecordingsClient
+      initialData={initialData}
+      initialClassId={classId ?? ""}
+      highlight={highlight}
+    />
+  );
 }

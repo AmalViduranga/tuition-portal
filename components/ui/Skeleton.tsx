@@ -13,7 +13,7 @@ export default function Skeleton({
 
   const variantClasses = {
     text: "h-3 w-full rounded-md",
-    rectangular: "rounded-xl",
+    rectangular: "rounded-lg",
     circular: "rounded-full",
   };
 

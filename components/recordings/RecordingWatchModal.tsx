@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Badge, DateFormat } from "@/components/ui";
 import YouTubeEmbed from "@/components/videos/YouTubeEmbed";
 
@@ -19,30 +20,41 @@ interface RecordingWatchModalProps {
 }
 
 export default function RecordingWatchModal({ recording, onClose }: RecordingWatchModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="recording-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      <div className="max-h-[95vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+      <div className="max-h-[95vh] w-full max-w-5xl overflow-y-auto rounded-lg border border-border bg-card">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-card px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-blue-600">
+            <p className="text-xs font-medium uppercase tracking-wide text-link">
               {recording.class_groups?.name ?? "Class recording"}
             </p>
-            <h2 id="recording-modal-title" className="mt-1 text-lg font-semibold text-slate-900 sm:text-xl">
+            <h2 id="recording-modal-title" className="mt-1 text-lg font-semibold text-foreground sm:text-xl">
               {recording.title}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Close"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -53,12 +65,12 @@ export default function RecordingWatchModal({ recording, onClose }: RecordingWat
 
           {recording.description ? (
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">Description</h3>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{recording.description}</p>
+              <h3 className="text-sm font-semibold text-foreground">Description</h3>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{recording.description}</p>
             </div>
           ) : null}
 
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <span>
               Released <DateFormat date={recording.release_at} format="long" />
             </span>

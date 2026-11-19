@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         created_at,
         revoked_at,
         revoke_reason,
-        profiles (full_name),
+        profiles (full_name, email),
         materials (title)
       `)
       .is('revoked_at', null)
@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       id: item.id,
       student_id: item.student_id,
       student_name: Array.isArray(item.profiles) ? item.profiles[0]?.full_name : (item.profiles as { full_name?: string })?.full_name,
+      student_email: Array.isArray(item.profiles) ? item.profiles[0]?.email : (item.profiles as { email?: string | null })?.email,
       material_id: item.material_id,
       material_title: Array.isArray(item.materials) ? item.materials[0]?.title : (item.materials as { title?: string })?.title,
       created_at: item.created_at,

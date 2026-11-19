@@ -1,0 +1,6 @@
+.shell { display: flex; flex: 1; min-width: 0; flex-direction: column; }
+.shell a:focus-visible, .shell button:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+.shell header button { min-width: 44px; min-height: 44px; }
+@media (prefers-reduced-motion: reduce) {
+  .shell *, .shell *::before, .shell *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

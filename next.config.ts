@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+// 'unsafe-eval' is only needed by the development runtime (React refresh / source maps).
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com;
+  script-src 'self' 'unsafe-inline' ${isProduction ? "" : "'unsafe-eval'"} https://va.vercel-scripts.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https:;
   font-src 'self' data: https:;
@@ -13,8 +16,21 @@ const cspHeader = `
   base-uri 'self';
   form-action 'self';
   frame-ancestors 'none';
-  ${process.env.NODE_ENV === "production" ? "upgrade-insecure-requests;" : ""}
+  ${isProduction ? "upgrade-insecure-requests;" : ""}
 `.replace(/\s{2,}/g, " ").trim();
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: cspHeader },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=(), magnetometer=()",
+  },
+  // HTTPS only in production; never sent from the local http dev server.
+  ...(isProduction ? [{ key: "Strict-Transport-Security", value: "max-age=63072000" }] : []),
+];
 
 const nextConfig: NextConfig = {
   images: {
@@ -38,28 +54,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/(.*)",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: cspHeader,
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=(), magnetometer=()",
-          },
-        ],
+        headers: securityHeaders,
       },
     ];
   },

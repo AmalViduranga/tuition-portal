@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Video, FileText, Download, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowLeft, Video, FileText, Download, ExternalLink } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { Badge } from "@/components/ui";
 import { loadStudentRecordings } from "@/lib/recordings/student-recordings";
 import { loadStudentMaterials } from "@/lib/materials/student-materials";
+import { getStudentAccessContext, isClassAccessActive } from "@/lib/recordings/access-logic";
 import ClassRecordingsList from "@/components/recordings/ClassRecordingsList";
 import { MaterialOpenLink } from "@/components/materials/MaterialOpenLink";
 
@@ -18,27 +19,57 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
   const { highlight } = await searchParams;
   const { supabase, user } = await requireUser();
 
-  // Load recordings and materials for this specific class using the centralized source of truth
-  const [recordingsPayload, materialsPayload, enrollRes] = await Promise.all([
+  // Load recordings, materials, access context, and non-revoked enrollments for this class.
+  const [recordingsPayload, materialsPayload, accessContext, enrollRes] = await Promise.all([
     loadStudentRecordings(supabase, user.id, classId),
     loadStudentMaterials(supabase, user.id, classId),
-    supabase.from("student_class_enrollments")
-      .select("class_groups(name, description, is_active)")
+    getStudentAccessContext(supabase, user.id),
+    supabase
+      .from("student_class_enrollments")
+      .select("start_access_date, access_end_date, class_groups(id, name, description, is_active)")
       .eq("student_id", user.id)
       .eq("class_id", classId)
-      .maybeSingle()
+      .is("revoked_at", null)
+      .order("start_access_date", { ascending: false })
+      .order("created_at", { ascending: false }),
   ]);
 
-  const group = Array.isArray(enrollRes.data?.class_groups) 
-    ? enrollRes.data.class_groups[0] 
-    : enrollRes.data?.class_groups;
-
-  if (!enrollRes.data || !group?.is_active) {
+  if (enrollRes.error) {
+    console.error("Failed to load class enrollment:", enrollRes.error);
     notFound();
   }
 
+  const activeEnrollmentRows = (enrollRes.data ?? []).filter((row) => {
+    const cg = Array.isArray(row.class_groups) ? row.class_groups[0] : row.class_groups;
+    return cg?.is_active === true;
+  });
+
+  const isAccessActive = isClassAccessActive(classId, accessContext);
   const visibleRecordings = recordingsPayload.recordings;
   const visibleMaterials = materialsPayload.materials;
+
+  // Prefer an enrollment row with an active/valid class_group; fall back to access via existing grants.
+  const preferredEnrollment =
+    activeEnrollmentRows.find((row) => {
+      const today = new Date().toISOString().split("T")[0];
+      let end = row.access_end_date;
+      if (!end) {
+        const d = new Date(row.start_access_date);
+        d.setDate(d.getDate() + 40);
+        end = d.toISOString().split("T")[0];
+      }
+      return today >= row.start_access_date && today <= end;
+    }) ?? activeEnrollmentRows[0];
+
+  const group = preferredEnrollment
+    ? Array.isArray(preferredEnrollment.class_groups)
+      ? preferredEnrollment.class_groups[0]
+      : preferredEnrollment.class_groups
+    : null;
+
+  if (!group?.is_active) {
+    notFound();
+  }
 
   return (
     <div className="space-y-8">
@@ -50,15 +81,15 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to My Classes
         </Link>
-        <div className="rounded-2xl bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 transition-all">
+        <div className="rounded-lg bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 transition-all">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Badge variant="success" className="font-semibold text-[11px]">
-                  Enrollment Active
+                <Badge variant={isAccessActive ? "success" : "warning"} className="font-semibold text-xs">
+                  {isAccessActive ? "Enrollment Active" : "Access Window Inactive"}
                 </Badge>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {group?.name ?? "Class"}
               </h1>
               {group?.description ? (
@@ -75,7 +106,7 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800">
+      <section className="rounded-lg bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800">
         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 dark:border-slate-800 pb-3">
           <Video className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Class Recordings</h2>
@@ -86,7 +117,7 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
         <ClassRecordingsList recordings={visibleRecordings} highlight={highlight} />
       </section>
 
-      <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white">
+      <section className="rounded-lg bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white">
         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 dark:border-slate-800 pb-3">
           <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Class Materials</h2>
@@ -99,7 +130,7 @@ export default async function ClassDetailPage({ params, searchParams }: Props) {
             <article 
               key={material.id} 
               id={material.id}
-              className={`rounded-xl border p-4 transition-all duration-200 ${
+              className={`rounded-lg border p-4 transition-all duration-200 ${
                 highlight === material.id 
                   ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 shadow-md ring-1 ring-blue-500' 
                   : 'border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-blue-500/30 dark:hover:border-blue-500/30'

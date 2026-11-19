@@ -50,12 +50,26 @@ export default function PromotionPopup() {
     fetchPromotion();
   }, [pathname]);
 
-  if (!isOpen || !promotion) return null;
-
   const handleClose = () => {
     setIsOpen(false);
-    localStorage.setItem("dismissedPromotionId", promotion.id);
+    if (promotion) {
+      localStorage.setItem("dismissedPromotionId", promotion.id);
+    }
   };
+
+  useEffect(() => {
+    if (!isOpen || !promotion) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        localStorage.setItem("dismissedPromotionId", promotion.id);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, promotion]);
+
+  if (!isOpen || !promotion) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -70,16 +84,20 @@ export default function PromotionPopup() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={promotion.title || "Announcement"}
       onClick={handleBackdropClick}
     >
-      <div className="relative flex w-full max-w-[600px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative flex w-full max-w-[600px] flex-col overflow-hidden rounded-lg border border-border bg-card">
         <button
+          type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/80"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/75 text-white transition-colors hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           aria-label="Close promotion"
         >
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5" aria-hidden="true" />
         </button>
 
         <div
@@ -94,12 +112,12 @@ export default function PromotionPopup() {
             className="w-full h-auto object-contain"
           />
           {(promotion.title || promotion.description) && (
-            <div className="bg-white p-4 text-center">
+            <div className="bg-card p-4 text-center border-t border-border">
               {promotion.title && (
-                <h2 className="text-xl font-bold text-slate-900">{promotion.title}</h2>
+                <h2 className="text-xl font-bold text-foreground">{promotion.title}</h2>
               )}
               {promotion.description && (
-                <p className="mt-2 text-sm text-slate-600">{promotion.description}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{promotion.description}</p>
               )}
             </div>
           )}

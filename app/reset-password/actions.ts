@@ -31,7 +31,8 @@ export async function resetPassword(formData: FormData) {
   });
 
   if (updateError) {
-    return { error: updateError.message };
+    console.error("Password reset update failed:", updateError);
+    return { error: "Could not reset your password. Please request a new reset link and try again." };
   }
 
   // Also clear the flag in profiles table

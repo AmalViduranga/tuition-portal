@@ -1,51 +1,135 @@
-import { classGroups } from "@/lib/content";
-import { CalendarDays, Clock, MapPin, MonitorPlay, Sparkles } from "lucide-react";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { loadPublicContent } from "@/lib/server/public-content";
+import { buildClassWhatsAppUrl } from "@/lib/whatsapp";
 
-export default function SchedulePage() {
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Class Schedule | MathsLK A/L Mathematics",
+  description: "Weekly online class times for active G.C.E. A/L Mathematics classes by Amal Viduranga.",
+};
+
+export default async function SchedulePage() {
+  const content = await loadPublicContent();
+  const classes = content.status === "ready" ? content.classes : [];
+
   return (
-    <div className="flex flex-col gap-8 md:gap-12 pb-16">
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center shadow-sm md:p-12 transition-all">
-        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
-        <div className="flex flex-col items-center justify-center gap-2.5 sm:flex-row">
-          <p className="inline-flex items-center gap-2 rounded-full bg-violet-50 dark:bg-violet-950/50 border border-violet-200/60 dark:border-violet-800/60 px-3.5 py-1 text-xs font-semibold text-violet-700 dark:text-violet-300">
-            <CalendarDays className="h-3.5 w-3.5" /> Weekly Plan
-          </p>
-          <p className="inline-flex items-center gap-2 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-800/60 px-3.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-300">
-            <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-            2028 A/L Intake Now Open
-          </p>
-        </div>
-        <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-900 dark:text-white md:text-5xl">Class Schedule</h1>
-        <p className="mt-3 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-          Find the timeline that fits you best and join our sessions. We offer various classes to cater to different batches.
+    <div className="flex flex-col gap-8 pb-16">
+      <header className="border-b border-border pb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">Class schedule</h1>
+        <p className="mt-3 max-w-[60ch] text-base text-muted-foreground">
+          Weekly class times for currently active G.C.E. A/L Mathematics batches. All classes are held online.
         </p>
-      </section>
+      </header>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {classGroups.map((group, idx) => (
-          <article key={idx} className="group rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 shadow-sm hover:border-blue-500/30 dark:hover:border-blue-500/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white transition-colors">
-               <MonitorPlay className="h-6 w-6" />
-            </div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{group.name}</h2>
-            <div className="space-y-3">
-               <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs sm:text-sm">
-                 <CalendarDays className="h-4 w-4 text-blue-500 shrink-0" />
-                 <span className="font-semibold">{group.day}</span>
-               </div>
-               <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs sm:text-sm">
-                 <Clock className="h-4 w-4 text-blue-500 shrink-0" />
-                 <span className="font-semibold">{group.time}</span>
-               </div>
-               <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs sm:text-sm">
-                 <MapPin className="h-4 w-4 text-blue-500 shrink-0" />
-                 <span className="font-semibold">{group.mode}</span>
-               </div>
-            </div>
-          </article>
-        ))}
-      </div>
+      {content.status === "error" && (
+        <div role="status" className="rounded-lg border border-border bg-muted p-5 text-sm text-foreground">
+          Class schedule could not be loaded right now. Please{" "}
+          <Link href="/contact" className="font-semibold text-link underline underline-offset-4">
+            contact us
+          </Link>{" "}
+          for the latest times.
+        </div>
+      )}
+
+      {content.status === "ready" && classes.length === 0 && (
+        <div role="status" className="rounded-lg border border-border bg-muted p-5 text-sm text-foreground">
+          No active classes are open right now.{" "}
+          <Link href="/contact" className="font-semibold text-link underline underline-offset-4">
+            Contact us
+          </Link>{" "}
+          for upcoming intake dates.
+        </div>
+      )}
+
+      {content.status === "ready" && classes.length > 0 && (
+        <>
+          {/* Table from tablet width up */}
+          <div className="hidden overflow-hidden rounded-lg border border-border bg-card md:block">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-border bg-muted text-muted-foreground">
+                <tr>
+                  <th scope="col" className="px-5 py-3.5 font-semibold">Class</th>
+                  <th scope="col" className="px-5 py-3.5 font-semibold">Day</th>
+                  <th scope="col" className="px-5 py-3.5 font-semibold">Time</th>
+                  <th scope="col" className="px-5 py-3.5 font-semibold">Format</th>
+                  <th scope="col" className="px-5 py-3.5 text-right font-semibold">Enquiry</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {classes.map((group) => (
+                  <tr key={group.id}>
+                    <th scope="row" className="px-5 py-4 align-top font-semibold text-foreground">
+                      <span className="block">{group.name}</span>
+                      {group.description && (
+                        <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                          {group.description}
+                        </span>
+                      )}
+                    </th>
+                    <td className="px-5 py-4 align-top text-foreground">
+                      {group.day || "Schedule on enquiry"}
+                    </td>
+                    <td className="px-5 py-4 align-top text-foreground tabular-nums">
+                      {group.time || "Shared on WhatsApp"}
+                    </td>
+                    <td className="px-5 py-4 align-top text-muted-foreground">
+                      {group.mode || "Online"}
+                    </td>
+                    <td className="px-5 py-4 text-right align-top">
+                      <a
+                        href={buildClassWhatsAppUrl(group.name)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Ask about ${group.name} on WhatsApp`}
+                        className="inline-flex min-h-10 items-center font-semibold text-link underline decoration-link/60 underline-offset-4 transition-colors hover:decoration-link"
+                      >
+                        Ask about this class ↗
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Stacked rows on phones */}
+          <ul className="divide-y divide-border rounded-lg border border-border bg-card md:hidden">
+            {classes.map((group) => (
+              <li key={group.id} className="px-4 py-4">
+                <h2 className="text-base font-semibold text-foreground">{group.name}</h2>
+                {group.description && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">{group.description}</p>
+                )}
+                <p className="mt-1.5 text-sm text-foreground tabular-nums">
+                  {group.day && group.time
+                    ? `${group.day} · ${group.time}`
+                    : group.day || group.time || "Schedule shared on WhatsApp"}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{group.mode || "Online"}</p>
+                <a
+                  href={buildClassWhatsAppUrl(group.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Ask about ${group.name} on WhatsApp`}
+                  className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-link underline decoration-link/60 underline-offset-4 hover:decoration-link"
+                >
+                  Ask about this class ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <p className="text-sm text-muted-foreground">
+        Not sure which class is right for you?{" "}
+        <Link href="/contact" className="font-semibold text-link underline decoration-link/60 underline-offset-4 hover:decoration-link">
+          Contact us
+        </Link>{" "}
+        and we will help you choose.
+      </p>
     </div>
   );
 }
-

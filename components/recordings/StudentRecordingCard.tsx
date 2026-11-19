@@ -33,22 +33,21 @@ export default function StudentRecordingCard({ recording, isHighlighted, onOpen 
           onOpen();
         }
       }}
-      className={`group w-full flex flex-col text-left rounded-2xl overflow-hidden border bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+      className={`group w-full flex flex-col text-left rounded-lg overflow-hidden border bg-card transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
         isHighlighted
           ? "border-blue-500 ring-1 ring-blue-500"
-          : "border-slate-200 hover:border-blue-200"
+          : "border-border hover:border-blue-400 dark:hover:border-blue-600"
       }`}
     >
-      <div className="relative aspect-video bg-slate-100 overflow-hidden">
+      <div className="relative aspect-video bg-muted overflow-hidden">
         <RecordingThumbnail
           thumbnailUrl={recording.thumbnail_url}
           youtubeVideoId={recording.youtube_video_id}
           title={recording.title}
-          className="transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/10">
-          <span className="flex h-14 w-14 scale-90 items-center justify-center rounded-full bg-white/95 text-blue-600 opacity-0 shadow-lg transition-all group-hover:scale-100 group-hover:opacity-100">
-            <svg className="ml-1 h-7 w-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/25">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-blue-600 opacity-0 transition-opacity group-hover:opacity-100">
+            <svg className="ml-0.5 h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
           </span>
@@ -63,16 +62,16 @@ export default function StudentRecordingCard({ recording, isHighlighted, onOpen 
       </div>
 
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-semibold text-slate-900 line-clamp-2 leading-snug">{recording.title}</h3>
+        <h3 className="font-semibold text-foreground line-clamp-2 leading-snug">{recording.title}</h3>
         {recording.description ? (
-          <p className="mt-2 text-sm text-slate-600 line-clamp-2">{recording.description}</p>
+          <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{recording.description}</p>
         ) : null}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
           <div className="flex flex-col gap-1">
-            <span className="font-medium">{recording.class_groups?.name ?? "Class"}</span>
+            <span className="font-medium text-link">{recording.class_groups?.name ?? "Class"}</span>
             <DateFormat date={recording.release_at} format="short" />
           </div>
-          <span className="inline-flex h-8 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+          <span className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors group-hover:bg-primary-hover">
             Watch
           </span>
         </div>

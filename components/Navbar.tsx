@@ -33,8 +33,19 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
       }
     }
 
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        setProfileMenuOpen(false);
+      }
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
   // Close menus on route change
@@ -54,6 +65,8 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
 
   if (isInternalRoute) return null;
 
+  const isLoginRoute = pathname === "/login";
+
   const navLinks = [
     { href: "/about", label: "About" },
     { href: "/results", label: "Results" },
@@ -62,8 +75,8 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-[#090D16]/85 backdrop-blur-2xl shadow-xs transition-colors duration-200">
-      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#090D16] transition-colors duration-200">
+      <nav className="container-fluid flex items-center justify-between py-3">
         <div className="flex items-center gap-2.5 md:gap-3.5">
           <Link href="/" className="flex items-center hover:opacity-90 transition-opacity shrink-0" aria-label="Home">
             <Image
@@ -72,11 +85,11 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
               width={42}
               height={42}
               priority
-              className="h-8 w-8 md:h-9 md:w-9 object-contain drop-shadow-xs"
+              className="h-8 w-8 md:h-9 md:w-9 object-contain"
             />
           </Link>
           <div className="flex flex-col justify-center gap-0.5">
-            <Link href="/" className="hidden sm:block text-base font-extrabold tracking-tight text-blue-600 dark:text-blue-400 md:text-lg hover:opacity-90 transition-opacity leading-none">
+            <Link href="/" className="hidden sm:block text-base font-bold tracking-tight text-foreground md:text-lg leading-none">
               {siteName}
             </Link>
             <ExamCountdown variant="compact" />
@@ -91,10 +104,11 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-xl px-3.5 py-2 text-sm font-medium transition-all duration-150 ${
+                aria-current={isActive ? "page" : undefined}
+                className={`px-3 py-2 text-sm font-medium underline-offset-[10px] decoration-2 transition-colors ${
                   isActive
-                    ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold shadow-xs"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
+                    ? "text-foreground underline decoration-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {link.label}
@@ -111,7 +125,9 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
             <div className="relative ml-1" ref={profileMenuRef}>
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                aria-expanded={profileMenuOpen}
+                aria-haspopup="true"
+                className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold text-xs">
                   {profile.full_name?.charAt(0) || user.email?.charAt(0) || (profile.role === 'admin' ? "A" : "S")}
@@ -125,54 +141,56 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-52 origin-top-right rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-1.5 shadow-xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-52 origin-top-right rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-1.5 shadow-sm ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
                   <div className="border-b border-slate-100 dark:border-slate-800 px-4 py-2.5">
-                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Signed in as</p>
+                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Signed in as</p>
                     <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{user.email}</p>
                     {profile.role === 'admin' && (
-                      <span className="mt-1.5 inline-block rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">
+                      <span className="mt-1.5 inline-block rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 px-2 py-0.5 text-xs font-bold uppercase text-blue-600 dark:text-blue-400">
                         Admin
                       </span>
                     )}
                   </div>
                   <div className="p-1 space-y-0.5">
-                    <Link href="/dashboard" className="block rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
+                    <Link href="/dashboard" className="block rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
                       Dashboard
                     </Link>
-                    <Link href="/dashboard/profile" className="block rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
+                    <Link href="/dashboard/profile" className="block rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors font-medium">
                       Profile
                     </Link>
                     {profile.role === 'admin' && (
-                      <Link href="/admin" className="block rounded-xl px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors">
+                      <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors">
                         Admin Panel
                       </Link>
                     )}
                   </div>
                   <form action={logout} className="border-t border-slate-100 dark:border-slate-800 p-1">
-                    <ActionSubmitButton className="block w-full bg-transparent px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 rounded-xl transition-colors">
+                    <ActionSubmitButton className="block w-full bg-transparent px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 rounded-lg transition-colors">
                       Sign out
                     </ActionSubmitButton>
                   </form>
                 </div>
               )}
             </div>
-          ) : (
+          ) : !isLoginRoute ? (
             <LoadingLink
               href="/login"
-              className="ml-1 inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="ml-1 inline-flex min-h-11 items-center justify-center rounded-lg bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors"
             >
               Student Login
             </LoadingLink>
-          )}
+          ) : null}
         </div>
 
         {/* Mobile controls */}
         <div className="flex items-center gap-2 md:hidden" ref={mobileMenuRef}>
           <ThemeToggle size="sm" />
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none shadow-xs"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shadow-xs"
             aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
           >
             <span className="sr-only">Open main menu</span>
             {!mobileMenuOpen ? (
@@ -188,7 +206,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
 
           {/* Mobile dropdown */}
           {mobileMenuOpen && (
-            <div className="absolute right-4 top-16 mt-2 w-64 origin-top-right rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2.5 shadow-2xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
+            <div id="mobile-menu" className="absolute right-4 top-16 mt-2 w-64 origin-top-right rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2.5 shadow-sm ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-150">
               {user && profile && (
                 <div className="mb-2 border-b border-slate-100 dark:border-slate-800 px-3 pb-2.5">
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -196,7 +214,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                   </p>
                   <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
                   {profile.role === 'admin' && (
-                    <span className="mt-1.5 inline-block rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">
+                    <span className="mt-1.5 inline-block rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 px-2 py-0.5 text-xs font-bold uppercase text-blue-600 dark:text-blue-400">
                       Admin
                     </span>
                   )}
@@ -208,7 +226,7 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`block rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       pathname === link.href
                         ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold"
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -219,32 +237,34 @@ export default function Navbar({ siteName, user, profile }: NavbarProps) {
                 ))}
               </div>
 
+              {(user && profile) || !isLoginRoute ? (
               <div className="mt-2 border-t border-slate-100 dark:border-slate-800 pt-2">
                 {user && profile ? (
                   <div className="space-y-1">
-                    <Link href="/dashboard" className="block rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">
+                    <Link href="/dashboard" className="block rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">
                       Dashboard
                     </Link>
-                    <Link href="/dashboard/profile" className="block rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">
+                    <Link href="/dashboard/profile" className="block rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">
                       Profile
                     </Link>
                     {profile.role === 'admin' && (
-                      <Link href="/admin" className="block rounded-xl px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50">
+                      <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50">
                         Admin Panel
                       </Link>
                     )}
                     <form action={logout}>
-                      <ActionSubmitButton className="block w-full bg-transparent shadow-none border-none rounded-xl px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 mt-1">
+                      <ActionSubmitButton className="block w-full bg-transparent shadow-none border-none rounded-lg px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 mt-1">
                         Sign out
                       </ActionSubmitButton>
                     </form>
                   </div>
                 ) : (
-                  <LoadingLink href="/login" className="mt-1 block rounded-xl bg-blue-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+                  <LoadingLink href="/login" className="mt-1 flex min-h-11 items-center justify-center rounded-lg bg-primary px-3.5 py-2.5 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
                     Student Login
                   </LoadingLink>
                 )}
               </div>
+              ) : null}
             </div>
           )}
         </div>

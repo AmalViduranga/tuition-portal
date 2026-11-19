@@ -14,8 +14,8 @@ export function SubmitButton({ label, loadingLabel }: SubmitButtonProps) {
     <button
       type="submit"
       disabled={pending}
-      className={`w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
-        pending ? "opacity-65 cursor-not-allowed pointer-events-none" : "hover:bg-blue-500 active:scale-[0.99]"
+      className={`w-full min-h-11 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+        pending ? "opacity-65 cursor-not-allowed pointer-events-none" : "hover:bg-primary-hover"
       }`}
     >
       <div className="flex items-center justify-center gap-2">

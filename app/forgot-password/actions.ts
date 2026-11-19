@@ -8,7 +8,7 @@ export async function forgotPassword(formData: FormData) {
   const supabase = await createClient();
 
   if (!email) {
-    redirect("/forgot-password?error=Email%20is%20required");
+    redirect("/forgot-password?error=email_required");
   }
 
   // Construct the correct callback URL

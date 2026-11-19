@@ -1,0 +1,382 @@
+/* Homepage. Colours come from the shared tokens in globals.css. */
+.home {
+  --home-ink: var(--foreground);
+  --home-muted: var(--muted-foreground);
+  --home-paper: var(--card);
+  --home-soft: var(--muted);
+  --home-border: var(--border);
+  --home-blue: var(--link);
+  color: var(--home-ink);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.25rem, 4vw, 3.5rem);
+  line-height: 1.65;
+}
+.home h1, .home h2, .home h3, .home p { margin: 0; }
+.home h2 { font-size: clamp(1.45rem, 2.2vw, 1.85rem); line-height: 1.25; font-weight: 700; letter-spacing: -.02em; text-wrap: balance; }
+.home h3 { font-size: 1rem; font-weight: 600; line-height: 1.45; }
+.home a, .home button { -webkit-tap-highlight-color: transparent; }
+.home a:focus-visible, .home button:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; border-radius: .35rem; }
+
+/* Hero */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+  gap: clamp(1.5rem, 3.5vw, 3.75rem);
+  align-items: start;
+  padding-top: clamp(.25rem, 1.2vw, 1.25rem);
+}
+.heroCopy { min-width: 0; }
+.kicker { color: var(--home-muted); font-size: .925rem; font-weight: 500; margin-bottom: .75rem !important; }
+.home h1 {
+  font-size: clamp(2rem, 3.4vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.12;
+  text-wrap: balance;
+  max-width: 21ch;
+}
+.intro {
+  color: var(--home-muted);
+  font-size: clamp(1rem, 1.1vw, 1.125rem);
+  max-width: 56ch;
+  margin: 1.15rem 0 !important;
+}
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin: 1.25rem 0 .45rem; }
+.primaryLink, .secondaryLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 46px;
+  padding: .68rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: .5rem;
+  font-size: .95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.primaryLink { color: var(--primary-foreground); background: var(--primary); }
+.primaryLink:hover { background: var(--primary-hover); }
+.primaryLink:active { filter: brightness(.95); }
+.secondaryLink { background: var(--home-paper); border-color: var(--home-border); color: var(--home-ink); }
+.secondaryLink:hover { border-color: var(--home-ink); background: var(--home-soft); }
+.secondaryLink:active { background: var(--home-soft); }
+
+.textLink {
+  color: var(--home-blue);
+  font-size: .925rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.textLink:hover { opacity: .85; }
+
+.quietLink {
+  color: var(--home-muted);
+  font-size: .875rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  transition: color .15s;
+}
+.quietLink:hover { color: var(--home-ink); }
+
+.inlineLink {
+  color: var(--home-blue);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.teacherByline {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid var(--home-border);
+  padding-top: 1.25rem;
+  margin-top: 1rem;
+  max-width: 56ch;
+}
+.teacherByline img {
+  width: 68px;
+  height: 76px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: .5rem;
+  background: var(--home-soft);
+  flex-shrink: 0;
+}
+.teacherByline strong { font-size: 1rem; font-weight: 600; display: block; }
+.teacherByline p { font-size: .875rem; color: var(--home-muted); line-height: 1.5; margin-top: .15rem; }
+
+/* Current lessons panel */
+.lessons {
+  background: var(--home-paper);
+  border: 1px solid var(--home-border);
+  border-left: 3px solid var(--primary);
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  border-radius: .625rem;
+  min-width: 0;
+  scroll-margin-top: 6rem;
+}
+.lessonsHeader { margin-bottom: .5rem; }
+.lessons h2 { font-size: 1.25rem; }
+.lessonsSubtitle { font-size: .8125rem; color: var(--home-muted); margin-top: .25rem !important; }
+.lessonList { margin: .5rem 0 0; }
+.lessonRow { padding: .95rem 0; border-bottom: 1px solid var(--home-border); }
+.lessonRow:last-child { border-bottom: 0; padding-bottom: .5rem; }
+.lessonList dt {
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--home-muted);
+  margin-bottom: .25rem;
+  letter-spacing: .01em;
+}
+.lessonList dd {
+  margin: 0;
+  font-family: var(--font-sinhala), var(--font-inter), sans-serif;
+  font-size: clamp(1.18rem, 1.45vw, 1.35rem);
+  font-weight: 700;
+  color: var(--home-ink);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+.lessonEmpty { font-size: .925rem; color: var(--home-muted); padding: 1rem 0; }
+.lessonsFooter { margin-top: .35rem; border-top: 1px solid var(--home-border); padding-top: .25rem; }
+.muted { font-weight: 500; color: var(--home-muted); font-size: .95rem; font-family: var(--font-inter), sans-serif; }
+.notice {
+  font-size: .875rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--home-border);
+  background: var(--home-soft);
+  border-radius: .4rem;
+  color: var(--home-ink);
+}
+
+/* Student portal shortcuts */
+.resources {
+  border-top: 1px solid var(--home-border);
+  border-bottom: 1px solid var(--home-border);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.resources > a {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: 1.1rem 1.25rem 1.1rem .25rem;
+  min-width: 0;
+  min-height: 60px;
+  text-decoration: none;
+  transition: background-color .15s;
+}
+.resources > a + a { border-left: 1px solid var(--home-border); padding-left: 1.25rem; }
+.resources > a:hover { background: var(--home-soft); }
+.resources > a > svg { color: var(--home-muted); flex-shrink: 0; }
+.resources > a > svg:last-child { margin-left: auto; }
+.resources strong { font-size: .95rem; font-weight: 600; display: block; color: var(--home-ink); }
+.resources small { font-size: .8125rem; color: var(--home-muted); display: block; line-height: 1.45; margin-top: .1rem; }
+.resources > a:hover strong { color: var(--home-blue); text-decoration: underline; text-underline-offset: 4px; }
+
+/* Classes & schedule */
+.section { scroll-margin-top: 6rem; }
+.sectionHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.15rem; }
+.filters button {
+  font-size: .875rem;
+  min-height: 44px;
+  padding: .5rem 1rem;
+  border: 1px solid var(--home-border);
+  background: var(--home-paper);
+  color: var(--home-muted);
+  border-radius: .45rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s, color .15s;
+}
+.filters button[aria-pressed="true"] {
+  background: var(--home-ink);
+  border-color: var(--home-ink);
+  color: var(--background);
+  font-weight: 600;
+}
+.filters button:hover { border-color: var(--home-ink); color: var(--home-ink); }
+.filters button[aria-pressed="true"]:hover { color: var(--background); }
+
+.scheduleTableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--home-border);
+  border-radius: .625rem;
+  background: var(--home-paper);
+}
+.scheduleTable { width: 100%; border-collapse: collapse; text-align: left; font-size: .925rem; }
+.scheduleTable thead { background: var(--home-soft); border-bottom: 1px solid var(--home-border); }
+.scheduleTable thead th {
+  padding: .8rem 1.1rem;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--home-muted);
+}
+.scheduleTable tbody tr { border-bottom: 1px solid var(--home-border); }
+.scheduleTable tbody tr:last-child { border-bottom: 0; }
+.scheduleTable tbody th, .scheduleTable tbody td {
+  padding: 1rem 1.1rem;
+  vertical-align: middle;
+}
+.scheduleClassName { display: block; font-weight: 600; color: var(--home-ink); }
+.scheduleClassDesc { display: block; font-size: .8125rem; font-weight: 400; color: var(--home-muted); margin-top: .15rem; }
+.tabular { font-variant-numeric: tabular-nums; }
+.scheduleMode { color: var(--home-muted); font-size: .85rem; }
+.scheduleActionCol { text-align: right; white-space: nowrap; }
+.scheduleEnquiryLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--home-blue);
+  font-size: .875rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.scheduleEnquiryLink:hover { opacity: .85; }
+
+.scheduleMobileList {
+  display: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--home-border);
+  border-radius: .625rem;
+  background: var(--home-paper);
+}
+.scheduleMobileRow {
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--home-border);
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.scheduleMobileRow:last-child { border-bottom: 0; }
+.scheduleMobileTime { font-size: .925rem; font-variant-numeric: tabular-nums; color: var(--home-ink); margin-top: .2rem !important; }
+
+/* Two-column editorial sections — tightened rhythm */
+.approach, .teacherSection {
+  display: grid;
+  grid-template-columns: minmax(0, 21rem) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.75rem);
+  border-top: 1px solid var(--home-border);
+  padding-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+.bodyCopy { color: var(--home-muted); margin: .55rem 0 !important; max-width: 40ch; font-size: .95rem; }
+.teachingPoints { list-style: none; padding: 0; margin: 0; max-width: 68ch; }
+.teachingPoints li {
+  display: flex;
+  gap: .85rem;
+  padding: .7rem 0;
+  border-bottom: 1px solid var(--home-border);
+  font-size: .975rem;
+}
+.teachingPoints li:first-child { padding-top: 0; }
+.teachingPoints li:last-child { border-bottom: 0; padding-bottom: 0; }
+.teachingPoints span {
+  color: var(--home-muted);
+  font-size: .875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding-top: .1rem;
+  min-width: 1.35rem;
+}
+.teacherList {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+  color: var(--home-ink);
+  font-size: .975rem;
+  max-width: 68ch;
+}
+.teacherList li { padding: .3rem 0; }
+.teacherList li::marker { color: var(--home-muted); }
+
+/* Past results — static editorial proof, clearly distinct from interactive cards */
+.results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 1.25rem 2rem;
+  border-top: 1px solid var(--home-border);
+  padding-top: 1.25rem;
+}
+.resultBlock {
+  padding-left: 1rem;
+  border-left: 2px solid var(--home-border);
+}
+.resultBlock h3 { color: var(--home-muted); font-size: .9rem; font-weight: 600; }
+.resultBlock p {
+  margin: .35rem 0 .3rem !important;
+  color: var(--home-ink);
+  font-size: clamp(1.125rem, 1.5vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.resultBlock span { color: var(--home-muted); font-size: .875rem; }
+
+/* Closing contact band */
+.contact {
+  background: var(--home-soft);
+  padding: clamp(1.4rem, 2.5vw, 2.25rem);
+  border: 1px solid var(--home-border);
+  border-radius: .625rem;
+  margin-bottom: .75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem 2.5rem;
+}
+.contact p { color: var(--home-muted); margin-top: .45rem; max-width: 50ch; font-size: .975rem; }
+.contact .actions { margin: 0; }
+
+.home [lang="si"] { letter-spacing: normal; }
+
+@media (max-width: 1023px) {
+  .hero { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
+  .resources { grid-template-columns: 1fr; }
+  .resources > a + a { border-left: 0; border-top: 1px solid var(--home-border); padding-left: .25rem; }
+  .resources > a { padding: .95rem .25rem; }
+  .approach, .teacherSection { grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .hero { grid-template-columns: 1fr; padding-top: 0; gap: 1.75rem; }
+  .home h1 { font-size: clamp(1.8rem, 7.2vw, 2.45rem); }
+  .sectionHeading { align-items: flex-start; flex-wrap: wrap; gap: .25rem 1rem; }
+  .scheduleTableWrap { display: none; }
+  .scheduleMobileList { display: block; }
+  .approach, .teacherSection { grid-template-columns: 1fr; gap: 1rem; }
+  .actions > a { flex-grow: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home *, .home *::before, .home *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}

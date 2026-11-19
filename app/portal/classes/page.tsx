@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, ArrowRight, Calendar, CheckCircle2, AlertCircle } from "lucide-react";
+import { BookOpen, ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { Card, DateFormat, Badge } from "@/components/ui";
 import { uniqueBy } from "@/lib/utils/arrays";
@@ -39,7 +39,7 @@ export default async function StudentClassesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">My Classes</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">My Classes</h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
           Classes and batch groups you are currently enrolled in.
         </p>
@@ -47,7 +47,7 @@ export default async function StudentClassesPage() {
 
       {activeEnrollments.length === 0 ? (
         <Card className="text-center py-16 bg-slate-50/50 dark:bg-slate-900/50 border-dashed">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400">
             <BookOpen className="w-7 h-7" />
           </div>
           <h2 className="text-base font-bold text-slate-900 dark:text-white">No Classes Yet</h2>
@@ -68,15 +68,15 @@ export default async function StudentClassesPage() {
             const isExpired = !isAccessActive && (new Date().toISOString().split('T')[0] > calculatedEnd);
 
             return (
-              <Card key={enr.class_id} className="flex flex-col h-full hover:shadow-lg hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-all duration-200">
+              <Card key={enr.class_id} className="flex flex-col h-full hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-all duration-200">
                 <div className="flex justify-between items-start mb-3">
                   <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white line-clamp-2">
                     {classGroup.name}
                   </h2>
                   {isAccessActive ? (
-                    <Badge variant="success" className="font-semibold text-[10px] shrink-0">Active</Badge>
+                    <Badge variant="success" className="font-semibold text-xs shrink-0">Active</Badge>
                   ) : (
-                    <Badge variant={isExpired ? "danger" : "warning"} className="font-semibold text-[10px] shrink-0">
+                    <Badge variant={isExpired ? "danger" : "warning"} className="font-semibold text-xs shrink-0">
                       {isExpired ? "Expired" : "Pending"}
                     </Badge>
                   )}
@@ -88,7 +88,7 @@ export default async function StudentClassesPage() {
                   </p>
                 ) : (
                   <p className="text-xs text-slate-400 dark:text-slate-500 italic mb-4">
-                    Combined Mathematics class group
+                    A/L Mathematics class group
                   </p>
                 )}
 
@@ -119,11 +119,11 @@ export default async function StudentClassesPage() {
                   </div>
 
                   <Link
-                    href={`/portal/class/${classGroup.id}`}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 px-4 py-2.5 text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                    href={`/portal/recordings?class_id=${encodeURIComponent(classGroup.id)}`}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 px-4 py-2.5 text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
-                    <span>View Class Details</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span>Watch Class Recordings</span>
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                   </Link>
                 </div>
               </Card>

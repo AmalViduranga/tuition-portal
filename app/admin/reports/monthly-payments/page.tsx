@@ -75,10 +75,10 @@ export default function MonthlyReportPage() {
   return (
     <div className="space-y-8 pb-12">
       {/* Header & Filters */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-6 rounded-lg border border-border">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Monthly Financial Report</h1>
-          <p className="text-slate-500 mt-1">Detailed breakdown of payments and active free cards</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Monthly Financial Report</h1>
+          <p className="text-muted-foreground mt-1">Detailed breakdown of payments and active free cards</p>
         </div>
         
         <div className="flex flex-wrap items-end gap-3">
@@ -111,35 +111,35 @@ export default function MonthlyReportPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
         </div>
       ) : error ? (
-        <Card className="bg-red-50 border-red-200 p-8 text-center">
-          <p className="text-red-700 font-medium">{error}</p>
+        <Card className="bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/50 p-8 text-center">
+          <p className="text-red-700 dark:text-red-400 font-medium">{error}</p>
           <Button onClick={fetchReport} className="mt-4" variant="outline">Try Again</Button>
         </Card>
       ) : reportData ? (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl text-white shadow-lg shadow-blue-200">
+            <div className="bg-primary p-6 rounded-lg text-primary-foreground">
               <p className="text-blue-100 text-sm font-medium">Monthly Income</p>
-              <h2 className="text-4xl font-black mt-1">Rs. {reportData.summary.totalMonthlyIncome.toLocaleString()}</h2>
+              <h2 className="text-4xl font-bold mt-1 tabular-nums">Rs. {reportData.summary.totalMonthlyIncome.toLocaleString()}</h2>
               <div className="mt-4 flex items-center gap-2 text-blue-100 text-xs">
-                <span className="bg-blue-500/30 px-2 py-0.5 rounded-full">Primary Revenue</span>
+                <span className="bg-white/20 px-2 py-0.5 rounded-full">Primary Revenue</span>
               </div>
             </div>
             
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <p className="text-slate-500 text-sm font-medium">Paid Students</p>
-              <h2 className="text-4xl font-black text-slate-900 mt-1">{reportData.summary.totalPaidStudents}</h2>
-              <p className="text-xs text-slate-400 mt-4">Approved full payments</p>
+            <div className="bg-card p-6 rounded-lg border border-border">
+              <p className="text-muted-foreground text-sm font-medium">Paid Students</p>
+              <h2 className="text-4xl font-bold text-foreground mt-1 tabular-nums">{reportData.summary.totalPaidStudents}</h2>
+              <p className="text-xs text-muted-foreground mt-4">Approved full payments</p>
             </div>
             
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <p className="text-slate-500 text-sm font-medium">Free Card Students</p>
-              <h2 className="text-4xl font-black text-slate-900 mt-1">{reportData.summary.totalFreeCardStudents}</h2>
-              <p className="text-xs text-slate-400 mt-4">Active non-paying students</p>
+            <div className="bg-card p-6 rounded-lg border border-border">
+              <p className="text-muted-foreground text-sm font-medium">Free Card Students</p>
+              <h2 className="text-4xl font-bold text-foreground mt-1 tabular-nums">{reportData.summary.totalFreeCardStudents}</h2>
+              <p className="text-xs text-muted-foreground mt-4">Active non-paying students</p>
             </div>
           </div>
 
@@ -149,7 +149,7 @@ export default function MonthlyReportPage() {
 
           {/* Class-wise Groups */}
           {reportData.classGroups.length === 0 ? (
-            <Card className="p-12 text-center text-slate-500">
+            <Card className="p-12 text-center text-muted-foreground">
                No records found for the selected period.
             </Card>
           ) : (
@@ -163,16 +163,16 @@ export default function MonthlyReportPage() {
 
                 return (
                   <div key={group.name} className="space-y-4">
-                    <div className="flex items-center justify-between px-2">
-                       <h3 className="text-xl font-bold text-slate-800">{group.name}</h3>
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-2">
+                       <h3 className="text-xl font-bold text-foreground">{group.name}</h3>
                        <div className="flex gap-4 text-sm">
-                          <span className="text-slate-500">Paid: <b className="text-slate-900">{group.paidCount}</b></span>
-                          <span className="text-slate-500">Free: <b className="text-slate-900">{group.freeCardCount}</b></span>
-                          <span className="text-slate-500">Income: <b className="text-blue-600 font-bold">Rs. {group.totalIncome.toLocaleString()}</b></span>
+                          <span className="text-muted-foreground">Paid: <b className="text-foreground">{group.paidCount}</b></span>
+                          <span className="text-muted-foreground">Free: <b className="text-foreground">{group.freeCardCount}</b></span>
+                          <span className="text-muted-foreground">Income: <b className="text-link font-bold tabular-nums">Rs. {group.totalIncome.toLocaleString()}</b></span>
                        </div>
                     </div>
                     
-                    <Card className="overflow-hidden border-slate-200">
+                    <Card padding="none" className="overflow-hidden border-border">
                       <Table
                         columns={[
                           {
@@ -180,8 +180,8 @@ export default function MonthlyReportPage() {
                             header: "Student",
                             render: (row: { id: string; student_name: string; phone?: string; }) => (
                               <div>
-                                <p className="font-semibold text-slate-900">{row.student_name}</p>
-                                <p className="text-xs text-slate-500">{row.phone || "No phone"}</p>
+                                <p className="font-semibold text-foreground">{row.student_name}</p>
+                                <p className="text-xs text-muted-foreground">{row.phone || "No phone"}</p>
                               </div>
                             ),
                           },
@@ -207,13 +207,13 @@ export default function MonthlyReportPage() {
                           {
                             key: "amount",
                             header: "Amount",
-                            className: "text-right font-medium",
-                            render: (row: { id: string; mode: string; amount: number }) => row.mode === "paid" ? `Rs. ${row.amount.toLocaleString()}` : <span className="text-slate-400">-</span>,
+                            className: "text-right font-medium tabular-nums",
+                            render: (row: { id: string; mode: string; amount: number }) => row.mode === "paid" ? `Rs. ${row.amount.toLocaleString()}` : <span className="text-muted-foreground">-</span>,
                           },
                         ]}
 
                         data={filteredRows}
-                        className="bg-white"
+                        className="border-0 rounded-none"
                       />
                     </Card>
                   </div>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { requireUser } from "@/lib/auth";
 import { logout } from "@/app/login/actions";
 import StudentNotifications from "@/components/portal/StudentNotifications";
-import { ActionSubmitButton } from "@/components/ui";
+import { ActionSubmitButton, ThemeToggle } from "@/components/ui";
 import PortalNav from "@/app/portal/PortalNav";
 import ExamCountdown from "@/components/home/ExamCountdown";
 
@@ -21,12 +21,19 @@ export default async function DashboardLayout({
 
   if (!profile?.is_active) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4 text-center">
-        <div>
-          <h1 className="text-2xl font-bold text-red-600">Account Inactive</h1>
-          <p className="mt-2 text-slate-600">Your account has been deactivated. Please contact support.</p>
-          <form action={logout} className="mt-4">
-            <button type="submit" className="text-blue-600 font-medium">Logout</button>
+      <div className="flex min-h-screen items-center justify-center p-4 text-center bg-background">
+        <div className="rounded-lg border border-border bg-card p-8 max-w-md w-full">
+          <h1 className="text-2xl font-bold text-rose-600 dark:text-rose-400">Account Inactive</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Your account has been deactivated. Please contact support.
+          </p>
+          <form action={logout} className="mt-6">
+            <button
+              type="submit"
+              className="w-full min-h-11 rounded-lg bg-slate-900 dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
+            >
+              Sign out
+            </button>
           </form>
         </div>
       </div>
@@ -34,47 +41,48 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shadow-sm backdrop-blur transition-all">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 md:gap-3">
+    <div className="min-h-screen bg-background text-foreground font-sans transition-colors">
+      <header className="sticky top-0 z-30 border-b border-border bg-card transition-colors">
+        <div className="container-fluid flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2.5 md:gap-3.5">
             <Link href="/dashboard" className="flex items-center hover:opacity-90 transition-opacity shrink-0">
               <Image
                 src="/AV_Logo_01-removebg-preview.png"
                 alt="AV Classes Logo"
-                width={42}
-                height={42}
+                width={36}
+                height={36}
                 priority
-                className="h-8 w-8 md:h-10 md:w-10 object-contain shrink-0"
+                className="h-8 w-8 md:h-9 md:w-9 object-contain shrink-0"
               />
             </Link>
             <div className="flex flex-col justify-center gap-0.5">
-              <Link href="/dashboard" className="text-xl font-bold tracking-tight text-blue-700 hover:opacity-90 transition-opacity leading-none">
+              <Link href="/dashboard" className="text-base md:text-lg font-bold tracking-tight text-link hover:opacity-90 transition-opacity leading-none">
                 <span className="hidden sm:inline-block">Student Dashboard</span>
                 <span className="sm:hidden">Dashboard</span>
               </Link>
               <ExamCountdown variant="compact" />
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             {profile?.role === "admin" && (
               <Link
                 href="/admin"
-                className="hidden sm:inline-flex items-center rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                className="hidden sm:inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
               >
                 Admin Panel
               </Link>
             )}
+            <ThemeToggle size="sm" />
             <StudentNotifications />
             <Link
               href="/dashboard/profile"
-              className="inline-flex items-center rounded-lg bg-white border border-slate-200 shadow-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="inline-flex items-center rounded-lg bg-card border border-border px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               Profile
             </Link>
             <form action={logout}>
               <ActionSubmitButton
-                className="inline-flex items-center rounded-lg bg-slate-900 shadow-sm border border-transparent px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                className="inline-flex items-center rounded-lg bg-slate-900 dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
               >
                 Sign out
               </ActionSubmitButton>
@@ -83,7 +91,7 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="container-fluid py-8">
         <div className="mb-8">
           <PortalNav />
         </div>

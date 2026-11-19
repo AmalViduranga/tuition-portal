@@ -1,8 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
@@ -13,63 +13,47 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+let fallbackTheme: Theme = "light";
+const THEME_EVENT = "mathslk-theme-change";
+
+function readThemeSnapshot() {
+  let theme: Theme = fallbackTheme;
+  try {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") {
+      theme = saved;
+    } else {
+      theme = "light";
+    }
+  } catch { /* Retain in-memory preference if storage is unavailable. */ }
+  const resolved = theme === "dark" ? "dark" : "light";
+  return `${theme}:${resolved}`;
+}
+
+function subscribeTheme(listener: () => void) {
+  window.addEventListener("storage", listener);
+  window.addEventListener(THEME_EVENT, listener);
+  return () => {
+    window.removeEventListener("storage", listener);
+    window.removeEventListener(THEME_EVENT, listener);
+  };
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-  const [mounted, setMounted] = useState(false);
+  const snapshot = useSyncExternalStore(subscribeTheme, readThemeSnapshot, () => "light:light");
+  const [preference, resolved] = snapshot.split(":");
+  const theme: Theme = preference === "dark" ? "dark" : "light";
+  const resolvedTheme = resolved === "dark" ? "dark" : "light";
 
   useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem("theme") as Theme | null;
-      if (savedTheme && ["light", "dark", "system"].includes(savedTheme)) {
-        setThemeState(savedTheme);
-      }
-    } catch {
-      // Ignore localStorage read errors
-    }
-    setMounted(true);
-  }, []);
+    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+    document.documentElement.style.colorScheme = resolvedTheme;
+  }, [resolvedTheme]);
 
-  useEffect(() => {
-    if (!mounted) return;
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    function applyTheme() {
-      const isDark =
-        theme === "dark" || (theme === "system" && mediaQuery.matches);
-      const root = document.documentElement;
-
-      if (isDark) {
-        root.classList.add("dark");
-        root.style.colorScheme = "dark";
-        setResolvedTheme("dark");
-      } else {
-        root.classList.remove("dark");
-        root.style.colorScheme = "light";
-        setResolvedTheme("light");
-      }
-    }
-
-    applyTheme();
-
-    const handler = () => {
-      if (theme === "system") {
-        applyTheme();
-      }
-    };
-
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, [theme, mounted]);
-
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    try {
-      localStorage.setItem("theme", newTheme);
-    } catch {
-      // Ignore localStorage write errors
-    }
+  const setTheme = (next: Theme) => {
+    fallbackTheme = next;
+    try { localStorage.setItem("theme", next); } catch { /* In-memory preference still works. */ }
+    window.dispatchEvent(new Event(THEME_EVENT));
   };
 
   const toggleTheme = () => {

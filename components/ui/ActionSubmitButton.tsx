@@ -21,7 +21,7 @@ export default function ActionSubmitButton({
       type="submit"
       disabled={pending || disabled}
       aria-busy={pending}
-      className={`relative inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:scale-[0.98] ${
+      className={`relative inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
         pending ? "cursor-not-allowed opacity-75 pointer-events-none" : ""
       } ${className}`}
       {...props}
